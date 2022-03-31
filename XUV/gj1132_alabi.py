@@ -33,17 +33,17 @@ vpm = vpi.VplanetModel(inparams, inpath=inpath, outparams=outparams)
 # ========================================================
 
 # Data: (mean, stdev)
-prior_data = [(None, None),     # mass [Msun]
+prior_data = [(0.181, 0.019),     # mass [Msun]
             (-2.92, 0.26),    # log(fsat) 
             (None, None),     # tsat [Gyr]
-            (9, 1),       # age [Gyr]
+            (8, 2),       # age [Gyr]
             (-1.18, 0.31)]    # beta
 
-like_data = np.array([[5.22e-4, 0.19e-4],   # Lbol [Lsun]
-                    [7.5e-4, 1.5e-4]])    # Lxuv/Lbol
+like_data = np.array([[4.38e-3, 3.4e-4],   # Lbol [Lsun]
+                    [3.5e-5, 3.5e-5]])    # Lxuv/Lbol
 
 # Prior bounds
-bounds = [(0.09, 0.14),        
+bounds = [(0.1, 0.3),        
         (-5.0, -1.0),
         (0.1, 12.0),
         (0.1, 12.0),
@@ -102,5 +102,5 @@ if __name__ == "__main__":
  
     sm.plot(plots=["emcee_corner"])
 
-    sm.run_dynesty(ptform=prior_transform, mode='dynamic')
-    sm.plot(plots=["dynesty_all"])
+    #sm.run_dynesty(ptform=prior_transform, mode='dynamic')
+    #sm.plot(plots=["dynesty_all"])
