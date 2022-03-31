@@ -7,6 +7,7 @@ import numpy as np
 from functools import partial
 import scipy
 import os
+from alabi.cache_utils import load_model_cache
 
 
 # ========================================================
@@ -14,16 +15,16 @@ import os
 # ========================================================
 
 #inpath = os.path.join(vpi.INFILE_DIR, "/Users/rory/src/vplanet_inference")
-inpath = "/Users/rory/src/vplanet_inference/infiles/stellar"
+inpath = "."
 
 inparams  = {"star.dMass": u.Msun,          
-             "star.dSatXUVFrac": u.dex(u.dimensionless_unscaled),   
-             "star.dSatXUVTime": u.Gyr,    
-             "vpl.dStopTime": u.Gyr,       
-             "star.dXUVBeta": -u.dimensionless_unscaled}
+            "star.dSatXUVFrac": u.dex(u.dimensionless_unscaled),   
+            "star.dSatXUVTime": u.Gyr,    
+            "vpl.dStopTime": u.Gyr,       
+            "star.dXUVBeta": -u.dimensionless_unscaled}
 
 outparams = {"final.star.Luminosity": u.Lsun,
-             "final.star.LXUVStellar": u.Lsun}
+            "final.star.LXUVStellar": u.Lsun}
 
 vpm = vpi.VplanetModel(inparams, inpath=inpath, outparams=outparams)
 
@@ -33,20 +34,20 @@ vpm = vpi.VplanetModel(inparams, inpath=inpath, outparams=outparams)
 
 # Data: (mean, stdev)
 prior_data = [(None, None),     # mass [Msun]
-              (-2.92, 0.26),    # log(fsat) 
-              (None, None),     # tsat [Gyr]
-              (7.6, 2.2),       # age [Gyr]
-              (-1.18, 0.31)]    # beta
+            (-2.92, 0.26),    # log(fsat) 
+            (None, None),     # tsat [Gyr]
+            (9, 1),       # age [Gyr]
+            (-1.18, 0.31)]    # beta
 
 like_data = np.array([[5.22e-4, 0.19e-4],   # Lbol [Lsun]
-                      [7.5e-4, 1.5e-4]])    # Lxuv/Lbol
+                    [7.5e-4, 1.5e-4]])    # Lxuv/Lbol
 
 # Prior bounds
-bounds = [(0.07, 0.11),        
-          (-5.0, -1.0),
-          (0.1, 12.0),
-          (0.1, 12.0),
-          (-2.0, 0.0)]
+bounds = [(0.09, 0.14),        
+        (-5.0, -1.0),
+        (0.1, 12.0),
+        (0.1, 12.0),
+        (-2.0, 0.0)]
 
 # ========================================================
 # Configure prior 
@@ -83,19 +84,23 @@ def lnpost(theta):
 kernel = "ExpSquaredKernel"
 
 labels = [r"$m_{\star}$ [M$_{\odot}$]", r"$f_{sat}$",
-          r"$t_{sat}$ [Gyr]", r"Age [Gyr]", r"$\beta_{XUV}$"]
+        r"$t_{sat}$ [Gyr]", r"Age [Gyr]", r"$\beta_{XUV}$"]
 
-sm = SurrogateModel(fn=lnpost, bounds=bounds, prior_sampler=ps, 
-                    savedir=f"results/{kernel}", labels=labels)
-sm.init_samples(ntrain=100, ntest=100, reload=False)
-sm.init_gp(kernel=kernel, fit_amp=False, fit_mean=True, white_noise=-15)
-sm.active_train(niter=500, algorithm="bape", gp_opt_freq=10)
-sm.plot(plots=["gp_all"])
+if __name__ == "__main__":
 
-sm = alabi.cache_utils.load_model_cache(f"results/{kernel}/")
+    # sm = SurrogateModel(fn=lnpost, bounds=bounds, prior_sampler=ps, 
+    #                     savedir=f"results/{kernel}", labels=labels)
+    # sm.init_samples(ntrain=100, ntest=100, reload=False)
+    # sm.init_gp(kernel=kernel, fit_amp=False, fit_mean=True, white_noise=-15)
+    # sm.active_train(niter=500, algorithm="bape", gp_opt_freq=10)
+    # sm.plot(plots=["gp_all"])
 
-sm.run_emcee(lnprior=lnprior, nwalkers=50, nsteps=5e4, opt_init=False)
-sm.plot(plots=["emcee_corner"])
+    # sm = alabi.cache_utils.load_model_cache(f"results/{kernel}/")
 
-sm.run_dynesty(ptform=prior_transform, mode='dynamic')
-sm.plot(plots=["dynesty_all"])
+    sm = load_model_cache(f"results/{kernel}/surrogate_model.pkl")
+    sm.run_emcee(lnprior=lnprior, nwalkers=50, nsteps=int(5e4), opt_init=False)
+ 
+    sm.plot(plots=["emcee_corner"])
+
+    sm.run_dynesty(ptform=prior_transform, mode='dynamic')
+    sm.plot(plots=["dynesty_all"])
