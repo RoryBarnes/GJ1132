@@ -88,16 +88,16 @@ labels = [r"$m_{\star}$ [M$_{\odot}$]", r"$f_{sat}$",
 
 if __name__ == "__main__":
 
-    # sm = SurrogateModel(fn=lnpost, bounds=bounds, prior_sampler=ps, 
-    #                     savedir=f"results/{kernel}", labels=labels)
-    # sm.init_samples(ntrain=100, ntest=100, reload=False)
-    # sm.init_gp(kernel=kernel, fit_amp=False, fit_mean=True, white_noise=-15)
-    # sm.active_train(niter=500, algorithm="bape", gp_opt_freq=10)
-    # sm.plot(plots=["gp_all"])
+    sm = SurrogateModel(fn=lnpost, bounds=bounds, prior_sampler=ps, 
+                         savedir=f"results/{kernel}", labels=labels)
+    sm.init_samples(ntrain=100, ntest=100, reload=False)
+    sm.init_gp(kernel=kernel, fit_amp=False, fit_mean=True, white_noise=-15)
+    sm.active_train(niter=500, algorithm="bape", gp_opt_freq=10)
+    sm.plot(plots=["gp_all"])
 
     # sm = alabi.cache_utils.load_model_cache(f"results/{kernel}/")
 
-    sm = load_model_cache(f"results/{kernel}/surrogate_model.pkl")
+    #sm = load_model_cache(f"results/{kernel}/surrogate_model.pkl")
     sm.run_emcee(lnprior=lnprior, nwalkers=50, nsteps=int(5e4), opt_init=False)
  
     sm.plot(plots=["emcee_corner"])
