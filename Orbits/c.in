@@ -5,8 +5,7 @@ saModules 	eqtide distorb     # Modules
 # Physical Properties
 dMass			-3  	  # Mass, negative -> Earth masses
 dRadius			-1.25  		# Radius, negative -> Earth radii
-# >L another guess, see b
-dRotPeriod	-1.0  		# Rotation period, negative -> days
+bForceEqSpin    1
 dObliquity	0.0       # Obliquity (degrees)
 dRadGyra		0.4       # Radius of gyration (unitless)
 
@@ -30,4 +29,4 @@ dLongP        312.0             # Longitude of the Periapse (degrees)
 
 
 #Output
-saOutputOrder Time -RotPer LongP SemimajorAxis Eccentricity -SurfEnFluxTot 
+saOutputOrder Time -RotPer LongP SemimajorAxis Eccentricity -SurfEnFluxTot Inc

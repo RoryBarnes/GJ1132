@@ -5,10 +5,8 @@ saModules 	eqtide distorb        	# Modules
 # Physical Properties
 dMass			-1.66  	  # Mass, negative -> Earth masses
 dRadius			-1.13  		# Radius, negative -> Earth radii
-# >L This is a guess from a source graph (Damasso 2018)
-dRotPeriod	-1.0  		# Rotation period, negative -> days
-# >L yet another straight up guess.
-dObliquity	30.0      # Obliquity (degrees)
+bForceEqSpin    1
+dObliquity	0.0      # Obliquity (degrees)
 dRadGyra		0.4       # Radius of gyration (unitless)
 
 # Orbital Properties
@@ -31,5 +29,5 @@ sOrbitModel   rd4             # Use 4th Order disturbing function model
 
 
 #Output
-saOutputOrder Time -RotPer LongP SemimajorAxis Eccentricity -SurfEnFluxTot 
+saOutputOrder Time -RotPer LongP SemimajorAxis Eccentricity -SurfEnFluxTot Inc
 		
