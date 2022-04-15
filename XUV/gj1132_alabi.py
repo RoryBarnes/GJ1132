@@ -89,14 +89,18 @@ labels = [r"$m_{\star}$ [M$_{\odot}$]", r"$f_{sat}$",
 
 if __name__ == "__main__":
 
-    #sm = SurrogateModel(fn=lnpost, bounds=bounds, prior_sampler=ps, 
-    #                      savedir=f"results/{kernel}", labels=labels)
+    # sm = SurrogateModel(fn=lnpost, bounds=bounds, prior_sampler=ps, 
+    #                       savedir=f"results/{kernel}", labels=labels)
     # sm.init_samples(ntrain=100, ntest=100, reload=False)
     # sm.init_gp(kernel=kernel, fit_amp=False, fit_mean=True, white_noise=-15)
-    # sm.active_train(niter=500, algorithm="bape", gp_opt_freq=10, save_progress=True)
+    # sm.active_train(niter=2000, algorithm="bape", gp_opt_freq=10, save_progress=True)
     # sm.plot(plots=["gp_all"])
 
+    # sm = alabi.cache_utils.load_model_cache(f"results/{kernel}/")
+
     sm = alabi.cache_utils.load_model_cache(f"results/{kernel}/")
+    sm.active_train(niter=500, algorithm="bape", gp_opt_freq=10,save_progress=True)
+    # sm.plot(plots=["gp_all"])
 
     #sm = load_model_cache(f"results/{kernel}/surrogate_model.pkl")
     sm.run_emcee(lnprior=lnprior, nwalkers=50, nsteps=int(1e5), opt_init=False)
@@ -106,17 +110,17 @@ if __name__ == "__main__":
     #sm.run_dynesty(ptform=prior_transform, mode='dynamic')
     #sm.plot(plots=["dynesty_all"])
 
-    # emcee_prior_data = [(0.181, 0.019),     # mass [Msun] Berta-Thompson 2015
-    #         (-2.92, 0.26),    # log(fsat) 
-    #         (None, None),     # tsat [Gyr]
-    #         (8, 2),       # age [Gyr]
-    #         (-1.18, 0.31)]    # beta
+    emcee_prior_data = [(0.181, 0.019),     # mass [Msun] Berta-Thompson 2015
+            (-2.92, 0.26),    # log(fsat) 
+            (None, None),     # tsat [Gyr]
+            (8, 2),       # age [Gyr]
+            (-1.18, 0.31)]    # beta
 
-    # emcee_prior_bounds = [(0.12, 0.24),        
-    #     (-4.0, -1.0),
-    #     (0.1, 5.0),
-    #     (5.0, 12.0),
-    #     (-2.0, 0.0)]
+    emcee_prior_bounds = [(0.12, 0.24),        
+        (-4.0, -2.5),
+        (0.1, 5.0),
+        (5.0, 12.0),
+        (-2, -1.5)]
 
     # def lnprior_joint(theta):
     #     lnp = ut.lnprior_normal(theta, bounds, prior_data)
@@ -129,12 +133,13 @@ if __name__ == "__main__":
             
     #     return lnp
 
-    # emcee_lnprior = partial(lnprior_joint, bounds=emcee_prior_bounds, data=emcee_prior_data)
+    emcee_lnprior = partial(ut.lnprior_normal, bounds=emcee_prior_bounds, data=emcee_prior_data)
+    #emcee_lnprior = partial(lnprior, bounds=emcee_prior_bounds, data=emcee_prior_data)
 
-    # sm = alabi.cache_utils.load_model_cache(f"results/{kernel}/")
+    sm = alabi.cache_utils.load_model_cache(f"results/{kernel}/")
 
-    # sm.run_emcee(lnprior=emcee_lnprior, nwalkers=50, nsteps=int(5e4), opt_init=False)
-    # sm.plot(plots=["emcee_corner"])
+    sm.run_emcee(lnprior=emcee_lnprior, nwalkers=50, nsteps=int(1e5), opt_init=False)
+    sm.plot(plots=["emcee_corner"])
 
 
 
