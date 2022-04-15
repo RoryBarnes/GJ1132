@@ -102,10 +102,10 @@ if __name__ == "__main__":
     sm.active_train(niter=500, algorithm="bape", gp_opt_freq=10,save_progress=True)
     # sm.plot(plots=["gp_all"])
 
-    # sm = load_model_cache(f"results/{kernel}")
-    # sm.run_emcee(lnprior=lnprior, nwalkers=50, nsteps=int(1e5), opt_init=False)
+    #sm = load_model_cache(f"results/{kernel}/surrogate_model.pkl")
+    sm.run_emcee(lnprior=lnprior, nwalkers=50, nsteps=int(1e5), opt_init=False)
  
-    # sm.plot(plots=["emcee_corner"])
+    sm.plot(plots=["emcee_corner"])
 
     #sm.run_dynesty(ptform=prior_transform, mode='dynamic')
     #sm.plot(plots=["dynesty_all"])
