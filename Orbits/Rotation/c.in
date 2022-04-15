@@ -5,13 +5,12 @@ saModules 	eqtide distorb distrot    # Modules
 # Physical Properties
 dMass			-3  	  # Mass, negative -> Earth masses
 dRadius			-1.25  		# Radius, negative -> Earth radii
-# >L another guess, see b
-dRotPeriod	-1.0  		# Rotation period, negative -> days
-dObliquity	0.0       # Obliquity (degrees)
+bForceEqSpin	1
+dObliquity		23.5       # Obliquity (degrees)
 dRadGyra		0.4       # Radius of gyration (unitless)
 
 # Orbital Properties
-dEcc        0.1		# Eccentricity
+dEcc        0		# Eccentricity
 # >L current set is flat/wet/pushed, next is 10/wet/pushed
 dSemi       -0.0476         # Semi-major axis, negative -> AU
 
