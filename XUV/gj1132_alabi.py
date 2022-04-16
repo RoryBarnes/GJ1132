@@ -96,66 +96,11 @@ if __name__ == "__main__":
     sm.active_train(niter=100, algorithm="bape", gp_opt_freq=10, save_progress=True)
     sm.plot(plots=["gp_all"])
 
-    # sm = alabi.cache_utils.load_model_cache(f"results/{kernel}/")
-
-    # sm = alabi.cache_utils.load_model_cache(f"results/{kernel}/")
-    # sm.active_train(niter=2000, algorithm="bape", gp_opt_freq=10,save_progress=True)
-    # sm.plot(plots=["gp_all"])
-
-    # sm = load_model_cache(f"results/{kernel}")
+    #sm = load_model_cache(f"results/{kernel}")
     sm.run_emcee(lnprior=lnprior, nwalkers=50, nsteps=int(1e5), opt_init=False)
     sm.plot(plots=["emcee_corner"])
 
-    #sm.run_dynesty(ptform=prior_transform, mode='dynamic')
-    #sm.plot(plots=["dynesty_all"])
+    sm.run_dynesty(ptform=prior_transform, mode='dynamic')
+    sm.plot(plots=["dynesty_all"])
 
-    # emcee_prior_data = [(0.181, 0.019),     # mass [Msun] Berta-Thompson 2015
-    #         (-2.92, 0.26),    # log(fsat) 
-    #         (None, None),     # tsat [Gyr]
-    #         (8, 2),       # age [Gyr]
-    #         (-1.18, 0.31)]    # beta
-
-    # emcee_prior_bounds = [(0.12, 0.24),        
-    #     (-4.0, -2.5),
-    #     (0.1, 5.0),
-    #     (5.0, 12.0),
-    #     (-2, -1.5)]
-
-    # def lnprior_joint(theta):
-    #     lnp = ut.lnprior_normal(theta, bounds, prior_data)
-
-    #     # if tsat > age
-    #     if theta[2] > theta[3]: 
-    #         lnp += -np.inf
-    #     else:
-    #         lnp += 0
-            
-    #     return lnp
-
-    # emcee_lnprior = partial(lnprior, bounds=emcee_prior_bounds, data=emcee_prior_data)
-
-    # sm = alabi.cache_utils.load_model_cache(f"results/{kernel}/")
-
-    # sm.run_emcee(lnprior=emcee_lnprior, nwalkers=50, nsteps=int(5e4), opt_init=False)
-    # sm.plot(plots=["emcee_corner"])
-
-
-
-    # emcee_prior_data = [(0.181, 0.019),     # mass [Msun] Berta-Thompson 2015
-    #     (-2.92, 0.26),    # log(fsat) 
-    #     (None, None),     # tsat [Gyr]
-    #     (None, None),       # age [Gyr]
-    #     (-1.18, 0.31)]    # beta
-
-    # emcee_prior_bounds = [(0.12, 0.24),        
-    #     (-4.0, -1.0),
-    #     (0.1, 5.0),
-    #     (5.0, 12.0),
-    #     (-2.0, 0.0)]
-
-    # emcee_lnprior = partial(ut.lnprior_normal, bounds=emcee_prior_bounds, data=emcee_prior_data)
-
-    # sm = alabi.cache_utils.load_model_cache(f"results/{kernel}/")
-
-    # sm.run_emcee(lnprior=emcee_lnprior, nwalkers=50, nsteps=int(5e4), opt_init=False)
-    # sm.plot(plots=["emcee_corner"])
+ 
