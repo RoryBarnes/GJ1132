@@ -3,7 +3,7 @@ sName		star                  # Body name
 saModules    	stellar flare              # Active modules
 
 # Physical properties
-dMass        	0.181                  # Mass in Msun
+dMass        	0.189                  # Mass in Msun
 dRotPeriod      -1.0                  # Rotation period, negative -> days
 dAge            1.0e6                 # Initial age [yr]
 
@@ -11,15 +11,15 @@ dAge            1.0e6                 # Initial age [yr]
 sStellarModel	  baraffe             # Stellar evolution model
 bHaltEndBaraffeGrid 0                 # Don't end sim when we reach end of grid
 sMagBrakingModel  matt                # Magnetic braking model
-dSatXUVFrac       1.0e-3              # XUV Saturation fraction
-dSatXUVTime       -1.0                # XUV Saturation timescale, negative-> in Gyr
-dXUVBeta          1.23                # XUV decay power law exponent
+dSatXUVFrac       1.0e-2.949              # XUV Saturation fraction
+dSatXUVTime       -2.002                # XUV Saturation timescale, negative-> in Gyr
+dXUVBeta          1.197                # XUV decay power law exponent
 
 #flare module
-#dFlareMinEnergy            -1.0e33              # Min flare energy
-#dFlareMaxEnergy           -1.0e37              # Max flare energy
-#sFlareFFD                 DAVENPORT   # flare frenquency distribution evolution model
-#dEnergyBin                4                          # Number of bins between min and max energy
+dFlareMinEnergy           -1.0e33              # Min flare energy
+dFlareMaxEnergy           -1.0e37              # Max flare energy
+sFlareFFD                 DAVENPORT   # flare frenquency distribution evolution model
+dEnergyBin                4                          # Number of bins between min and max energy
 
 saOutputOrder 	Time -Luminosity -LXUVStellar -LXUVTot $
                 -FlareFreq1 -FlareFreq2 -FlareFreq3 -FlareFreq4
