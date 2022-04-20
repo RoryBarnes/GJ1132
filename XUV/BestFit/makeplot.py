@@ -23,6 +23,19 @@ flare3 = out.star.FlareFreq3
 flare4 = out.star.FlareFreq4
 flare = (flare1 + flare2 + flare3 + flare4)*365.25
 
+sun = vplanet.get_output('Sun')
+time = sun.star.Time/1e9
+lsun = sun.star.Luminosity
+lsunstellar = sun.star.LXUVStellar/lsun
+lsunflare = sun.star.LXUVFlare/lsun
+lsuntot = sun.star.LXUVTot/lsun
+flare1 = sun.star.FlareFreq1
+flare2 = sun.star.FlareFreq2
+flare3 = sun.star.FlareFreq3
+flare4 = sun.star.FlareFreq4
+sunflare = (flare1 + flare2 + flare3 + flare4)*365.25
+
+
 nfig=1
 plt.figure(nfig,figsize= (6.5,4))
 plt.subplots_adjust(hspace=.5)
@@ -38,6 +51,10 @@ plt.text(4,1.175e-3,r'$f_{sat}$')
 plt.plot(time,ltot,color=vpl.colors.red,label="Total")
 plt.plot(time,lstellar,color=vpl.colors.orange,label="Quiescent")
 plt.plot(time,lflare,color=vpl.colors.pale_blue,label="Flares")
+plt.plot(time,lsuntot,color=vpl.colors.red,linestyle='dashed')
+plt.plot(time,lsunstellar,color=vpl.colors.orange,linestyle='dashed')
+plt.plot(time,lsunflare,color=vpl.colors.pale_blue,linestyle='dashed')
+
 plt.xlabel('Time (Gyr)')
 plt.ylabel(r'XUV Luminosity/Total Luminosity')
 plt.ylim(1e-4,2e-3)
@@ -47,11 +64,13 @@ plt.xscale('log')
 plt.legend()
 
 plt.subplot(122)
-plt.plot(time,flare,color='black')
+plt.plot(time,flare,color='black',label='GJ 1132')
+plt.plot(time,sunflare,color='black',linestyle='dashed',label='Sun')
 plt.xlabel('Time (Gyr)')
 plt.ylabel(r'N$_{Carrington}$/year')
 plt.xscale('log')
 plt.ylim(0,60)
+plt.legend()
 
 plt.tight_layout()
 #plt.savefig('structure.png')
