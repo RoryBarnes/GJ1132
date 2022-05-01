@@ -13,11 +13,11 @@ dOrbPeriod [-1.628931, 0.000027, g, max0] b_orbper
 
 file star.in
 
-dMass [dynesty_samples_final.npy, npy, p, 1] mass
-dSatXUVFrac [dynesty_samples_final.npy, npy, p, 2] fsat
-dSatXUVTime [dynesty_samples_final.npy, npy, p, 3] tsat
-dXUVBeta [dynesty_samples_final.npz, npy, p, 5] beta
+dMass [dynesty_transform_final.npy, npy, p, 1] mass
+dSatXUVFrac [dynesty_transform_final.npy, npy, p, 2] fsat
+dSatXUVTime [dynesty_transform_final.npy, npy, p, 3] tsat
+dXUVBeta [dynesty_transform_final.npy, npy, p, 5] beta
 
 file vpl.in
 
-dStopTime [dynesty_samples_final.npy, npy, p, 4] age
+dStopTime [dynesty_transform_final.npy, npy, p, 4] age
