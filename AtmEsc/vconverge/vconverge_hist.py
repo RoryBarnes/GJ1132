@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import matplotlib.pyplot as plt
 
-file=open("1000TO/Converged_Param_Dictionary.json")
+file=open("500TO/Converged_Param_Dictionary.json")
 
 data = json.load(file)
 
