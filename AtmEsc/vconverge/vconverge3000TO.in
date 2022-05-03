@@ -1,0 +1,11 @@
+sVspaceFile vspace3000TO.in
+iStepSize 100
+iMaxSteps 200
+sConvergenceMethod KS_statistic
+fConvergenceCondition 0.004
+iNumberOfConvergences 3
+
+sObjectFile b3000.in
+
+saConverge final SurfWaterMass
+
