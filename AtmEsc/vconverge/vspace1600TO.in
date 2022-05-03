@@ -1,10 +1,10 @@
 srcfolder .
-destfolder 2000TO
-trialname 2000TO_
+destfolder 1600TO
+trialname 1600TO_
 samplemode random
 randsize 500
 
-file b2000.in
+file b1600.in
 
 dMass [-1.66, 0.023, g, max0] b_mass
 dRadius [-1.13, 0.02, g, max0] b_radius
