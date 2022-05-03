@@ -1,15 +1,19 @@
 import matplotlib.pyplot as plt 
 import vplot as vpl
 import json
+import numpy as np
 
-saDirs = ["500TO", "1000TO"]
+saDirs = ["400TO", "500TO", "600TO", "1000TO", "1100TO", "1200TO", 
+          "1300TO", "1400TO", "1500TO", "2000TO", "2500TO", "3000TO",
+          "3500TO"]
 
 daProb = [0 for i in range(len(saDirs))]
 
-fig = plt.figure(figsize=(8.5, 6))
-plt.subplot(2, 1, 1)
+fig = plt.figure(figsize=(6.5, 4))
+plt.subplot(1, 2, 1)
 iTrial = 0
 for sDir in saDirs:
+    print(sDir)
     sFile=sDir+"/Converged_Param_Dictionary.json"
     iLength=len(sDir)-2
     dWaterInitial = int(sDir[0:iLength])
@@ -22,17 +26,17 @@ for sDir in saDirs:
     daWaterInitial = [dWaterInitial for i in range(iNumTrials)]
     iNumDevolatilized = 0
     for dWaterFinal in daWaterFinal:
-        print(dWaterFinal)
+        #print(dWaterFinal)
         if dWaterFinal == 0.0:
             iNumDevolatilized += 1
-    print(iNumDevolatilized)
+    #print(iNumDevolatilized)
     daProb[iTrial] = iNumDevolatilized/iNumTrials
     iTrial += 1
 
-    plt.plot(daWaterInitial,daWaterFinal,color='black')
+    plt.scatter(daWaterInitial,np.array(daWaterFinal)/np.array(daWaterInitial),color='black', alpha=0.1, s=10)
 
     plt.xlabel("Iniital Water (TO)")
-    plt.ylabel("Final Water (TO)")
+    plt.ylabel("Fraction Water Remaining")
 
 iTrial = 0
 daWaterInitial = [0 for i in range(len(saDirs))]
@@ -42,10 +46,11 @@ for sDir in saDirs:
     daWaterInitial[iTrial] = int(sDir[0:iLength])
     iTrial += 1
 
-plt.subplot(2, 1, 2)
+plt.subplot(1, 2, 2)
 
-plt.plot(daWaterInitial,daProb)
+plt.plot(daWaterInitial,daProb,color='black')
+plt.ylim(0,1)
 plt.xlabel("Initial Water (TO)")
-plt.ylabel("P(Devolatilized")
+plt.ylabel("P(Devolatilized)")
 
 fig.savefig('gj1132b_devolatization.pdf')
