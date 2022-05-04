@@ -3,9 +3,10 @@ import vplot as vpl
 import json
 import numpy as np
 
-saDirs = ["400TO", "500TO", "600TO", "1000TO", "1100TO", "1200TO", 
-          "1300TO", "1400TO", "1500TO", "2000TO", "2500TO", "3000TO",
-          "3500TO"]
+saDirs = ["300TO", "400TO", "500TO", "600TO", "700TO", "800TO", "900TO",
+            "1000TO", "1100TO", "1200TO", "1300TO", "1400TO", "1500TO", 
+            "1600TO", "1700TO", "1800TO", "2000TO", "2500TO", "3000TO",
+            "3500TO"]
 
 daProb = [0 for i in range(len(saDirs))]
 
