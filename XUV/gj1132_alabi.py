@@ -84,23 +84,23 @@ def lnpost(theta):
 
 kernel = "ExpSquaredKernel"
 
-labels = [r"$m_{\star}$ [M$_{\odot}$]", r"$f_{sat}$",
+labels = [r"$m_{\star}$ [M$_{\odot}$]", r"log($f_{sat}$)",
         r"$t_{sat}$ [Gyr]", r"Age [Gyr]", r"$\beta_{XUV}$"]
 
 if __name__ == "__main__":
 
-    sm = SurrogateModel(fn=lnpost, bounds=bounds, prior_sampler=ps, 
-                          savedir=f"results/{kernel}", labels=labels)
-    sm.init_samples(ntrain=400, ntest=100, reload=False)
-    sm.init_gp(kernel=kernel, fit_amp=False, fit_mean=True, white_noise=-15)
-    sm.active_train(niter=100, algorithm="bape", gp_opt_freq=10, save_progress=True)
-    sm.plot(plots=["gp_all"])
+    # sm = SurrogateModel(fn=lnpost, bounds=bounds, prior_sampler=ps, 
+    #                       savedir=f"results/{kernel}", labels=labels)
+    # sm.init_samples(ntrain=400, ntest=100, reload=False)
+    # sm.init_gp(kernel=kernel, fit_amp=False, fit_mean=True, white_noise=-15)
+    # sm.active_train(niter=100, algorithm="bape", gp_opt_freq=10, save_progress=True)
+    # sm.plot(plots=["gp_all"])
 
-    #sm = load_model_cache(f"results/{kernel}")
-    sm.run_emcee(lnprior=lnprior, nwalkers=50, nsteps=int(1e5), opt_init=False)
+    sm = load_model_cache(f"results/{kernel}")
+    #sm.run_emcee(lnprior=lnprior, nwalkers=50, nsteps=int(1e5), opt_init=False)
     sm.plot(plots=["emcee_corner"])
 
-    sm.run_dynesty(ptform=prior_transform, mode='dynamic')
+    #sm.run_dynesty(ptform=prior_transform, mode='dynamic')
     sm.plot(plots=["dynesty_all"])
 
  

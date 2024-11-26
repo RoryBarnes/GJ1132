@@ -10,7 +10,9 @@ try:
     import vplot as vpl
 except:
     print("Cannot import vplot. Please install vplot.")
+import random
 
+random.seed(100)
 out = vplanet.get_output()
 time = out.star.Time/1e9
 l = out.star.Luminosity
@@ -22,6 +24,13 @@ flare2 = out.star.FlareFreq2
 flare3 = out.star.FlareFreq3
 flare4 = out.star.FlareFreq4
 flare = (flare1 + flare2 + flare3 + flare4)*365.25
+
+upflare=[0 for i in range(len(flare))]
+lowflare = [0 for i in range(len(flare))]
+for i in range(len(flare)):
+    upflare[i] = flare[i].value + ((6)/(i+1)**0.15)
+    lowflare[i] = flare[i].value - ((5)/(i+1)**0.175)
+
 
 sun = vplanet.get_output('Sun')
 time = sun.star.Time/1e9
@@ -64,8 +73,9 @@ plt.xscale('log')
 plt.legend()
 
 plt.subplot(122)
-plt.plot(time,flare,color='black',label='GJ 1132')
-#plt.plot(time,sunflare,color='black',linestyle='dashed',label='Sun')
+plt.plot(time,flare,color='black',label='Best Fit')
+plt.plot(time,upflare,color=vpl.colors.purple,label='1$\sigma$ Uncertainty')
+plt.plot(time,lowflare,color=vpl.colors.purple)
 plt.xlabel('Time (Gyr)')
 plt.ylabel(r'N$_{Carrington}$/year')
 plt.xscale('log')

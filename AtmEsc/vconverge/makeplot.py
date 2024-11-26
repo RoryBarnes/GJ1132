@@ -9,11 +9,11 @@ saDirs = ["300TO", "400TO", "500TO",
             "1600TO", "1700TO", "1800TO", "1900TO", "2000TO", 
             "2100TO", "2200TO", "2300TO", "2400TO", "2500TO", 
             "2600TO", "2700TO", "2800TO", "2900TO", "3000TO",
-            "3100TO", "3200TO", "3300TO", "3500TO"]
+            "3100TO", "3200TO", "3300TO", "3400TO", "3500TO"]
 
 daProb = [0 for i in range(len(saDirs))]
 
-fig = plt.figure(figsize=(6.5, 4))
+fig = plt.figure(figsize=(6.5, 3.5))
 plt.subplot(1, 2, 1)
 iTrial = 0
 for sDir in saDirs:
@@ -55,6 +55,6 @@ plt.subplot(1, 2, 2)
 plt.plot(daWaterInitial,daProb,color='black')
 plt.ylim(0,1)
 plt.xlabel("Initial Water (TO)")
-plt.ylabel("P(Devolatilized)")
+plt.ylabel("Probability of Devolatization")
 
 fig.savefig('gj1132b_devolatization.pdf')

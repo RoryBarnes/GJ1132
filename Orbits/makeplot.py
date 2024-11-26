@@ -5,7 +5,7 @@ import vplanet
 orbits = vplanet.get_output()
 rot = vplanet.get_output("Rotation")
 
-fig = plt.figure(figsize=(8.5, 6))
+fig = plt.figure(figsize=(6.5, 4.5))
 plt.subplot(2, 2, 1)
 plt.plot(orbits.b.Time / 1e6, orbits.b.Eccentricity,color=vplot.colors.red,label='GJ 1132 b')
 plt.plot(orbits.c.Time / 1e6, orbits.c.Eccentricity,color=vplot.colors.orange,label='GJ 1132 c')
@@ -31,7 +31,7 @@ plt.ylabel("Obliquity ($^{\circ}$)")
 plt.ylim(7e-3,25)
 plt.xlim(0,100)
 plt.yscale('log')
-plt.text(65,12,'Circular Orbits',fontsize=12)
+plt.text(55,10,'Circular Orbits',fontsize=12)
 
 plt.subplot(2, 2, 4)
 plt.plot(rot.b.Time / 1e3, rot.b.SurfEnFluxTotal,color=vplot.colors.red)
