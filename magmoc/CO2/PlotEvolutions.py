@@ -40,7 +40,7 @@ axs[1,1].set(xlabel='Time (Myr)', ylabel='O$_2$ Partial Press. (Bar)', xscale='l
 #    plt.xscale('log')
     
 
-data = np.loadtxt("GJ1132.GJ1132b.forward")
+data = np.loadtxt("GJ1132.b.forward")
 R_N_Planet = 1.15
 M_N_Planet = 1.62
 
@@ -133,7 +133,7 @@ axs[1,1].set_xlim(xmin,xmax)
 #axs[1,0].legend()
 #axs[1,1].legend()
 
-data = np.loadtxt("../water/GJ1132.GJ1132b.forward")
+#data = np.loadtxt("../water/GJ1132.GJ1132b.forward")
 
 time        = data[:,0]  # time (yr)
 TpotH2O        = data[:,1]  # Potential temp magma ocean (K)
@@ -196,11 +196,11 @@ PressPartO2  = Press_O_H2O*MOLWEIGHTO2/MOL_ave_tot
 l=100
 k=5
 
-axs[0,0].plot(time*10**-6, TpotH2O, label='H$_2$O only',color=vplot.colors.pale_blue)
-axs[0,1].plot(time*10**-6,PressPartH2O,color=vplot.colors.pale_blue)
-axs[1,1].plot(time*10**-6,PressPartO2,color=vplot.colors.pale_blue)
+# axs[0,0].plot(time*10**-6, TpotH2O, label='H$_2$O only',color=vplot.colors.pale_blue)
+# axs[0,1].plot(time*10**-6,PressPartH2O,color=vplot.colors.pale_blue)
+# axs[1,1].plot(time*10**-6,PressPartO2,color=vplot.colors.pale_blue)
 
-axs[0,0].legend()
+# axs[0,0].legend()
 
 
 plt.savefig("gj1132magmoc.pdf")
