@@ -37,7 +37,7 @@ sPlanetRadiusModel        none
 bInstantO2Sink            0
 sAtmXAbsEffH2OModel       none
 dAtmXAbsEffH2O 		  0.3
-bCMEEscape               1
+bCMEEscape              1
 dCMEEscapeEfficiency    0.5
 
 # RADHEAT Parameters
