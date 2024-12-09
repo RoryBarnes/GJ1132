@@ -36,13 +36,15 @@ d238UNumMan      [-1, 0.1, g] 238UMan
 d238UNumCore     [-1, 0.1, g] 238UCore
 d238UNumCrust    [-1, 0.1, g] 238UCrust
 
+dTidalQ         [300, 10000, u] q
+
 file star.in
 
-dMass [../../../XUV/dynesty_transform_final.npy, npy, p, 1] mass
-dSatXUVFrac [../../../XUV/dynesty_transform_final.npy, npy, p, 2] fsat
-dSatXUVTime [../../../XUV/dynesty_transform_final.npy, npy, p, 3] tsat
-dXUVBeta [../../../XUV/dynesty_transform_final.npy, npy, p, 5] beta
+dMass [../../../../XUV/dynesty_transform_final.npy, npy, p, 1] mass
+dSatXUVFrac [../../../../XUV/dynesty_transform_final.npy, npy, p, 2] fsat
+dSatXUVTime [../../../../XUV/dynesty_transform_final.npy, npy, p, 3] tsat
+dXUVBeta [../../../../XUV/dynesty_transform_final.npy, npy, p, 5] beta
 
 file vpl.in
 
-dStopTime [../../../XUV/dynesty_transform_final.npy, npy, p, 4] age
+dStopTime [../../../../XUV/dynesty_transform_final.npy, npy, p, 4] age
