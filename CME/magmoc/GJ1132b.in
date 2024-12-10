@@ -1,6 +1,6 @@
 # Planet b parameters
 sName         b			                     # Body's name
-saModules     magmoc atmesc radheat eqtide flare       # Modules to apply, exact spelling required
+saModules     magmoc atmesc radheat eqtide      # Modules to apply, exact spelling required
 
 # Physical Properties
 dMass         -1.83                       # Mass, negative -> Earth masses
@@ -70,22 +70,17 @@ saTidePerts     GJ1132          # Body name(s) of tidal perturbers
 bFixOrbit 	1		   # Keep dEcc constant?
 bForceEqSpin	0		   # Planet tidally locked, no rotation?
 
-# FLARE Parameters
-dCMEProtonEnergy           -30
-dCMEOpeningAngle    -120
-dCMEXRayXUVScaling  50
-dCarringtonFluence  1e14
-dCarringtonLX        -1.26e14
-
 # Orbital Properties
 dSemi         -0.0157              # Semi-major axis, negative -> AU
 dEcc          0.001                # Eccentricity
 
 # Output
-saOutputOrder Time -SurfTemp -SolidRadius MeltFraction NetFluxAtmo $
-    -WaterMassMOAtm -WaterMassSol -PressWaterAtm $
-    -OxygenMassMOAtm -OxygenMassSol  -PressOxygenAtm $
-    -CO2MassMOAtm -CO2MassSol -PressCO2Atm $
-    -RadioPower -TidalPower $
+saOutputOrder Time $
+#    -SurfTemp -SolidRadius MeltFraction NetFluxAtmo $
+#    -WaterMassMOAtm -WaterMassSol -PressWaterAtm $
+#    -OxygenMassMOAtm -OxygenMassSol  -PressOxygenAtm $
+#    -CO2MassMOAtm -CO2MassSol -PressCO2Atm $
+#    -RadioPower -TidalPower $
+    -PressWaterAtm -PressOxygenAtm -PressCO2Atm $
     -CMELossWater -CMELossOxygen -CMELossCO2
 
