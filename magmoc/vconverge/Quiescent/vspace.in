@@ -16,9 +16,7 @@ dManMeltDensity	[4000, 100, g] dense
 
 dMassFracFeOIni	[0.0788, 0.01, g] FeO	
 dWaterMassAtm [-1000, -1, u] watm
-dCO2MassMOAtm [-1000, -1, u] cmo
-dCO2FracMelt [-7.4e-05, 1e-6, g] cmelt
-dWaterFracMelt [-2.6e-4, 1e-7, g] wmelt
+dCO2ToWaterRatio [0.1, 0.9, u] ratio
 
 d40KNumMan    [-10, -1, u] 40KMan
 d40KNumCore   [-1, 0.1, g] 40KCore
@@ -35,6 +33,8 @@ d235UNumCrust    [-1, 0.1, g] 235UCrust
 d238UNumMan      [-1, 0.1, g] 238UMan
 d238UNumCore     [-1, 0.1, g] 238UCore
 d238UNumCrust    [-1, 0.1, g] 238UCrust
+
+dTidalQMantle [300, 3000, u] Q
 
 file star.in
 

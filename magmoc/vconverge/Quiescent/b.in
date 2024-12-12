@@ -10,9 +10,10 @@ dRotPeriod    -1                           # Rotation Period, negative -> days
 # MAGMOC Properties
 dMassFracFeOIni		0.0788		  # Initial mass fraction of FeO in the mantle (default: 0.0788)
 dWaterMassAtm -1
-dCO2MassMOAtm -1.0
-dCO2FracMelt -7.440005569012708e-05
-dWaterFracMelt -0.0002602597810997568
+#dCO2MassMOAtm -1.0
+#dCO2FracMelt -7.440005569012708e-05
+#dWaterFracMelt -0.0002602597810997568
+dCO2ToWaterRatio 0.3
 
 dSurfTemp		4000		  # Initial surface temperature (default: 4000K)
 dManMeltDensity		4000		  # Mantle melt density (default: 4000kg/m^3)
@@ -61,7 +62,7 @@ d238UNumCore     -1
 d238UNumCrust    -1
 
 # EQTIDE Parameters
-dTidalQ         1000		   # Tidal phase lag
+dTidalQMantle         1000		   # Tidal phase lag
 dK2             0.3	           # Love number of degree 2
 dMaxLockDiff    0.01
 saTidePerts     star          # Body name(s) of tidal perturbers
@@ -70,6 +71,7 @@ bForceEqSpin	0		   # Planet tidally locked, no rotation?
 
 # Orbital Properties
 dEcc          0.001                # Eccentricity
+dOrbPeriod      -1.62892911
 
 # Output
 saOutputOrder Time -PotTemp -SurfTemp -SolidRadius -WaterMassMOAtm -WaterMassSol -OxygenMassMOAtm -OxygenMassSol -PressWaterAtm -PressOxygenAtm -HydrogenMassSpace -OxygenMassSpace FracFe2O3Man NetFluxAtmo WaterFracMelt -RadioPower -TidalPower $
