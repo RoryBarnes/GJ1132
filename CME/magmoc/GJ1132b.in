@@ -10,9 +10,10 @@ dRotPeriod    -1                           # Rotation Period, negative -> days
 # MAGMOC Properties
 dMassFracFeOIni		0.0788		  # Initial mass fraction of FeO in the mantle (default: 0.0788)
 dWaterMassAtm -100
-dWaterFracMelt -0.02163632466966269
-dCO2MassMOAtm -30.0
-dCO2FracMelt -0.002293285445703201
+#dWaterFracMelt -0.02163632466966269
+#dCO2MassMOAtm -30.0
+#dCO2FracMelt -0.002293285445703201
+dCO2ToWaterRatio    0.3
 
 dSurfTemp		4000		  # Initial surface temperature (default: 4000K)
 dManMeltDensity		4000		  # Mantle melt density (default: 4000kg/m^3)

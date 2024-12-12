@@ -12,6 +12,15 @@ dSatXUVFrac   1.e-3                       # Saturation level of the XUV luminosi
 dSatXUVTime   -1                          # Saturation time of XUV radiation [neg: Gyr]
 
 # FLARE Parameters
+dFlareMinEnergy            -1.0e31              # Min flare energy
+dFlareMaxEnergy            -1.0e33              # Max flare energy
+sFlareFFD                           single      # flare frenquency distribution evolution model
+dEnergyBin                       1000           # Number of bins between min and max energy
+sFlareBandPass                  sxr
+dFlareSingleStarA1         -0.3604934462736657
+dFlareSingleStarA2         -0.44700000000000006
+dFlareSingleStarB1          11.90683497664417
+dFlareSingleStarB2          12.060285714285714
 dCMEProtonEnergy           -30
 dCMEOpeningAngle    -120
 dCMEXRayXUVScaling  50
