@@ -1,19 +1,22 @@
-# Earthlike parameters
-sName		venus			# Body's name
-saModules 	radheat thermint atmesc
+# Venuslike parameters
+sName		b			# Body's name
+saModules 	radheat thermint atmesc eqtide
 
 # Physical Properties
-dMass		-0.815  			# Mass, negative -> Earth masses
-dRadius		-0.949  			# Radius, negative -> Earth radii
-dRotPeriod	-1.0  			# Rotation period, negative -> days
+dMass         -1.83                       # Mass, negative -> Earth masses
+dRadius       -1.191                      # Radius, negative -> Earth radii
+dRotPeriod    -1                           # Rotation Period, negative -> days
+
+
+# Physical Properties
 dObliquity	23.5
 dRadGyra	0.5
-# Orbital Properties
-dEcc            0.0167		# Eccentricity
-dSemi           -0.72		# Semi-major axis, negative -> AU
 
+# Orbital Propertiesve -> AU
+dEcc          0.001                # Eccentricity
 
 # RADHEAT Parameters
+dSemi         -0.0157              # Semi-major axis, negati
 # *Num* are in numbers of atoms, negative -> Earth vals
 ### 40K
 d40KPowerMan -6.564734e-01 #
@@ -65,11 +68,16 @@ bInstantO2Sink            0 #
 dJeansTime		  -10 #
 sAtmXAbsEffH2OModel bolmont16 #
 
+# Eqtide
+dImK2ManOrbModel   2
+dShModRef        1e5 #1e6
+dStiffness       1.71e13  #3e13
+saTidePerts star
 
 saOutputOrder -Time -TMan -TLid -TCore -CrustDepth -StagLidDepth -CrustMass $
   -MeltMassFluxMan -FMeltUMan -ViscUMan $
-  -MagMom -RIC $
+  -MagMom -RIC -OxygenMass $
   -RadPowerMan -RadPowerCrust -RadPowerCore $
   -WaterOutgasRate -WaterLossRate -SurfWaterMass -ManWaterMass -CrustWaterMass -OceanMassLost $
-  -CO2OutgasRate -SurfaceCO2Mass  -CrustCO2Mass  -ManCO2Mass -PCO2MeltBubble 
+  -CO2OutgasRate -SurfaceCO2Mass  -CrustCO2Mass -ManCO2Mass -PCO2MeltBubble 
 
