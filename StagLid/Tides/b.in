@@ -75,7 +75,7 @@ dStiffness       1.71e13  #3e13
 saTidePerts star
 
 saOutputOrder -Time -TMan -TLid -TCore -CrustDepth -StagLidDepth -CrustMass $
-  -MeltMassFluxMan -FMeltUMan -ViscUMan $
+  -MeltMassFluxMan -FMeltUMan -ViscUMan -EqtidePower $
   -MagMom -RIC -OxygenMass $
   -RadPowerMan -RadPowerCrust -RadPowerCore $
   -WaterOutgasRate -WaterLossRate -SurfWaterMass -ManWaterMass -CrustWaterMass -OceanMassLost $

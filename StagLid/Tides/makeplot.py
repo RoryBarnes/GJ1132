@@ -87,5 +87,5 @@ plt.xlabel("Time (Gyr)")
 # Save the figure
 #ext = get_args().ext
 plt.tight_layout()
-fig.savefig(path / "NoTidesOutgassing.png",)
+fig.savefig(path / "TidesOutgassing.png",)
 
