@@ -1,0 +1,18 @@
+sVspaceFile vspace.in
+iStepSize 100
+iMaxSteps 200
+sConvergenceMethod KS_statistic
+fConvergenceCondition 0.004
+iNumberOfConvergences 3
+
+sObjectFile b.in
+
+saConverge final SurfTemp 
+saConverge final WaterMassSol 
+saConverge final WaterMassMOAtm 
+saConverge final PressWaterAtm 
+saConverge final PressOxygenAtm 
+saConverge final FracFe2O3Man 
+saConverge final CO2MassSol 
+saConverge final CO2MassMOAtm 
+saConverge final PressCO2Atm

@@ -1,0 +1,48 @@
+srcfolder .
+destfolder output
+trialname magmoc_
+samplemode random
+randsize 500
+
+file b.in
+
+dMass [-1.83, 0.19, g, max0] bmass
+dRadius [-1.191, 0.04, g, max0] brad
+dEcc [0.0157, 0.00013, g, min0, max1] ecc
+dOrbPeriod [-1.62892911, 3e-7, g, max0] orbper
+
+dSurfTemp		[4000, 100, g] tsurf
+dManMeltDensity	[4000, 100, g] dense
+
+dMassFracFeOIni	[0.0788, 0.01, g] FeO	
+dWaterMassAtm [-1000, -1, u] watm
+dCO2ToWaterRatio [0.1, 0.9, u] ratio
+
+d40KNumMan    [-10, -1, u] 40KMan
+d40KNumCore   [-1, 0.1, g] 40KCore
+d40KNumCrust  [-1, 0.1, g] 40KCrust
+
+d232ThNumMan      [-1, 0.1, g] 232ThMan
+d232ThNumCore     [-1, 0.1, g] 232ThCore
+d232ThNumCrust    [-1, 0.1, g] 232ThCrust
+
+d235UNumMan      [-1, 0.1, g] 235UMan
+d235UNumCore     [-1, 0.1, g] 235UCore
+d235UNumCrust    [-1, 0.1, g] 235UCrust
+
+d238UNumMan      [-1, 0.1, g] 238UMan
+d238UNumCore     [-1, 0.1, g] 238UCore
+d238UNumCrust    [-1, 0.1, g] 238UCrust
+
+dTidalQMantle [300, 3000, u] Q
+
+file star.in
+
+dMass [../../../XUV/dynesty_transform_final.npy, npy, p, 1] mass
+dSatXUVFrac [../../../XUV/dynesty_transform_final.npy, npy, p, 2] fsat
+dSatXUVTime [../../../XUV/dynesty_transform_final.npy, npy, p, 3] tsat
+dXUVBeta [../../../XUV/dynesty_transform_final.npy, npy, p, 5] beta
+
+file vpl.in
+
+dStopTime [../../../XUV/dynesty_transform_final.npy, npy, p, 4] age

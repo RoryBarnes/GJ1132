@@ -1,0 +1,39 @@
+# The host star
+sName	        GJ1132                    # Body's name
+saModules	 stellar flare eqtide                # Modules to apply, exact spelling required
+
+# Physical Parameters
+dMass         0.1945                       # Mass, solar masses
+dAge          5e6
+
+# STELLAR Parameters
+sStellarModel baraffe                     # Stellar evolution model: `baraffe` or `none`
+dSatXUVFrac   1.e-3                       # Saturation level of the XUV luminosity
+dSatXUVTime   -1                          # Saturation time of XUV radiation [neg: Gyr]
+
+# FLARE Parameters
+dFlareMinEnergy            -1.0e31              # Min flare energy
+dFlareMaxEnergy            -1.0e33              # Max flare energy
+sFlareFFD                           single      # flare frenquency distribution evolution model
+dEnergyBin                       1000           # Number of bins between min and max energy
+sFlareBandPass                  sxr
+dFlareSingleStarA1         -0.3604934462736657
+dFlareSingleStarA2         -0.44700000000000006
+dFlareSingleStarB1          11.90683497664417
+dFlareSingleStarB2          12.060285714285714
+dCMEProtonEnergy           -30
+dCMEOpeningAngle    -120
+dCMEXRayXUVScaling  50
+dCarringtonFluence  -1e14
+dCarringtonLX        -1.26e21
+
+# EqTide Parameters
+dTidalQ         1e6		   # Tidal phase lag
+dK2             1	           # Love number of degree 2
+dMaxLockDiff    0.01
+saTidePerts     b          # Body name(s) of tidal perturbers
+#bFixOrbit 	1		   # Keep dEcc constant?
+bForceEqSpin	0		   # Planet tidally locked, no rotation?
+
+# Output
+saOutputOrder Age -Luminosity -LXUVStellar -LXUVFlare
