@@ -27,6 +27,9 @@ dFlareSingleStarB2         [16.780, 0.621, g] b2
 dCMEOpeningAngle [120, 10, g] open
 dCMEProtonEnergy [-40, -20, u] pren
 dCMEXRayXUVScaling [25, 100, u] xscale
+dCMEMomentumScaling [100, 10000, u] momscale
+dCarrigntonFluence [14, 1, G] CarrFl
+dCarringtonLX [1.26e21, 0.14e21, g] CarrLX
 
 file vpl.in
 
