@@ -19,6 +19,11 @@ dMass [dynesty_transform_final.npy, npy, p, 1] mass
 dSatXUVFrac [dynesty_transform_final.npy, npy, p, 2] fsat
 dSatXUVTime [dynesty_transform_final.npy, npy, p, 3] tsat
 dXUVBeta [dynesty_transform_final.npy, npy, p, 5] beta
+dFlareSingleStarA1         [-0.301, 0.063, g] a1
+dFlareSingleStarA2         [-0.533, 0.612, g] a2
+dFlareSingleStarB1         [8.732, 1.2415827982573244, g] b1
+dFlareSingleStarB2         [16.780, 0.621, g] b2
+
 
 file vpl.in
 

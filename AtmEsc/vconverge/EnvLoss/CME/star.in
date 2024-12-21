@@ -26,6 +26,9 @@ dFlareSingleStarA2          -0.5334471077641867
 dFlareSingleStarB1           8.731613540323513
 dFlareSingleStarB2          16.78046229493345
 
+dCMEOpeningAngle 120
+dCMEProtonEnergy -30
+dCMEXRayXUVScaling 50
 
 
 saOutputOrder 	Time -Luminosity -LXUVStellar -LXUVFlare -LXUVTot 
