@@ -31,11 +31,9 @@ dStagLidDepth	[45000, 55000, u] LidDepth
 dTMan 		[2500, 3500, u] TMan 
 dTCMB 		[4000, 5000, u] TCMB
 dEruptEff 	[0.005, 0.05, u] Erupt
-dViscRef 	[10000000, 5011872336, u] ViscRef
 dViscJumpMan 	[1.04, 100, u] ViscJump
-dWaterViscMan   [3000000, 4000000, u] WaterVisc
 dManWaterMass 	[-50, -1, u] ManWater
-dManCO2Mass 	[5e+20, 6e20, u] ManCO2
+dManCO2Mass 	[5e+20, 5e21, u] ManCO2
 dDTChiRef 	[50, 60, u] ChiRef
 dTrefLind 	[5000, 6000, u] TLind
 dSurfWaterMass  [-50, -0.1, u] SurfWater

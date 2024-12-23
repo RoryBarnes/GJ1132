@@ -16,23 +16,7 @@ dRadGyra	0.5
 dEcc          0.001                # Eccentricity
 
 # RADHEAT Parameters
-# *Num* are in numbers of atoms, negative -> Earth vals
-### 40K
-d40KPowerMan -6.564734e-01 #
-d40KPowerCore -6.129731e-01 #
-d40KPowerCrust    -1e-9
-### 232Th
-d232ThPowerMan	  -1
-d232ThPowerCore	  -1e-9
-d232ThPowerCrust  -1e-9
-### 235U
-d235UPowerMan     -1
-d235UPowerCore	  -1e-9
-d235UPowerCrust	  -1e-9
-### 238U
-d238UPowerMan	  -1
-d238UPowerCore	  -1e-9
-d238UPowerCrust	  -1e-9
+# Set by vspace
 
 ### THERMINT inputs.
 dTSurf	700
