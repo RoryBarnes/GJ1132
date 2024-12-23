@@ -16,7 +16,6 @@ dRadGyra	0.5
 dEcc          0.001                # Eccentricity
 
 # RADHEAT Parameters
-dSemi         -0.0157              # Semi-major axis, negati
 # *Num* are in numbers of atoms, negative -> Earth vals
 ### 40K
 d40KPowerMan -6.564734e-01 #
