@@ -1,0 +1,14 @@
+sVspaceFile vspace.in
+iStepSize 500
+iMaxSteps 200
+sConvergenceMethod KS_statistic
+fConvergenceCondition 0.004
+iNumberOfConvergences 3
+
+sObjectFile b.in
+
+saConverge final TMan 
+saConverge final TCore 
+saConverge final OxygenMass 
+saConverge final SurfWaterMass 
+saConverge final SurfaceCO2Mass

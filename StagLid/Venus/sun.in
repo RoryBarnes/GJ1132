@@ -1,0 +1,18 @@
+# sun parameters
+sName        sun #
+saModules    stellar #
+
+# Output
+saOutputOrder Age -Luminosity -LXUVStellar -Radius Temperature -HZLimRunaway -HZLimMoistGreenhouse #
+
+# Physical Parameters #
+dMass        1.00 #
+dAge         5e7 #
+dObliquity   0 #
+dRotPeriod   -30 #
+dRadGyra     0.5 #
+
+# STELLAR Parameters
+sStellarModel baraffe #
+dSatXUVFrac 1.e-3 #
+dSatXUVTime -.1 #

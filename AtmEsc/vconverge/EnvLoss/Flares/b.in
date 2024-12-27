@@ -1,0 +1,16 @@
+# Planet b parameters
+sName         b                     # Body's name
+saModules       atmesc
+dSolidMass         -1.62                       # Mass, negative -> Earth masses
+dOrbPeriod    -1.628931
+
+dXFrac                    1.0
+dSurfWaterMass            0
+bHaltEnvelopeGone         1
+sPlanetRadiusModel        lopez
+dAtmXAbsEffH              0.1
+dEcc                      0.
+bAtmEscAuto         1
+dEnvelopeMass             -0.1
+
+saOutputOrder Time -Mass -EnvelopeMass Radius

@@ -1,0 +1,22 @@
+# The host star
+sName	        star                    # Body's name
+saModules	stellar eqtide               # Modules to apply, exact spelling required
+
+# Physical Parameters
+dMass         0.1945                       # Mass, solar masses
+dAge          5e6
+
+# STELLAR Parameters
+sStellarModel baraffe                     # Stellar evolution model: `baraffe` or `none`
+dSatXUVFrac   1.12e-3                       # Saturation level of the XUV luminosity
+dSatXUVTime   -2.002                          # Saturation time of XUV radiation [neg: Gyr]
+
+dTidalQ         1e6		   # Tidal phase lag
+dK2             1	           # Love number of degree 2
+dMaxLockDiff    0.01
+saTidePerts     b          # Body name(s) of tidal perturbers
+#bFixOrbit 	1		   # Keep dEcc constant?
+bForceEqSpin	0		   # Planet tidally locked, no rotation?
+
+# Output
+saOutputOrder Age -Luminosity -LXUVStellar -Radius Temperature

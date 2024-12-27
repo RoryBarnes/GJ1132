@@ -1,0 +1,66 @@
+# Venuslike parameters
+sName		b			# Body's name
+saModules 	radheat thermint atmesc eqtide
+
+# Physical Properties
+dMass         -1.83                       # Mass, negative -> Earth masses
+dRadius       -1.191                      # Radius, negative -> Earth radii
+dRotPeriod    -1                           # Rotation Period, negative -> days
+
+
+# Physical Properties
+dObliquity	23.5
+dRadGyra	0.5
+
+# Orbital Propertiesve -> AU
+dEcc          0.001                # Eccentricity
+
+# RADHEAT Parameters
+# Set by vspace
+
+### THERMINT inputs.
+dTSurf	700
+dCoreRadFrac       0.51 # CRF should be 0.51 according to Smrekar (2018)
+dCrustDepth	30000
+dStagLidDepth	50000
+dTMan 2.723317e+03 #
+dTCMB 4.379634e+03 #
+dStagLid	1
+dManHFlowPref	1
+dEruptEff 1.666781e-02
+dViscRef 7.826984e+07
+dViscJumpMan 2.176916e+01
+dWaterViscMan 3.510372e+06
+dElecCondCore 8.509180e+05 #
+dManWaterMass -4.420946e+00 # 4.5 TO in mantle
+dManCO2Mass 5.661425e+20
+dDTChiRef 5.704621e+01
+dTrefLind 5.863653e+03
+
+
+# ATMESC Properties
+dXFrac                    1.0             # X-Ray/XUV absorption radius (fraction of planet radius)
+dSurfWaterMass           -3 # Initial surface water (Earth oceans)
+dEnvelopeMass             0               # Initial envelope mass (Earth masses)
+bHaltSurfaceDesiccated    0               # Halt when dry?
+bHaltEnvelopeGone         0               # Halt when evaporated?
+#dMinSurfWaterMass         -1.e-7          # Planet is desiccated when water content drops below this (Earth oceans)
+sWaterLossModel           lbexact #
+sPlanetRadiusModel        none #
+bInstantO2Sink            0 #
+dJeansTime		  -10 #
+sAtmXAbsEffH2OModel bolmont16 #
+
+# Eqtide
+dImK2ManOrbModel   2
+dShModRef        1e5 #1e6
+dStiffness       1.71e13  #3e13
+saTidePerts star
+
+saOutputOrder -Time -TMan -TLid -TCore -CrustDepth -StagLidDepth -CrustMass $
+  -MeltMassFluxMan -FMeltUMan -ViscUMan -EqtidePower $
+  -MagMom -RIC -OxygenMass $
+  -RadPowerMan -RadPowerCrust -RadPowerCore $
+  -WaterOutgasRate -WaterLossRate -SurfWaterMass -ManWaterMass -CrustWaterMass -OceanMassLost $
+  -CO2OutgasRate -SurfaceCO2Mass  -CrustCO2Mass -ManCO2Mass -PCO2MeltBubble 
+
