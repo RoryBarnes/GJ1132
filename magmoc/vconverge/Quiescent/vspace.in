@@ -2,7 +2,7 @@ srcfolder .
 destfolder output
 trialname magmoc_
 samplemode random
-randsize 500
+randsize 1000
 
 file b.in
 
