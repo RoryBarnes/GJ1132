@@ -1,5 +1,5 @@
 sVspaceFile vspace.in
-iStepSize 100
+iStepSize 500
 iMaxSteps 200
 sConvergenceMethod KS_statistic
 fConvergenceCondition 0.004
@@ -16,3 +16,4 @@ saConverge final FracFe2O3Man
 saConverge final CO2MassSol 
 saConverge final CO2MassMOAtm 
 saConverge final PressCO2Atm
+saConverge final Age 

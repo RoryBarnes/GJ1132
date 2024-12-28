@@ -270,39 +270,42 @@ def vconverge(vcnvFile):
 
 	for subdir, dirs, files in os.walk(dst_fold): # Loop through all the sims and extract info from each log
 		if subdir != dst_fold:
-			curr_file = open(os.path.join(subdir, vplanet_logfile), 'r')
-			curr_lines = curr_file.readlines()
-			curr_file.close()
-			finithold = None
-			currbody = None
-			for i in range(len(curr_lines)):
-				if len(curr_lines[i].split()) > 2:
-					if curr_lines[i].split()[1] == 'FINAL':
-						finithold = 'final'
-#						print(curr_lines[i].split()[1])
-					elif curr_lines[i].split()[1] == 'INITIAL':
-						finithold = 'initial'
-#						print(curr_lines[i].split()[1])
-					elif curr_lines[i].split()[1] == 'BODY:':
-						currbody = curr_lines[i].split()[2]
-#						print(currbody)
-					elif curr_lines[i].split()[0] in variable:
-#						index = variable.index(curr_lines[i].split()[0])
-						index = np.where(variable == curr_lines[i].split()[0])[0]
-						if currbody in body[index] and finithold in finit[index]:
-							bodyindex = np.where(body[index] == currbody)[0]
-							finitindex = np.where(finit[index] == finithold)[0]
-							trueindex = None
-							for g in bodyindex:
-#								print('g: ',g)
-								for h in finitindex:
-#									print('h: ',h)
-									if g == h:
-										trueindex = g
-							if trueindex is not None:
-#								print('body '+str(body[index][trueindex])+', variable '+str(variable[index][trueindex])+'_'+str(finit[index][trueindex])+' AKA '+str(curr_lines[i].split()[0]))
-#								print('In params_to_conv: '+str(np.array(params_to_conv)[index][trueindex]))
-								converge_dict[np.array(params_to_conv)[index][trueindex]].append(float(curr_lines[i].split()[len(curr_lines[i].split()) - 1]))
+			try:
+				curr_file = open(os.path.join(subdir, vplanet_logfile), 'r')
+				curr_lines = curr_file.readlines()
+				curr_file.close()
+				finithold = None
+				currbody = None
+				for i in range(len(curr_lines)):
+					if len(curr_lines[i].split()) > 2:
+						if curr_lines[i].split()[1] == 'FINAL':
+							finithold = 'final'
+	#						print(curr_lines[i].split()[1])
+						elif curr_lines[i].split()[1] == 'INITIAL':
+							finithold = 'initial'
+	#						print(curr_lines[i].split()[1])
+						elif curr_lines[i].split()[1] == 'BODY:':
+							currbody = curr_lines[i].split()[2]
+	#						print(currbody)
+						elif curr_lines[i].split()[0] in variable:
+	#						index = variable.index(curr_lines[i].split()[0])
+							index = np.where(variable == curr_lines[i].split()[0])[0]
+							if currbody in body[index] and finithold in finit[index]:
+								bodyindex = np.where(body[index] == currbody)[0]
+								finitindex = np.where(finit[index] == finithold)[0]
+								trueindex = None
+								for g in bodyindex:
+	#								print('g: ',g)
+									for h in finitindex:
+	#									print('h: ',h)
+										if g == h:
+											trueindex = g
+								if trueindex is not None:
+	#								print('body '+str(body[index][trueindex])+', variable '+str(variable[index][trueindex])+'_'+str(finit[index][trueindex])+' AKA '+str(curr_lines[i].split()[0]))
+	#								print('In params_to_conv: '+str(np.array(params_to_conv)[index][trueindex]))
+									converge_dict[np.array(params_to_conv)[index][trueindex]].append(float(curr_lines[i].split()[len(curr_lines[i].split()) - 1]))
+			except:
+				print("File "+subdir+"/"+vplanet_logfile+" not found! Ignoring.")
 
 	# Check to make sure all requested parameters are real
 	for i in params_to_conv:
