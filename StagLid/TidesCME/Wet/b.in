@@ -1,0 +1,72 @@
+# Venuslike parameters
+sName		    b			# Body's name
+saModules 	radheat thermint atmesc eqtide
+
+# Physical Properties
+dMass         -1.83                       # Mass, negative -> Earth masses
+dRadius       -1.191                      # Radius, negative -> Earth radii
+dRotPeriod    -1                           # Rotation Period, negative -> days
+
+
+# Physical Properties
+dObliquity	23.5
+dRadGyra	  0.5
+
+# Orbital Properties -> AU
+dEcc          1e-5                # Eccentricity
+dOrbPeriod    -1.628931
+bFixOrbit     1
+
+# RADHEAT Parameters
+# Set by vspace
+
+### THERMINT inputs.
+dTSurf	      700
+dCoreRadFrac  0.51 # CRF should be 0.51 according to Smrekar (2018)
+dCrustDepth	  30000
+dStagLidDepth	50000
+dTMan         2725
+dTCMB         4375
+dStagLid	    1
+dManHFlowPref	1
+dEruptEff     0.01
+dViscRef      7.8e+07
+dViscJumpMan  21.77
+dWaterViscMan 3.5e+06
+dElecCondCore 8.5e+05 
+dManWaterMass -1 
+dManCO2Mass   1.75e21 # 25% of total water mass; 50% in mantle
+dDTChiRef     57
+dTrefLind     5850
+
+
+# ATMESC Properties
+dXFrac                    1.0             # X-Ray/XUV absorption radius (fraction of planet radius)
+dSurfWaterMass           -9               # Initial surface water (Earth oceans)
+dSurfCO2Mass              1.75e21         # 25% of total water mass; 50% in atm
+dEnvelopeMass             0               # Initial envelope mass (Earth masses)
+bHaltSurfaceDesiccated    0               # Halt when dry?
+bHaltEnvelopeGone         0               # Halt when evaporated?
+sWaterLossModel           lbexact 
+sPlanetRadiusModel        none 
+bInstantO2Sink            0 
+dJeansTime		            -15 
+sAtmXAbsEffH2OModel       bolmont16 
+
+bCMEEscape            1
+dCMEEscapeEfficiency  0.5
+
+# Eqtide
+dImK2ManOrbModel    2
+dShModRef           1e5
+dStiffness          1.71e13
+saTidePerts         star
+
+saOutputOrder -Time -TMan -TLid -TCore $
+  -SurfWaterMass -CrustWaterMass -ManWaterMass -WaterOutgasRate -WaterLossRate $
+  -SurfaceCO2Mass  -CrustCO2Mass -ManCO2Mass -CO2OutgasRate -DCO2MassDtCME $
+  -OxygenMass -DOxygenMassDtCME $
+  -CrustDepth -StagLidDepth -CrustMass -RadPowerCrust $
+  -MeltMassFluxMan -FMeltUMan -ViscUMan -EqtidePower -RadPowerMan $
+  -MagMom -RIC -RadPowerCore 
+
