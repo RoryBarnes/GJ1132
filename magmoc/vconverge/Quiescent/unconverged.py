@@ -107,7 +107,6 @@ for subdir in subdirs:
 
             if final and parts[0] == '(Time)':
                 Time.append(float(parts[-1]))
-                print(float(parts[-1]))
 
         # print (SurfTemp[0])                
         # print (WaterMassSol[0])                
@@ -153,18 +152,16 @@ ValidRows = []
 # Get the number of rows based on the length of the lists in the dictionary
 #print(repr(output["Age,final"]))
 iNumRows = len(output["Age,final"])
-print(iNumRows)
 for i in range(iNumRows):
     bValid=1
     for key in output:
         try:
             if np.isnan(output[key][i]):
-                print(repr(i)+": NaN for "+repr(key))
+                #print(repr(i)+": NaN for "+repr(key))
                 bValid=0
         except:
             print(repr(key) + " " +repr(i))
 
-    print(repr(StopTime[i]) + " " + repr(Time[i]))
     if StopTime[i] < Time[i]:
         bValid=0
         # Extract the row as a list of values
@@ -177,7 +174,7 @@ for i in range(iNumRows):
 
         output["b,SurfWaterMass,final"][i] /= -TO
         output["b,WaterMassSol,final"][i] *= -1
-        output["b,ManCO2Mass,final"][i] /= -TO
+        output["b,CO2MassSol,final"][i] /= -TO
 
 
         row = [output[key][i] for key in output]
