@@ -4,7 +4,7 @@ saModules	stellar eqtide  flare             # Modules to apply, exact spelling r
 
 # Physical Parameters
 dMass         0.1945                       # Mass, solar masses
-dAge          5e6
+dAge          25e6
 
 # STELLAR Parameters
 sStellarModel baraffe                     # Stellar evolution model: `baraffe` or `none`
@@ -24,15 +24,15 @@ dFlareMaxEnergy            -1.0e34              # Max flare energy
 sFlareFFD                           single      # flare frequency distribution evolution model
 dEnergyBin                       1000           # Number of bins between min and max energy
 sFlareBandPass                  sxr
-dFlareSingleStarA1         -0.3008257433775617
-dFlareSingleStarA2          -0.5334471077641867
-dFlareSingleStarB1           8.731613540323513
-dFlareSingleStarB2          16.78046229493345
+dFlareSingleStarA1         -0.3
+dFlareSingleStarA2          -0.5
+dFlareSingleStarB1           8.7
+dFlareSingleStarB2          16.8
 
 dCMEOpeningAngle 120
 dCMEProtonEnergy -30
 dCMEXRayXUVScaling 50
-dCMEMomentumScaling 1e5
+dCMEMomentumScaling 1e3
 
 
 saOutputOrder 	Time -Luminosity -LXUVStellar -LXUVFlare -LXUVTot 

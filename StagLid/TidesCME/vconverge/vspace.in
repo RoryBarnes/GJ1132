@@ -2,7 +2,7 @@ srcfolder .
 destfolder output
 trialname staglid_
 samplemode random
-randsize 1000
+randsize 100
 
 file b.in
 
@@ -32,15 +32,21 @@ dTMan 		[2500, 3500, u] TMan
 dTCMB 		[4000, 5000, u] TCMB
 dEruptEff 	[0.005, 0.05, u] Erupt
 dViscJumpMan 	[1.04, 100, u] ViscJump
-dManWaterMass 	[-50, -1, u] ManWater
-dManCO2Mass 	[5e+20, 5e21, u] ManCO2
+
 dDTChiRef 	[50, 60, u] ChiRef
 dTrefLind 	[5000, 6000, u] TLind
-dSurfWaterMass  [-50, -0.1, u] SurfWater
+
+dManWaterMass 	[MagmaOceanFinal.npy, npy, p, 5] ManWater
+dSurfWaterMass  [MagmaOceanFinal.npy, npy, p, 8] SurfWater
+
+dManCO2Mass 	[MagmaOceanFinal.npy, npy, p, 12] ManCO2
+dSurfCO2Mass    [MagmaOceanFinal.npy, npy, p, 14] SurfCO2
+
+dOxygenMass     [MagmaOceanFinal.npy, npy, p, 9] Oxy 
 
 file star.in
 
-dAge [3000000, 10000000, u] age
+dAge [MagmaOceanFinal.npy, npy, p, 1] age
 dMass [dynesty_transform_final.npy, npy, p, 1] mass
 dSatXUVFrac [dynesty_transform_final.npy, npy, p, 2] fsat
 dSatXUVTime [dynesty_transform_final.npy, npy, p, 3] tsat
@@ -48,4 +54,4 @@ dXUVBeta [dynesty_transform_final.npy, npy, p, 5] beta
 
 file vpl.in
 
-dStopTime [dynesty_transform_final.npy, npy, p, 4] tstop
+dStopTime [MagmaOceanFinal.npy, npy, p, 2] tstop

@@ -1161,13 +1161,17 @@ def main():
             for ii in np.arange(len(iterables0)):
                 # generate histogram of simulations
                 plt.figure(figsize=(8, 8))
-                plt.hist(
-                    iterables0[ii],
-                    histtype="stepfilled",
-                    color="0.5",
-                    edgecolor="None",
-                    bins="fd"
-                )
+                try:
+                    plt.hist(
+                        iterables0[ii],
+                        histtype="stepfilled",
+                        color="0.5",
+                        edgecolor="None",
+                        bins="fd"
+                    )
+                except Exception as e:
+                    print(f"{str(e)}")
+                    print("\t"+repr(iterables0[ii]))
                 plt.xlabel(iter_name[ii])
                 plt.ylabel("Number of trials")
                 plt.savefig(
