@@ -165,16 +165,26 @@ for i in range(iNumRows):
     if StopTime[i] < Time[i]:
         bValid=0
         # Extract the row as a list of values
-    if output["b,CO2MassSol,final"][i] < 0:
+    if output["b,CO2MassAtm,final"][i] < 0:
+        #print("Final atm CO2 mass < 0") 
         bValid=0
+    if output["b,SurfWaterMass,final"][i] > 1e30 and bValid:
+        print(repr(i)+": "+repr(output["b,SurfWaterMass,final"][i])+ " "+repr(SurfWaterMass[i]),flush=True)
+        bValid = 0
+
 
     if bValid:
+        output["Time,final"][i] /= YearSec
         output["StopTime"][i] /= YearSec
+        #print(repr(output["Age,final"][i])+ " 1")
         output["Age,final"][i] /= YearSec
+        #print(repr(output["Age,final"][i])+ " 2")
 
+        #print(repr(output["b,SurfWaterMass,final"][i]),flush=True)
         output["b,SurfWaterMass,final"][i] /= -TO
+        #print(repr(output["b,SurfWaterMass,final"][i]),flush=True)
         output["b,WaterMassSol,final"][i] *= -1
-        output["b,CO2MassSol,final"][i] /= -TO
+        #output["b,CO2MassSol,final"][i] /= -TO
 
 
         row = [output[key][i] for key in output]
