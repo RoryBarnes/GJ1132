@@ -10,11 +10,14 @@ SurfTemp = []
 WaterMassSol = []
 WaterMassMOAtm = []
 PressWaterAtm = []
+SurfWaterMass = []
 OxygenMass = []
+PressOxygenAtm = []
 FracFe2O3Man = []
 CO2MassSol = []
 CO2MassMOAtm = []
 PressCO2Atm = []
+CO2MassAtm = []
 Age = []
 StopTime = []
 Time = []
@@ -108,6 +111,9 @@ for subdir in subdirs:
 
             if ready and parts[0] == '(SurfTemp)':
                 SurfTemp.append(float(parts[-1]))
+
+            if ready and parts[0] == '(SurfWaterMass)':
+                SurfWaterMass.append(float(parts[-1]))
             
             if ready and parts[0] == '(WaterMassSol)':
                 WaterMassSol.append(float(parts[-1]))
@@ -119,11 +125,17 @@ for subdir in subdirs:
                 PressWaterAtm.append(float(parts[-1]))
 
             if ready and parts[0] == '(PressOxygenAtm)':
+                PressOxygenAtm.append(float(parts[-1]))
+
+            if ready and parts[0] == '(OxygenMass)':
                 OxygenMass.append(float(parts[-1]))
 
             if ready and parts[0] == '(CO2MassSol)' and co2masssol == 0:
                 CO2MassSol.append(float(parts[-1]))
                 co2masssol = 1
+
+            if ready and parts[0] == '(CO2MassSol)' and co2masssol == 1:
+                CO2MassAtm.append(float(parts[-1]))  # Typo in vplanet! 2 CO2MassSol's!
 
             if ready and parts[0] == '(CO2MassMOAtm)':
                 CO2MassMOAtm.append(float(parts[-1]))
@@ -157,13 +169,19 @@ output = {
     "StopTime": StopTime,
     "Age,final": Age,
     "b,SurfTemp,final": SurfTemp,
+
     "b,WaterMassSol,final": WaterMassSol,
     "b,WaterMassMOAtm,final": WaterMassMOAtm,
     "b,PressWaterAtm,final": PressWaterAtm,
+    "b,SurfWaterMass,final": SurfWaterMass,
+
     "b,OxygenMass,final": OxygenMass,
+    "b,PressOxygenAtm,final": OxygenMass,
+    "b,FracFe2O3Man,final": FracFe2O3Man,
+
     "b,CO2MassSol,final": CO2MassSol,
     "b,CO2MassMOAtm,final": CO2MassMOAtm,
-    "b,FracFe2O3Man,final": FracFe2O3Man,
+    "b,CO2MassAtm,final": CO2MassAtm,
     "b,PressCO2Atm,final": PressCO2Atm
 }
 
@@ -196,4 +214,5 @@ np.save("MagmaOceanFinal.npy", ValidArray)
 
 print("Processed "+repr(found)+" directories.")
 print(repr(missing)+" log files missing.")
+print('Number of sims ready for stagnant lid: '+repr(len(ValidRows)))
 #print(SurfTemp)
