@@ -102,7 +102,7 @@ for subdir in subdirs:
             if ready and parts[0] == '(PressCO2Atm)':
                 PressCO2Atm.append(float(parts[-1]))
 
-            if ready and parts[0] == '(Time)':
+            if final and parts[0] == '(Time)':
                 Time.append(float(parts[-1]))
 
         # print (SurfTemp[0])                
@@ -147,14 +147,24 @@ with open('Unconverged_Param_Dictionary.json', 'w') as f:
 ValidRows = []
 
 # Get the number of rows based on the length of the lists in the dictionary
-iNumRows = len(next(iter(output.values())))
+#print(repr(output["Age,final"]))
+iNumRows = len(output["Age,final"])
 print(iNumRows)
 for i in range(iNumRows):
-    print(repr(StopTime[i]) + " " + repr(Time[i]))
-    # Check if the current row meets the criteria
-    if StopTime[i] < Time[i]:
+    bValid=1
+    for key in output:
+        try:
+            if np.isnan(output[key][i]):
+                print(repr(i)+": NaN for "+repr(key))
+                bValid=0
+        except:
+            print(repr(key) + " " +repr(i))
 
+    print(repr(StopTime[i]) + " " + repr(Time[i]))
+    if StopTime[i] < Time[i]:
+        bValid=0
         # Extract the row as a list of values
+    if bValid:
         row = [output[key][i] for key in output]
         ValidRows.append(row)
 
