@@ -6,6 +6,9 @@ from pathlib import Path
 body = 'b'
 vplanet_logfile = 'gj1132.log'
 
+YearSec = 365.25*3600*24
+TO=1.39e21
+
 SurfTemp = []
 WaterMassSol = []
 WaterMassMOAtm = []
@@ -122,21 +125,21 @@ for subdir in subdirs:
         print(f"Error reading file {file_path}: {e}")
 
 output = {
-    "Time,final": Time,
+    "Time,final": Time,                     #1
     "StopTime": StopTime,
     "Age,final": Age,
     "b,SurfTemp,final": SurfTemp,
 
-    "b,WaterMassSol,final": WaterMassSol,
+    "b,WaterMassSol,final": WaterMassSol,   #5
     "b,WaterMassMOAtm,final": WaterMassMOAtm,
     "b,PressWaterAtm,final": PressWaterAtm,
     "b,SurfWaterMass,final": SurfWaterMass,
 
-    "b,OxygenMass,final": OxygenMass,
+    "b,OxygenMass,final": OxygenMass,       #9
     "b,PressOxygenAtm,final": OxygenMass,
     "b,FracFe2O3Man,final": FracFe2O3Man,
 
-    "b,CO2MassSol,final": CO2MassSol,
+    "b,CO2MassSol,final": CO2MassSol,       #12
     "b,CO2MassMOAtm,final": CO2MassMOAtm,
     "b,CO2MassAtm,final": CO2MassAtm,
     "b,PressCO2Atm,final": PressCO2Atm
@@ -165,7 +168,18 @@ for i in range(iNumRows):
     if StopTime[i] < Time[i]:
         bValid=0
         # Extract the row as a list of values
+    if output["b,CO2MassSol,final"][i] < 0:
+        bValid=0
+
     if bValid:
+        output["StopTime"][i] /= YearSec
+        output["Age,final"][i] /= YearSec
+
+        output["b,SurfWaterMass,final"][i] /= -TO
+        output["b,WaterMassSol,final"][i] *= -1
+        output["b,ManCO2Mass,final"][i] /= -TO
+
+
         row = [output[key][i] for key in output]
         ValidRows.append(row)
 
