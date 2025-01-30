@@ -1,0 +1,57 @@
+srcfolder .
+destfolder output
+trialname staglid_
+samplemode random
+randsize 10000
+
+file b.in
+
+dEcc [0.0030547, 0.00412, g, min0, max1] ecc
+dOrbPeriod [-1.628931, 0.000027, g, max0] orbper
+
+d40KNumMan    [-10, -1, u] 40KMan
+d40KNumCore   [-1, 0.1, g] 40KCore
+d40KNumCrust  [-1, 0.1, g] 40KCrust
+
+d232ThNumMan      [-1, 0.1, g] 232ThMan
+d232ThNumCore     [-1, 0.1, g] 232ThCore
+d232ThNumCrust    [-1, 0.1, g] 232ThCrust
+
+d235UNumMan      [-1, 0.1, g] 235UMan
+d235UNumCore     [-1, 0.1, g] 235UCore
+d235UNumCrust    [-1, 0.1, g] 235UCrust
+
+d238UNumMan      [-1, 0.1, g] 238UMan
+d238UNumCore     [-1, 0.1, g] 238UCore
+d238UNumCrust    [-1, 0.1, g] 238UCrust
+
+dCoreRadFrac    [0.4, 0.6, u] CoreRad
+dCrustDepth	[25000, 35000, u] CrustDepth
+dStagLidDepth	[45000, 55000, u] LidDepth
+dTMan 		[2500, 3500, u] TMan 
+dTCMB 		[4000, 5000, u] TCMB
+dEruptEff 	[0.005, 0.05, u] Erupt
+dViscJumpMan 	[1.04, 100, u] ViscJump
+
+dDTChiRef 	[50, 60, u] ChiRef
+dTrefLind 	[5000, 6000, u] TLind
+
+dManWaterMass 	[MagmaOceanFinal.npy, npy, p, 5] ManWater
+dSurfWaterMass  [MagmaOceanFinal.npy, npy, p, 8] SurfWater
+
+dManCO2Mass 	[MagmaOceanFinal.npy, npy, p, 12] ManCO2
+dSurfCO2Mass    [MagmaOceanFinal.npy, npy, p, 14] SurfCO2
+
+dOxygenMass     [MagmaOceanFinal.npy, npy, p, 9] Oxy 
+
+file star.in
+
+dAge [MagmaOceanFinal.npy, npy, p, 1] age
+dMass [dynesty_transform_final.npy, npy, p, 1] mass
+dSatXUVFrac [dynesty_transform_final.npy, npy, p, 2] fsat
+dSatXUVTime [dynesty_transform_final.npy, npy, p, 3] tsat
+dXUVBeta [dynesty_transform_final.npy, npy, p, 5] beta
+
+file vpl.in
+
+dStopTime [MagmaOceanFinal.npy, npy, p, 2] tstop
