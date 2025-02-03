@@ -1,0 +1,39 @@
+# GJ 1132 b Parameters from Waalkes et al. (2019)
+sName		b							# Body's name
+saModules 	eqtide distorb distrot        	# Modules
+
+# Physical Properties
+dMass			-1.83  	  # Mass, negative -> Earth masses
+dRadius			-1.1191  		# Radius, negative -> Earth radii
+bForceEqSpin	0
+dRotPeriod		-1
+dObliquity		23.5      # Obliquity (degrees)
+dRadGyra		0.4       # Radius of gyration (unitless)
+
+# Orbital Properties
+dEcc        0		# Eccentricity
+# >L current set is flat/wet/pushed, next is 10/wet/pushed
+#dSemi       -0.0153          # Semi-major axis, negative -> AU
+dOrbPeriod   -1.62892911
+
+# Eqtide Properties
+dTidalQ     	100              # Tidal phase lag
+# >L Each orbital pattern needs to be run with TQ70(dry) and TQ12(wet)
+dK2           0.3             # Love number of degree 2
+dMaxLockDiff  0.01            # Tidally lock when spin period is within 1% of orbital period
+saTidePerts   star          # Tidally interacting with star
+
+# DISTORB Parameters
+dInc          0             # Orbital inclination (assume coplanar)
+dLongA        0             # Longitude of the Ascending node (degrees)
+dLongP        77.0             # Longitude of the Periapse (degrees)
+sOrbitModel   rd4             # Use 4th Order disturbing function model
+bInvPlane 	  1
+
+# DISTROT Parameters
+dPrecA		  0
+bCalcDynEllip 1
+
+#Output
+saOutputOrder Time -RotPer LongP SemimajorAxis Eccentricity -SurfEnFluxTot $
+		Inc Obli PrecA CassiniOne CassiniTwo PrecFNat DynEllip
