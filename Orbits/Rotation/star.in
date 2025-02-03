@@ -2,8 +2,8 @@ sName		    star		          # Body's name
 saModules   stellar eqtide    # Modules
 
 # Physical Parameters
-dMass		    0.181        # Mass, negative -> Earth masses
-dAge        1.0e6       # Assume star is 1 Myr old when disk disperses
+dMass		    0.1945        # Mass, negative -> Earth masses
+dAge        4.0e6       # Assume star is 1 Myr old when disk disperses
 dRadGyra	  0.4	        # Radius of gyration (moment of inertia constant)
 dRotPeriod  -122        # Rotation period, negative -> Days
 # >L source says >100days
