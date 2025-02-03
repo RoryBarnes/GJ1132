@@ -1,0 +1,16 @@
+sName		    star		          # Body's name
+saModules       spinbody    # Modules
+
+# Physical Parameters
+dMass		    0.1945        # Mass, negative -> Earth masses
+
+dSemi   0.0
+dEcc    0.0
+dInc    0.0
+dArgP   0.0
+dLongA  0.0
+dMeanA  0.0
+
+bUseOrbParams   1
+
+saOutputOrder	Time SemiMajorAxis Eccentricity SpiNBodyInc LongP SpiNBodyLongA MeanAnomaly

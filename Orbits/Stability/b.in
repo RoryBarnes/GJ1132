@@ -1,0 +1,19 @@
+# GJ 1132 b Parameters from Waalkes et al. (2019)
+sName		b							# Body's name
+saModules 	spinbody
+
+# Physical Properties
+dMass		-1.83  	  # Mass, negative -> Earth masses
+
+# Orbital Properties
+dSemi       -0.0157          # Semi-major axis, negative -> AU
+dEcc        0.05		# Eccentricity
+dInc        5.0             # Orbital inclination (assume coplanar)
+dLongA      0             # Longitude of the Ascending node (degrees)
+dArgP      77.0             # Longitude of the Periapse (degrees)
+dMeanA      25
+bUseOrbParams   1
+
+#Output
+saOutputOrder Time SemiMajorAxis Eccentricity SpiNBodyInc LongP SpiNBodyLongA MeanAnomaly
+		
