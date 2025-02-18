@@ -17,6 +17,7 @@ plt.rcParams.update({"font.size": 12, "legend.fontsize": 11})
 
 # Run vplanet
 out = vplanet.run(path / "vpl.in")
+#out = vplanet.get_output()
 
 # Plots
 rows = 3
@@ -103,5 +104,5 @@ plt.ylim([-0.1,3])
 # Save the figure
 #ext = get_args().ext
 plt.tight_layout()
-fig.savefig(path / "GJ1132b_StagLidCME_Earth.png",)
+fig.savefig(path / "GJ1132b_StagLidCME_Earth.png",dpi=300)
 
