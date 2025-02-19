@@ -203,7 +203,7 @@ def main():
                     prior_files.append(values[0])
                     if values[1] == 'npy':
                         fprior = np.load(values[0])
-                        prior_index = np.random.choice(fprior.shape[0], size=randsize, replace=False)
+                        prior_index = np.random.choice(fprior.shape[0], size=randsize, replace=True)
                         prior_indicies.append(prior_index)
                         samp = fprior[prior_index]
                         prior_samples.append(samp)

@@ -2,7 +2,7 @@ srcfolder .
 destfolder output
 trialname staglid_
 samplemode random
-randsize 100
+randsize 10000
 
 file b.in
 
