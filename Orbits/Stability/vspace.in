@@ -1,0 +1,27 @@
+srcfolder .
+destfolder output
+trialname stability
+samplemode random
+randsize 1000
+
+file b.in
+
+dMass [-1.83, 0.19, g] mb
+dEcc [0, 0.5, u] eb
+dArgP [0, 180, u] pb
+dLongA [0, 360, u] lb
+dInc [0, 5, u] ib 
+
+file c.in
+
+dMass [-4, -2, u] mc
+dEcc [0, 0.5, u] ec 
+dArgP [0, 180, u] pc 
+dLongA [0, 360, u] lc 
+dInc [0, 5, u] ic 
+
+file star.in
+
+dMass [0.1945, 0.0047, g] mass
+
+file vpl.in

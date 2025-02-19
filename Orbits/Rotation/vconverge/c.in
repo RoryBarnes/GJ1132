@@ -1,0 +1,30 @@
+# GJ 1132 c Parameters from Bonfils et al. (2018)
+sName				c												# Body's name
+saModules 	eqtide distorb # Modules
+
+# Physical Properties
+dMass			-3  	  # Mass, negative -> Earth masses
+dRadius			-1.25  		# Radius, negative -> Earth radii
+bForceEqSpin	1
+dObliquity		23.5       # Obliquity (degrees)
+dRadGyra		0.4       # Radius of gyration (unitless)
+
+# Orbital Properties
+dEcc        0		# Eccentricity
+# >L current set is flat/wet/pushed, next is 10/wet/pushed
+dSemi       -0.0476         # Semi-major axis, negative -> AU
+
+# Eqtide Properties
+dTidalQ     	100              # Tidal phase lag
+# >L Each orbital pattern needs to be run with TQ92 (dry) and TQ50(wet)
+dK2           0.3             # Love number of degree 2
+dMaxLockDiff  0.01            # Tidally lock when spin period is within 1% of orbital period
+saTidePerts   star          # Tidally interacting with star
+
+# DISTORB Parameters
+dInc          5.0             # Orbital inclination (degrees)
+dLongA        180.0             # Longitude of the Ascending node (degrees)
+dLongP        312.0             # Longitude of the Periapse (degrees)
+
+#Output
+saOutputOrder Time SemimajorAxis Eccentricity Inc LongA LongP 

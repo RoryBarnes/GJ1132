@@ -1,0 +1,17 @@
+# GJ 1132 c Parameters from Bonfils et al. (2018)
+sName			c			# Body's name
+saModules 	    spinbody
+
+# Physical Properties
+dMass			-3  	  # Mass, negative -> Earth masses
+
+dSemi       -0.0476          # Semi-major axis, negative -> AU
+dEcc        0.2		# Eccentricity
+dInc        3.0             # Orbital inclination (assume coplanar)
+dLongA      180             # Longitude of the Ascending node (degrees)
+dArgP      312.0             # Longitude of the Periapse (degrees)
+dMeanA      187
+bUseOrbParams   1
+
+#Output
+saOutputOrder Time SemiMajorAxis Eccentricity SpiNBodyInc LongP SpiNBodyLongA MeanAnomaly
