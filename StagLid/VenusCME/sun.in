@@ -1,0 +1,34 @@
+# sun parameters
+sName        sun #
+saModules    stellar flare 
+
+# Physical Parameters #
+dMass        1.00 #
+dAge         5e7 #
+dObliquity   0 #
+dRotPeriod   -30 #
+dRadGyra     0.5 #
+
+# STELLAR Parameters
+sStellarModel baraffe #
+dSatXUVFrac 1.e-3 #
+dSatXUVTime -.1 #
+
+# FLARE Parameters
+dFlareMinEnergy            -1.0e29              # Min flare energy
+dFlareMaxEnergy            -1.0e34              # Max flare energy
+sFlareFFD                           single      # flare frequency distribution evolution model
+dEnergyBin                       1000           # Number of bins between min and max energy
+sFlareBandPass                  sxr
+dFlareSingleStarA1         -0.3008257433775617
+dFlareSingleStarA2          -0.5334471077641867
+dFlareSingleStarB1           8.731613540323513
+dFlareSingleStarB2          16.78046229493345
+
+dCMEOpeningAngle 120
+dCMEProtonEnergy -30
+dCMEXRayXUVScaling 50
+dCMEMomentumScaling 1e5
+
+
+saOutputOrder 	Time -Luminosity -LXUVStellar -LXUVFlare -LXUVTot 
