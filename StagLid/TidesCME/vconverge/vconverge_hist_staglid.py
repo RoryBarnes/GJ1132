@@ -41,72 +41,66 @@ def NormHistPanel(column,color,x,y,label=None):
 
 #out = GetData("vconverge_tmp/tmp_Converged_Param_Dictionary.json")
 out = GetData("Unconverged_Param_Dictionary.json")
-daAge = ExtractColumn(out,"Age,final")/gyearsec
-daSurfTemp = ExtractColumn(out,"b,SurfTemp,final")
-daWaterSol = ExtractColumn(out,"b,WaterMassSol,final")
-daWaterMO = ExtractColumn(out,"b,WaterMassMOAtm,final")
-daWaterAtm = ExtractColumn(out,"b,PressWaterAtm,final")
-daOxyAtm = ExtractColumn(out,"b,PressOxygenAtm,final")
-daFe2O3 = ExtractColumn(out,"b,FracFe2O3Man,final")
-daCO2Sol = ExtractColumn(out,"b,CO2MassSol,final")
-daCO2MO = ExtractColumn(out,"b,CO2MassMOAtm,final")
-daCO2Atm = ExtractColumn(out,"b,PressCO2Atm,final")
+daWaterAtm = ExtractColumn(out,"b,SurfWaterMass,final")
+daWaterCrust = ExtractColumn(out,"b,CrustWaterMass,final")
+daWaterMan = ExtractColumn(out,"b,ManWaterMass,final")
+daCO2Atm = ExtractColumn(out,"b,SurfCO2Mass,final")
+daCO2Man = ExtractColumn(out,"b,ManCO2Mass,final")
+daCO2Crust = ExtractColumn(out,"b,CrustCO2Mass,final")
+daOxyAtm = ExtractColumn(out,"b,OxygenMass,final")
+daTMan = ExtractColumn(out,"b,MantleTemp,final")
+daMagMom = ExtractColumn(out,"b,MagMom,final")
 
-print(daOxyAtm)
 iNumBins = 50
 
-#fig, ax = plt.subplots(nrows = 3, ncols=3, figsize=(6.5, 7))
-fig, ax = plt.subplots(nrows = 3, ncols=2, figsize=(6.5, 7))
+fig, ax = plt.subplots(nrows = 3, ncols=3, figsize=(6.5, 7))
 # NormHistPanel(daSurfTemp,'k',0,0)
 # ax[0,0].set_xlabel('Surface Temp [K]')
 # ax[0,0].set_ylabel('Number')
-NormHistPanel(daAge,'k',0,0)
-ax[0,0].set_xlabel('Solidification Age [Gyr]')
+NormHistPanel(daWaterAtm,'k',0,0)
+ax[0,0].set_xlabel('Water Atm [bar]')
 ax[0,0].set_ylabel('Fraction')
 #ax[0,0].set_title('Magma Ocean')
 
 #NormHistPanel(np.log10(daFe2O3),'k',0,1)
 #ax[0,1].set_xlabel(r'log$_{10}$(Fe$_2$O$_3$ Fraction)')
-# NormHistPanel(daFe2O3,'k',0,1)
-# ax[0,1].set_xlabel(r'Mantle Fe$_2$O$_3$ Fraction')
-# ax[0,1].set_ylabel('Fraction')    
-# ax[0,1].set_title('Mantle')
+NormHistPanel(daWaterCrust,'k',0,1)
+ax[0,1].set_xlabel(r'Water Crust [TO]')
+ax[0,1].set_ylabel('Fraction')    
+#ax[0,1].set_title('Mantle')
 
-NormHistPanel(daOxyAtm/4e21,'k',0,1)
-ax[0,1].set_xlabel('Oxygen Atm. [kbar]')
-ax[0,1].set_ylabel('Fraction')
-#ax[0,1].set_title('Atmosphere')
+NormHistPanel(daWaterMan,'k',0,2)
+ax[0,2].set_xlabel('Water Mantle [TO]')
+ax[0,2].set_ylabel('Fraction')
+#ax[0,2].set_title('Atmosphere')
 
-#NormHistPanel(daWaterMO,'k',1,0)
-#ax[1,0].set_xlabel('Water Magma Ocean [TO]')
-#ax[1,0].set_ylabel('Fraction')
+daCO2Atm = daCO2Atm[(daCO2Atm >= 0) & (daCO2Atm <= 100)]
 
-daWaterSol = daWaterSol[(daWaterSol >= 0) & (daWaterSol <= 5)]
-
-NormHistPanel(daWaterSol,'k',1,0)
-ax[1,0].set_xlabel('Water Mantle [TO]')
+NormHistPanel(daCO2Atm,'k',1,0)
+ax[1,0].set_xlabel(r'CO$_2$ Atm [bar]')
 ax[1,0].set_ylabel('Fraction')
+#print(daCO2Atm)
 
-daWaterAtm = daWaterAtm[(daWaterAtm >= 0) & (daWaterAtm <= 5e4)]
-
-NormHistPanel(daWaterAtm/1e3,'k',1,1)
-ax[1,1].set_xlabel('Water Atm [kbar]')
+NormHistPanel(daCO2Crust,'k',1,1)
+ax[1,1].set_xlabel(r'CO$_2$ Crust [bar]')
 ax[1,1].set_ylabel('Fraction')
 
-#NormHistPanel(daCO2MO/co2mofactor,'k',2,0)
-#ax[2,0].set_xlabel(r'CO$_2$ Magma Ocean [$10^{21}$kg]')
-#ax[2,0].set_ylabel('Fraction')
+NormHistPanel(daCO2Man,'k',1,2)
+ax[1,2].set_xlabel(r'CO$_2$ Mantle [bar]')
+ax[1,2].set_ylabel('Fraction')
 
-daCO2Sol = daCO2Sol[(daCO2Sol >= 0) & (daCO2Sol <= 1e21)]
-
-NormHistPanel(daCO2Sol/co2solfactor,'k',2,0)
-ax[2,0].set_xlabel(r'CO$_2$ Mantle [$10^{18}$kg]')
+NormHistPanel(daOxyAtm,'k',2,0)
+ax[2,0].set_xlabel('Oxygen Atm. [bar]')
 ax[2,0].set_ylabel('Fraction')
 
-NormHistPanel(daCO2Atm/1e3,'k',2,1)
-ax[2,1].set_xlabel(r'CO$_2$ Atm. [kbar]')
+NormHistPanel(daTMan,'k',2,1)
+ax[2,1].set_xlabel('Mantle Temp. [K]')
 ax[2,1].set_ylabel('Fraction')
 
+NormHistPanel(daCO2Atm/1e3,'k',2,2)
+ax[2,2].set_xlabel(r'Mag. Moment [$\oplus$ Units]')
+ax[2,2].set_ylabel('Fraction')
 
-plt.savefig('GJ1132_MagmaOcean_Dist.png',dpi=300)
+
+plt.savefig('GJ1132_StagLid_Dist.png',dpi=300)
 

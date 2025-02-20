@@ -25,7 +25,7 @@ cols = 2
 body = out.b
 # Mantle Figure
 nfig = 1
-fig = plt.figure(nfig, figsize=(6.5, 9))
+fig = plt.figure(nfig, figsize=(6.5, 7))
 panel = 1
 plt.subplot(rows, cols, panel)
 plt.plot(body.Time, body.TMan, color=vplot.colors.red, linestyle="-", label="Mantle")
