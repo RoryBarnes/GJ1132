@@ -4,7 +4,7 @@
 *.log
 *.gz
 *envloss_rand*
-*xuv_rand*
+*rand*
 __pycache__
 .output
 *PriorIndices.json

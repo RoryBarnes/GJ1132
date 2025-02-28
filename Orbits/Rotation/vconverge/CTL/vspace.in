@@ -8,7 +8,7 @@ file vpl.in
 
 file star.in
 
-dMass [../../../XUV/dynesty_transform_final.npy, npy, p, 1] mass
+dMass [../../../../XUV/dynesty_transform_final.npy, npy, p, 1] mass
 
 file b.in
 
@@ -18,7 +18,7 @@ dRadius [-1.191, 0.04, g, max0] brad
 dObliquity [0, 90, s] obl
 dPrecA [0, 360, u] preca
 
-dTidalQ [50, 1000, u] Q
+dTidalTau [-500, -20, u] Tau
 dK2 [0.25, 0.5, u] k2
 
 file c.in

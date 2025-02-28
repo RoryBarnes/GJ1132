@@ -1,0 +1,27 @@
+srcfolder .
+destfolder output
+trialname cassini_
+samplemode random
+randsize 1000
+
+file vpl.in
+
+file star.in
+
+dMass [../../../../XUV/dynesty_transform_final.npy, npy, p, 1] mass
+
+file b.in
+
+dMass [-1.83, 0.19, g, max0] bmass
+dRadius [-1.191, 0.04, g, max0] brad
+
+dObliquity [0, 90, s] obl
+dPrecA [0, 360, u] preca
+
+dTidalQ [50, 1000, u] Q
+dK2 [0.25, 0.5, u] k2
+
+file c.in
+
+dInc [0, 5, g, min0] inc
+dLongA [0, 360, u] node
