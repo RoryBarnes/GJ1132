@@ -1,0 +1,61 @@
+==================================================================
+GP summary 
+==================================================================
+
+Configuration: 
+-------------- 
+Kernel: ExpSquaredKernel 
+Function bounds: [(0.09, 0.14), (-5.0, -1.0), (0.1, 12.0), (0.1, 12.0), (-2.0, 0.0)] 
+fit mean: True 
+fit amplitude: False 
+fit white_noise: False 
+GP white noise: -15 
+Active learning algorithm : bape 
+
+Number of total training samples: 600 
+Number of initial training samples: 100 
+Number of active training samples: 500 
+Number of test samples: 100 
+
+Results: 
+-------- 
+GP final hyperparameters: 
+   [mean:value] 	-16854.165707715198 
+   [kernel:metric:log_M_0_0] 	3939.817948899547 
+   [kernel:metric:log_M_1_1] 	4156.21020410733 
+   [kernel:metric:log_M_2_2] 	4224.289446826293 
+   [kernel:metric:log_M_3_3] 	4123.925065437165 
+   [kernel:metric:log_M_4_4] 	4157.48216919266 
+
+Active learning train runtime (s): 9927.0 
+
+Final test error: 1.1537519512356251 
+
+==================================================================
+emcee summary 
+==================================================================
+
+Configuration: 
+-------------- 
+Prior: User defined prior.Prior function: unrecorded 
+
+Number of walkers: 50 
+Number of steps per walker: 50000 
+
+Results: 
+-------- 
+Mean acceptance fraction: 0.301 
+Mean autocorrelation time: 191.166 steps 
+Burn: 395 
+Thin: 91 
+Total burned, thinned, flattened samples: 27250 
+
+emcee runtime (s): 118.0 
+
+Summary statistics: 
+$m_{\star}$ [M$_{\odot}$] = 0.11493387555367299 +/- 0.01435036031225359 
+$f_{sat}$ = -2.9786565408061847 +/- 1.1499572515585788 
+$t_{sat}$ [Gyr] = 6.062703447846779 +/- 3.4277037883790253 
+Age [Gyr] = 6.065255420077707 +/- 3.435728427536593 
+$\beta_{XUV}$ = -0.9922399151806612 +/- 0.5760607210228306 
+

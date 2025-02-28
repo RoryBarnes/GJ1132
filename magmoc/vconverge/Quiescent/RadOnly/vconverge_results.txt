@@ -1,0 +1,464 @@
+
+----- Step 1 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.022
+b,WaterMassSol,final ----- 0.012
+b,WaterMassMOAtm,final ----- 0.013666666666666667
+b,PressWaterAtm,final ----- 0.014333333333333333
+b,PressOxygenAtm,final ----- 0.014
+b,FracFe2O3Man,final ----- 0.017666666666666667
+b,CO2MassSol,final ----- 0.015
+b,CO2MassMOAtm,final ----- 0.009
+b,PressCO2Atm,final ----- 0.02
+
+Converged = False
+
+----- Step 2 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.014523809523809524
+b,WaterMassSol,final ----- 0.008571428571428572
+b,WaterMassMOAtm,final ----- 0.0064285714285714285
+b,PressWaterAtm,final ----- 0.008333333333333333
+b,PressOxygenAtm,final ----- 0.011666666666666667
+b,FracFe2O3Man,final ----- 0.007857142857142858
+b,CO2MassSol,final ----- 0.009523809523809525
+b,CO2MassMOAtm,final ----- 0.007142857142857143
+b,PressCO2Atm,final ----- 0.010476190476190476
+
+Converged = False
+
+----- Step 3 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.008214285714285714
+b,WaterMassSol,final ----- 0.015
+b,WaterMassMOAtm,final ----- 0.01982142857142857
+b,PressWaterAtm,final ----- 0.02035714285714286
+b,PressOxygenAtm,final ----- 0.007678571428571429
+b,FracFe2O3Man,final ----- 0.0067857142857142855
+b,CO2MassSol,final ----- 0.015714285714285715
+b,CO2MassMOAtm,final ----- 0.016785714285714286
+b,PressCO2Atm,final ----- 0.008214285714285714
+
+Converged = False
+
+----- Step 4 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.006805555555555555
+b,WaterMassSol,final ----- 0.007916666666666667
+b,WaterMassMOAtm,final ----- 0.006944444444444444
+b,PressWaterAtm,final ----- 0.010416666666666666
+b,PressOxygenAtm,final ----- 0.009166666666666667
+b,FracFe2O3Man,final ----- 0.006805555555555555
+b,CO2MassSol,final ----- 0.006111111111111111
+b,CO2MassMOAtm,final ----- 0.0059722222222222225
+b,PressCO2Atm,final ----- 0.006805555555555555
+
+Converged = False
+
+----- Step 5 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.005888888888888889
+b,WaterMassSol,final ----- 0.005888888888888889
+b,WaterMassMOAtm,final ----- 0.007666666666666666
+b,PressWaterAtm,final ----- 0.005222222222222222
+b,PressOxygenAtm,final ----- 0.0074444444444444445
+b,FracFe2O3Man,final ----- 0.006
+b,CO2MassSol,final ----- 0.0067777777777777775
+b,CO2MassMOAtm,final ----- 0.006111111111111111
+b,PressCO2Atm,final ----- 0.009111111111111111
+
+Converged = False
+
+----- Step 6 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.006727272727272728
+b,WaterMassSol,final ----- 0.010090909090909091
+b,WaterMassMOAtm,final ----- 0.004545454545454545
+b,PressWaterAtm,final ----- 0.005272727272727273
+b,PressOxygenAtm,final ----- 0.007181818181818182
+b,FracFe2O3Man,final ----- 0.006454545454545454
+b,CO2MassSol,final ----- 0.012545454545454545
+b,CO2MassMOAtm,final ----- 0.004909090909090909
+b,PressCO2Atm,final ----- 0.008181818181818182
+
+Converged = False
+
+----- Step 7 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.006363636363636364
+b,WaterMassSol,final ----- 0.006363636363636364
+b,WaterMassMOAtm,final ----- 0.005984848484848485
+b,PressWaterAtm,final ----- 0.006818181818181818
+b,PressOxygenAtm,final ----- 0.00946969696969697
+b,FracFe2O3Man,final ----- 0.0069696969696969695
+b,CO2MassSol,final ----- 0.007272727272727273
+b,CO2MassMOAtm,final ----- 0.005303030303030303
+b,PressCO2Atm,final ----- 0.008257575757575757
+
+Converged = False
+
+----- Step 8 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.00858974358974359
+b,WaterMassSol,final ----- 0.005897435897435898
+b,WaterMassMOAtm,final ----- 0.004551282051282051
+b,PressWaterAtm,final ----- 0.00532051282051282
+b,PressOxygenAtm,final ----- 0.005064102564102564
+b,FracFe2O3Man,final ----- 0.006730769230769231
+b,CO2MassSol,final ----- 0.004294871794871795
+b,CO2MassMOAtm,final ----- 0.005192307692307692
+b,PressCO2Atm,final ----- 0.0057051282051282055
+
+Converged = False
+
+----- Step 9 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.009395604395604395
+b,WaterMassSol,final ----- 0.005604395604395605
+b,WaterMassMOAtm,final ----- 0.005549450549450549
+b,PressWaterAtm,final ----- 0.0057692307692307696
+b,PressOxygenAtm,final ----- 0.0074725274725274725
+b,FracFe2O3Man,final ----- 0.007582417582417582
+b,CO2MassSol,final ----- 0.004450549450549451
+b,CO2MassMOAtm,final ----- 0.005659340659340659
+b,PressCO2Atm,final ----- 0.007747252747252747
+
+Converged = False
+
+----- Step 10 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.004428571428571428
+b,WaterMassSol,final ----- 0.004285714285714286
+b,WaterMassMOAtm,final ----- 0.0035238095238095237
+b,PressWaterAtm,final ----- 0.0044761904761904765
+b,PressOxygenAtm,final ----- 0.0057619047619047615
+b,FracFe2O3Man,final ----- 0.004666666666666667
+b,CO2MassSol,final ----- 0.004761904761904762
+b,CO2MassMOAtm,final ----- 0.0031904761904761906
+b,PressCO2Atm,final ----- 0.005190476190476191
+
+Converged = False
+
+----- Step 11 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.0040416666666666665
+b,WaterMassSol,final ----- 0.004833333333333334
+b,WaterMassMOAtm,final ----- 0.00475
+b,PressWaterAtm,final ----- 0.005166666666666667
+b,PressOxygenAtm,final ----- 0.005125
+b,FracFe2O3Man,final ----- 0.005583333333333333
+b,CO2MassSol,final ----- 0.005083333333333333
+b,CO2MassMOAtm,final ----- 0.006083333333333333
+b,PressCO2Atm,final ----- 0.004666666666666667
+
+Converged = False
+
+----- Step 12 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.0026838235294117645
+b,WaterMassSol,final ----- 0.003713235294117647
+b,WaterMassMOAtm,final ----- 0.005404411764705882
+b,PressWaterAtm,final ----- 0.006470588235294118
+b,PressOxygenAtm,final ----- 0.005955882352941176
+b,FracFe2O3Man,final ----- 0.004889705882352941
+b,CO2MassSol,final ----- 0.005477941176470588
+b,CO2MassMOAtm,final ----- 0.003823529411764706
+b,PressCO2Atm,final ----- 0.006360294117647059
+
+Converged = False
+
+----- Step 13 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.003562091503267974
+b,WaterMassSol,final ----- 0.005032679738562092
+b,WaterMassMOAtm,final ----- 0.005326797385620915
+b,PressWaterAtm,final ----- 0.005522875816993464
+b,PressOxygenAtm,final ----- 0.0049673202614379085
+b,FracFe2O3Man,final ----- 0.0070915032679738565
+b,CO2MassSol,final ----- 0.00411764705882353
+b,CO2MassMOAtm,final ----- 0.005163398692810458
+b,PressCO2Atm,final ----- 0.004803921568627451
+
+Converged = False
+
+----- Step 14 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.005935672514619883
+b,WaterMassSol,final ----- 0.006871345029239766
+b,WaterMassMOAtm,final ----- 0.008187134502923977
+b,PressWaterAtm,final ----- 0.008450292397660819
+b,PressOxygenAtm,final ----- 0.0037426900584795323
+b,FracFe2O3Man,final ----- 0.0030116959064327487
+b,CO2MassSol,final ----- 0.0061403508771929825
+b,CO2MassMOAtm,final ----- 0.007251461988304094
+b,PressCO2Atm,final ----- 0.005146198830409357
+
+Converged = False
+
+----- Step 15 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.0035789473684210526
+b,WaterMassSol,final ----- 0.0038421052631578945
+b,WaterMassMOAtm,final ----- 0.004657894736842106
+b,PressWaterAtm,final ----- 0.0030789473684210526
+b,PressOxygenAtm,final ----- 0.004736842105263158
+b,FracFe2O3Man,final ----- 0.0035789473684210526
+b,CO2MassSol,final ----- 0.0037368421052631578
+b,CO2MassMOAtm,final ----- 0.004210526315789474
+b,PressCO2Atm,final ----- 0.005368421052631579
+
+Converged = False
+
+----- Step 16 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.0018571428571428571
+b,WaterMassSol,final ----- 0.002761904761904762
+b,WaterMassMOAtm,final ----- 0.0030714285714285713
+b,PressWaterAtm,final ----- 0.0033809523809523808
+b,PressOxygenAtm,final ----- 0.003833333333333333
+b,FracFe2O3Man,final ----- 0.004071428571428571
+b,CO2MassSol,final ----- 0.0035238095238095237
+b,CO2MassMOAtm,final ----- 0.0025952380952380953
+b,PressCO2Atm,final ----- 0.005952380952380952
+
+Converged = False
+
+----- Step 17 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.0035930735930735933
+b,WaterMassSol,final ----- 0.0030086580086580088
+b,WaterMassMOAtm,final ----- 0.005043290043290043
+b,PressWaterAtm,final ----- 0.003961038961038961
+b,PressOxygenAtm,final ----- 0.004372294372294372
+b,FracFe2O3Man,final ----- 0.00329004329004329
+b,CO2MassSol,final ----- 0.003051948051948052
+b,CO2MassMOAtm,final ----- 0.00329004329004329
+b,PressCO2Atm,final ----- 0.002813852813852814
+
+Converged = False
+
+----- Step 18 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.00391304347826087
+b,WaterMassSol,final ----- 0.005988142292490118
+b,WaterMassMOAtm,final ----- 0.006857707509881423
+b,PressWaterAtm,final ----- 0.005513833992094862
+b,PressOxygenAtm,final ----- 0.0032213438735177865
+b,FracFe2O3Man,final ----- 0.0028458498023715413
+b,CO2MassSol,final ----- 0.004268774703557313
+b,CO2MassMOAtm,final ----- 0.006422924901185771
+b,PressCO2Atm,final ----- 0.003972332015810277
+
+Converged = False
+
+----- Step 19 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.00463768115942029
+b,WaterMassSol,final ----- 0.002971014492753623
+b,WaterMassMOAtm,final ----- 0.004275362318840579
+b,PressWaterAtm,final ----- 0.00480072463768116
+b,PressOxygenAtm,final ----- 0.004782608695652174
+b,FracFe2O3Man,final ----- 0.0047463768115942025
+b,CO2MassSol,final ----- 0.004311594202898551
+b,CO2MassMOAtm,final ----- 0.004528985507246377
+b,PressCO2Atm,final ----- 0.0051992753623188405
+
+Converged = False
+
+----- Step 20 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.0028
+b,WaterMassSol,final ----- 0.0020666666666666667
+b,WaterMassMOAtm,final ----- 0.00255
+b,PressWaterAtm,final ----- 0.00275
+b,PressOxygenAtm,final ----- 0.0019333333333333333
+b,FracFe2O3Man,final ----- 0.0034
+b,CO2MassSol,final ----- 0.00255
+b,CO2MassMOAtm,final ----- 0.0019166666666666666
+b,PressCO2Atm,final ----- 0.0022166666666666667
+
+Converged = True
+Number of Consecutive Convergences: 1
+
+----- Step 21 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.003107692307692308
+b,WaterMassSol,final ----- 0.0031692307692307692
+b,WaterMassMOAtm,final ----- 0.0016153846153846153
+b,PressWaterAtm,final ----- 0.002
+b,PressOxygenAtm,final ----- 0.005107692307692308
+b,FracFe2O3Man,final ----- 0.004938461538461538
+b,CO2MassSol,final ----- 0.0037846153846153845
+b,CO2MassMOAtm,final ----- 0.0024153846153846152
+b,PressCO2Atm,final ----- 0.005523076923076923
+
+Converged = False
+
+----- Step 22 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.0028205128205128207
+b,WaterMassSol,final ----- 0.0032763532763532763
+b,WaterMassMOAtm,final ----- 0.0047293447293447295
+b,PressWaterAtm,final ----- 0.0050427350427350425
+b,PressOxygenAtm,final ----- 0.0032763532763532763
+b,FracFe2O3Man,final ----- 0.0037464387464387463
+b,CO2MassSol,final ----- 0.002279202279202279
+b,CO2MassMOAtm,final ----- 0.0033475783475783475
+b,PressCO2Atm,final ----- 0.0034330484330484332
+
+Converged = False
+
+----- Step 23 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.0035978835978835977
+b,WaterMassSol,final ----- 0.0020105820105820104
+b,WaterMassMOAtm,final ----- 0.002261904761904762
+b,PressWaterAtm,final ----- 0.002208994708994709
+b,PressOxygenAtm,final ----- 0.003134920634920635
+b,FracFe2O3Man,final ----- 0.002632275132275132
+b,CO2MassSol,final ----- 0.002076719576719577
+b,CO2MassMOAtm,final ----- 0.0021825396825396826
+b,PressCO2Atm,final ----- 0.0018915343915343916
+
+Converged = True
+Number of Consecutive Convergences: 1
+
+----- Step 24 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.003041871921182266
+b,WaterMassSol,final ----- 0.0029926108374384234
+b,WaterMassMOAtm,final ----- 0.002795566502463054
+b,PressWaterAtm,final ----- 0.0016625615763546798
+b,PressOxygenAtm,final ----- 0.0024753694581280787
+b,FracFe2O3Man,final ----- 0.002955665024630542
+b,CO2MassSol,final ----- 0.0020935960591133003
+b,CO2MassMOAtm,final ----- 0.0028448275862068967
+b,PressCO2Atm,final ----- 0.003423645320197044
+
+Converged = True
+Number of Consecutive Convergences: 2
+
+----- Step 25 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.002735632183908046
+b,WaterMassSol,final ----- 0.003413793103448276
+b,WaterMassMOAtm,final ----- 0.004747126436781609
+b,PressWaterAtm,final ----- 0.004724137931034483
+b,PressOxygenAtm,final ----- 0.0023333333333333335
+b,FracFe2O3Man,final ----- 0.002574712643678161
+b,CO2MassSol,final ----- 0.0021264367816091955
+b,CO2MassMOAtm,final ----- 0.004183908045977011
+b,PressCO2Atm,final ----- 0.0025517241379310347
+
+Converged = False
+
+----- Step 26 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.0025913978494623655
+b,WaterMassSol,final ----- 0.0022688172043010754
+b,WaterMassMOAtm,final ----- 0.0025376344086021504
+b,PressWaterAtm,final ----- 0.0015483870967741935
+b,PressOxygenAtm,final ----- 0.0021182795698924733
+b,FracFe2O3Man,final ----- 0.0028924731182795697
+b,CO2MassSol,final ----- 0.0031290322580645163
+b,CO2MassMOAtm,final ----- 0.0017634408602150537
+b,PressCO2Atm,final ----- 0.002623655913978495
+
+Converged = True
+Number of Consecutive Convergences: 1
+
+----- Step 27 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.002600806451612903
+b,WaterMassSol,final ----- 0.003881048387096774
+b,WaterMassMOAtm,final ----- 0.003558467741935484
+b,PressWaterAtm,final ----- 0.0033568548387096775
+b,PressOxygenAtm,final ----- 0.0018346774193548387
+b,FracFe2O3Man,final ----- 0.0017842741935483871
+b,CO2MassSol,final ----- 0.0045766129032258065
+b,CO2MassMOAtm,final ----- 0.003598790322580645
+b,PressCO2Atm,final ----- 0.0020463709677419357
+
+Converged = False
+
+----- Step 28 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.002926136363636364
+b,WaterMassSol,final ----- 0.0019223484848484849
+b,WaterMassMOAtm,final ----- 0.0020738636363636363
+b,PressWaterAtm,final ----- 0.002206439393939394
+b,PressOxygenAtm,final ----- 0.002225378787878788
+b,FracFe2O3Man,final ----- 0.002746212121212121
+b,CO2MassSol,final ----- 0.0016666666666666668
+b,CO2MassMOAtm,final ----- 0.002414772727272727
+b,PressCO2Atm,final ----- 0.0014583333333333334
+
+Converged = True
+Number of Consecutive Convergences: 1
+
+----- Step 29 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.0019162210338680926
+b,WaterMassSol,final ----- 0.0028698752228163995
+b,WaterMassMOAtm,final ----- 0.0020944741532976825
+b,PressWaterAtm,final ----- 0.0018449197860962567
+b,PressOxygenAtm,final ----- 0.0020409982174688056
+b,FracFe2O3Man,final ----- 0.0016310160427807487
+b,CO2MassSol,final ----- 0.00267379679144385
+b,CO2MassMOAtm,final ----- 0.0027361853832442067
+b,PressCO2Atm,final ----- 0.0014884135472370767
+
+Converged = True
+Number of Consecutive Convergences: 2
+
+----- Step 30 -----
+
+KS Statistics:
+b,SurfTemp,final ----- 0.0014873949579831934
+b,WaterMassSol,final ----- 0.0022436974789915966
+b,WaterMassMOAtm,final ----- 0.001184873949579832
+b,PressWaterAtm,final ----- 0.001907563025210084
+b,PressOxygenAtm,final ----- 0.0015378151260504202
+b,FracFe2O3Man,final ----- 0.002142857142857143
+b,CO2MassSol,final ----- 0.00173109243697479
+b,CO2MassMOAtm,final ----- 0.0013697478991596638
+b,PressCO2Atm,final ----- 0.0029663865546218486
+
+Converged = True
+Number of Consecutive Convergences: 3
+
+-------------- VCONVERGE STATS ----------------
+
+Number of Steps Taken: 30
+Total Number of Simulations Ran: 3500
+3 Consecutive Convergences Achieved, vconverge run sucessful
+Total Number of Convergences during vconverge run: 7
