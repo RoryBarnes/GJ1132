@@ -29,6 +29,9 @@ dFlareSingleStarB2          16.78046229493345
 dCMEOpeningAngle 120
 dCMEProtonEnergy -30
 dCMEXRayXUVScaling 50
+dCMEMomentumScaling 1000
+dCarringtonFluence  -1e14
+dCarringtonLX       -1.26e21
 
 
 saOutputOrder 	Time -Luminosity -LXUVStellar -LXUVFlare -LXUVTot 
