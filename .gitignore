@@ -4,3 +4,10 @@
 *.log
 *.gz
 *envloss_rand*
+*xuv_rand*
+__pycache__
+.output
+*PriorIndices.json
+*PriorIndicies.json
+rand_list.dat
+vconverge_tmp

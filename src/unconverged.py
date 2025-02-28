@@ -13,7 +13,7 @@ TO=1.39e21
 StopTime = []
 Time = []
 
-ManWaterMass = []
+WaterManConc = []
 CrustWaterMass = []
 SurfWaterMass = []
 
@@ -22,9 +22,6 @@ OxygenMass = []
 SurfCO2Mass = []
 CrustCO2Mass = []
 ManCO2Mass = []
-
-MagMom = []
-TMan = []
 
 subdirs = [str(Path("output") / d.name) for d in Path("output").iterdir() if d.is_dir()]
 
@@ -84,14 +81,8 @@ for subdir in subdirs:
             if ready and parts[0] == '(SurfaceCO2Mass)':
                 SurfCO2Mass.append(float(parts[-1]))
 
-            if ready and parts[0] == '(ManWaterMass)':
-                ManWaterMass.append(float(parts[-1]))
-
-            if ready and parts[0] == '(TMan)':
-                TMan.append(float(parts[-1]))
-
-            if ready and parts[0] == '(MagMom)':
-                MagMom.append(float(parts[-1]))
+            if ready and parts[0] == '(WaterManConc)':
+                WaterManConc.append(float(parts[-1]))
 
             if final and parts[0] == '(Time)':
                 Time.append(float(parts[-1]))
@@ -102,16 +93,13 @@ for subdir in subdirs:
 output = {
     "b,SurfWaterMass,final": SurfWaterMass,
     "b,CrustWaterMass,final": CrustWaterMass,
-    "b,ManWaterMass,final": ManWaterMass,
+    "b,WaterManConc,final": WaterManConc,
 
     "b,SurfCO2Mass,final": SurfCO2Mass,       
-    "b,ManCO2Mass,final": ManCO2Mass,
+    "b,ManCO2MAss,final": ManCO2Mass,
     "b,CrustCO2Mass,final": CrustCO2Mass,
 
-    "b,OxygenMass,final": OxygenMass,
-
-    "b,MantleTemp,final": TMan,
-    "b,MagMom,final": MagMom
+    "b,OxygenMass,final": OxygenMass
 }
 
 with open('Unconverged_Param_Dictionary.json', 'w') as f:
@@ -144,9 +132,18 @@ for i in range(iNumRows):
 
 
     if bValid:
+        output["Time,final"][i] /= YearSec
+        output["StopTime"][i] /= YearSec
+        #print(repr(output["Age,final"][i])+ " 1")
+        output["Age,final"][i] /= YearSec
+        #print(repr(output["Age,final"][i])+ " 2")
+
+        #print(repr(output["b,SurfWaterMass,final"][i]),flush=True)
         output["b,SurfWaterMass,final"][i] /= -TO
-        output["b,CrustWaterMass,final"][i] /= -TO
-        output["b,CrustCO2Mass,final"][i] /= -TO
+        #print(repr(output["b,SurfWaterMass,final"][i]),flush=True)
+        output["b,WaterMassSol,final"][i] *= -1
+        #output["b,CO2MassSol,final"][i] /= -TO
+
 
         row = [output[key][i] for key in output]
         ValidRows.append(row)
@@ -158,6 +155,11 @@ ValidArray = np.array(ValidRows)
 np.save("MagmaOceanFinal.npy", ValidArray)
 #print(f"Filtered data successfully saved to {file_path}")
 
+
+
+
+
 print("Processed "+repr(found)+" directories.")
 print(repr(missing)+" log files missing.")
-print('Number of valid sims: '+repr(len(ValidRows)))
+print('Number of sims ready for stagnant lid: '+repr(len(ValidRows)))
+#print(SurfTemp)

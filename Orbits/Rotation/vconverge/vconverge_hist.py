@@ -5,7 +5,6 @@ import numpy as np
 import vplot
 
 fig = plt.figure(figsize=(3.25, 3))
-cumulative_earth_flux = 9.759583e+15
 
 # Step 1: Load and process JSON file
 with open("output/Converged_Param_Dictionary.json", 'r') as file:
@@ -19,23 +18,22 @@ with open("output/Converged_Param_Dictionary.json", 'r') as file:
         print("Error decoding JSON:", e)
 
 # Step 2: Extract and process the array
-key = "b,CumulativeXUVFlux,final"
+key = "b,Obliquity,final"
 if isinstance(data, dict):
-    lower_bound = 20
-    upper_bound = 3e3
+    lower_bound = 1e-7
+    upper_bound = 1e-3
     
     # Extract and clean data
-    daCumulativeXUVFlux = data.get(key)
-    daCumulativeXUVFlux_clean = pd.Series(daCumulativeXUVFlux).dropna()
-    daCumulativeXUVFlux_filtered = np.array(daCumulativeXUVFlux_clean)
-    daCumulativeXUVFlux_filtered = daCumulativeXUVFlux_filtered / cumulative_earth_flux
+    daObliquity = data.get(key)
+    daObliquity_clean = pd.Series(daObliquity).dropna()
+    daObliquity_filtered = np.array(daObliquity_clean)
     
     # Filter data within bounds
-    mask = (daCumulativeXUVFlux_filtered >= lower_bound) & (daCumulativeXUVFlux_filtered <= upper_bound)
-    daCumulativeXUVFlux_filtered = daCumulativeXUVFlux_filtered[mask]
-    
+    mask = (daObliquity_filtered >= lower_bound) & (daObliquity_filtered <= upper_bound)
+    daObliquity_filtered = daObliquity_filtered[mask]
+
     # Transform data to log space
-    log_data = np.log10(daCumulativeXUVFlux_filtered)
+    log_data = np.log10(daObliquity_filtered)
     
     # Create bins with equal widths in log space
     iNumBins = 50
@@ -50,19 +48,19 @@ if isinstance(data, dict):
     bin_edges = 10**log_bin_edges
     
     # Calculate histogram
-    counts, _ = np.histogram(daCumulativeXUVFlux_filtered, bins=bin_edges)
-    fractions = counts / len(daCumulativeXUVFlux_filtered)
+    counts, _ = np.histogram(daObliquity_filtered, bins=bin_edges)
+    fractions = counts / len(daObliquity_filtered)
     
     # Plot using the bin centers
     bin_centers = np.sqrt(bin_edges[:-1] * bin_edges[1:])  # Geometric mean for log space
     plt.step(bin_centers, fractions, where='mid', color='k')
     
     # Set plot parameters
-    plt.xlabel('Cumulative XUV Flux\nRelative to Modern Earth')
+    plt.xlabel(r'Equilibrium Obliquity ($^\circ$)')
     plt.ylabel('Fraction')
     plt.xlim(lower_bound, upper_bound)
     plt.xscale('log')
-    plt.ylim(0, 0.075)
-    plt.savefig('GJ1132b_CumulativeXUVFlux.png', dpi=300)
+    plt.ylim(0, 0.1)
+    plt.savefig('GJ1132b_Obliquity_Hist.png', dpi=300)
 else:
     print("Loaded data is not a dictionary.")
