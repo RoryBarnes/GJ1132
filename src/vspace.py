@@ -202,20 +202,25 @@ def main():
                         raise IOError("Random mode must be used when passing predefined priors")
                     if values[0] not in prior_files:
                         prior_files.append(values[0])
-                        if values[1] == 'npy':
-                            fprior = np.load(values[0])
-                            prior_index = np.random.choice(fprior.shape[0], size=randsize, replace=True)
-                            prior_indicies.append(prior_index)
-                            samp = fprior[prior_index]
-                            prior_samples.append(samp)
-                        elif values[1] == 'txt' or values[1] == 'dat':
-                            fprior = ascii.read(values[0])
-                            prior_index = np.random.choice(len(fprior), size=randsize, replace=False)
-                            prior_indicies.append(prior_index)
-                            samp = fprior[prior_index]
-                            prior_samples.append(samp)
-                        elif values[1] != 'npy' and values[1] != 'txt' and values[1] != 'dat':
-                            raise IOError("File type incompatible for predefined prior mode. Acceptable file types: npy, ascii formatted txt, ascii formatted dat")
+                        if os.path.exists(prior_files[0]):
+
+                            if values[1] == 'npy':
+                                    fprior = np.load(values[0])
+                                    prior_index = np.random.choice(fprior.shape[0], size=randsize, replace=True)
+                                    prior_indicies.append(prior_index)
+                                    samp = fprior[prior_index]
+                                    prior_samples.append(samp)
+                            elif values[1] == 'txt' or values[1] == 'dat':
+                                fprior = ascii.read(values[0])
+                                prior_index = np.random.choice(len(fprior), size=randsize, replace=False)
+                                prior_indicies.append(prior_index)
+                                samp = fprior[prior_index]
+                                prior_samples.append(samp)
+                            elif values[1] != 'npy' and values[1] != 'txt' and values[1] != 'dat':
+                                raise IOError("File type incompatible for predefined prior mode. Acceptable file types: npy, ascii formatted txt, ascii formatted dat")
+                        else:
+                            print("ERROR: File "+prior_files[0]+" does not exist.")
+                            exit()
             except:
                 print('ERROR: Incorrect instructions for distribution.')
                 print(inputf+', line '+repr(i)+': '+lines[i])
