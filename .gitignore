@@ -3,7 +3,6 @@
 *.png
 *.log
 *.gz
-*envloss_rand*
 *rand*
 __pycache__
 .output
@@ -11,3 +10,5 @@ __pycache__
 *PriorIndicies.json
 rand_list.dat
 vconverge_tmp
+.DS_Store
+*.pkl
