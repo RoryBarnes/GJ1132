@@ -8,7 +8,8 @@ import os
 import re
 import subprocess as sub
 import sys
-
+import matplotlib
+matplotlib.use('Agg')  # Set non-interactive backend
 import matplotlib.pyplot as plt
 import numpy as np
 import json
@@ -1180,6 +1181,7 @@ def main():
                         bins="fd"
                     )
                 except Exception as e:
+                    print("Unable to generate histograms")
                     print(f"{str(e)}")
                     print("\t"+repr(iterables0[ii]))
                 plt.xlabel(iter_name[ii])
