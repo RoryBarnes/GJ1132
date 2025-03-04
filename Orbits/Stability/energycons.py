@@ -5,6 +5,7 @@ import numpy as np
 
 # Initialize an array to store the relative energy differences
 energy_relative_differences = []
+semi_relative_differences = []
 
 # Iterate through matching directories
 for subdir in sorted(glob.glob("output/stabilityrand_*")):
@@ -21,7 +22,8 @@ for subdir in sorted(glob.glob("output/stabilityrand_*")):
         with open(log_file_path, 'r') as file:
             # Lists to store energy values
             energy_values = []
-            
+            semi_values = []
+
             # Iterate through lines
             for line in file:
                 # Look for the specific energy line
@@ -30,6 +32,12 @@ for subdir in sorted(glob.glob("output/stabilityrand_*")):
                     match = re.search(r': ([-+]?\d*\.\d+(?:[eE][-+]?\d+)?)', line)
                     if match:
                         energy_values.append(float(match.group(1)))
+
+                if "(SemiMajorAxis) Semi-major Axis [m]:" in line:
+                    # Extract the floating point value
+                    match = re.search(r': ([-+]?\d*\.\d+(?:[eE][-+]?\d+)?)', line)
+                    if match:
+                        semi_values.append(float(match.group(1)))
             
             # Check if we found at least two energy values
             if len(energy_values) >= 2:
@@ -39,6 +47,13 @@ for subdir in sorted(glob.glob("output/stabilityrand_*")):
             else:
                 print(f"Insufficient energy values in {log_file_path}")
     
+            if len(semi_values) >= 2:
+                # Calculate relative difference
+                relative_diff = abs((semi_values[-1] - semi_values[0]) / semi_values[0])
+                semi_relative_differences.append(relative_diff)
+            else:
+                print(f"Insufficient semi-major axis values in {log_file_path}")
+
     except IOError as e:
         print(f"Error reading {log_file_path}: {e}")
 
@@ -47,9 +62,11 @@ energy_relative_differences = np.array(energy_relative_differences)
 
 # Print the results
 print(f"Total number of relative differences calculated: {len(energy_relative_differences)}")
-print("First few relative differences:", energy_relative_differences[:5])
+print("First few energy relative differences:", energy_relative_differences[:5])
+print("First few semi relative differences:", semi_relative_differences[:5])
 
 # Save to a file
 np.savetxt('energy_relative_differences.txt', energy_relative_differences)
+np.savetxt('semi_relative_differences.txt', semi_relative_differences)
 
 
