@@ -1,0 +1,25 @@
+# GJ 1132 b Parameters from Xue et al. (2024)
+sName		b				# Body's name
+saModules 	eqtide      	# Modules
+
+# Physical Properties
+dMass			-1.83  	  # Mass, negative -> Earth masses
+dRadius			-1.191  		# Radius, negative -> Earth radii
+bForceEqSpin	0
+dRotPeriod		-1
+dObliquity		23.5      # Obliquity (degrees)
+dRadGyra		0.4       # Radius of gyration (unitless)
+
+# Orbital Properties
+dEcc        0.2		# Eccentricity
+#dSemi       -0.0153          # Semi-major axis, negative -> AU
+dOrbPeriod   -1.62892911
+
+# Eqtide Properties
+dTidalTau     -64           # Negative for seconds
+dK2           0.3             # Love number of degree 2
+dMaxLockDiff  0.01            # Tidally lock when spin period is within 1% of orbital period
+saTidePerts   star          # Tidally interacting with star
+
+#Output
+saOutputOrder Time SemimajorAxis Eccentricity -SurfEnFluxTot

@@ -185,7 +185,7 @@ def create_tmp_prior_files(RunIndex, og_triname, dst_fold): # Create new prior f
 				ascii.write(priorfi, 'vconverge_tmp/'+finame, format='fixed_width', delimiter=' ', overwrite=True)
 
 def vconverge(vcnvFile):
-	print('in the function')
+	#print('in the function')
 	# make the temporary directory
 	if os.path.exists('vconverge_tmp'):
 		shutil.rmtree('vconverge_tmp')
@@ -309,7 +309,7 @@ def vconverge(vcnvFile):
 
 	# Check to make sure all requested parameters are real
 	for i in params_to_conv:
-		print(converge_dict[i])
+		#print(converge_dict[i])
 		if converge_dict[i] == []:
 			raise IOError('%s is not being simulated by VPLanet, or is not a VPLanet recognizable parameter. Please check spelling, modules used, etc.' % i)
 
@@ -330,7 +330,6 @@ def vconverge(vcnvFile):
 		elif ConvMethod == 'KS_pval'or ConvMethod == 'KS_statistic': # If convergence method uses true values, save previous true values before next step
 			prev_dict = copy.deepcopy(converge_dict) # deep copy so the dictionaries don't refer to the same object
 
-		# Run Vspace
 		# Run Multi-planet
 		os.system('python3 vspace.py vconverge_tmp/vspace_tmp.in')
 		#os.system('multi-planet vconverge_tmp/vspace_tmp.in')
@@ -340,8 +339,16 @@ def vconverge(vcnvFile):
 		for subdir, dirs, files in os.walk('vconverge_tmp/Step_'+str(RunIndex)): # Loop through all the sims and extract info from each log
 			if subdir != 'vconverge_tmp/Step_'+str(RunIndex):
 				shutil.copytree(subdir, os.path.join(dst_fold, subdir.split('/')[len(subdir.split('/'))-1])) # Copy sim into user defined dest folder so they have the data after tmp files are deleted
-				curr_file = open(os.path.join(subdir, vplanet_logfile), 'r')
-				curr_lines = curr_file.readlines()
+				try:
+					curr_file = open(os.path.join(subdir, vplanet_logfile), 'r')
+				except: 
+					file = subdir+vplanet_logfile
+					raise IOError("Unable to open "+file)
+				try:
+					curr_lines = curr_file.readlines()
+				except:
+					file = subdir+vplanet_logfile
+					raise IOError("Unable to read all lines from "+file)
 				curr_file.close()
 				finithold = None
 				currbody = None

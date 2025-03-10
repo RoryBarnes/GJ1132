@@ -16,4 +16,4 @@ dEnvelopeMass             -0.1
 bCMEEscape   1
 dCMEEscapeEfficiency 0.5
 
-saOutputOrder Time -Mass -EnvelopeMass Radius -CMELossHydrogen
+saOutputOrder Time -Mass -EnvelopeMass Radius -CMELossHydrogen -DEnvMassDtCME -EscapeVelocity
