@@ -1,0 +1,73 @@
+
+----- Step 1 -----
+
+KS Statistics:
+b,Obliquity,final ----- 0.012358049432197728
+
+Converged = False
+
+----- Step 2 -----
+
+KS Statistics:
+b,Obliquity,final ----- 0.009749761582922145
+
+Converged = False
+
+----- Step 3 -----
+
+KS Statistics:
+b,Obliquity,final ----- 0.010470816445108545
+
+Converged = False
+
+----- Step 4 -----
+
+KS Statistics:
+b,Obliquity,final ----- 0.0042752171008684035
+
+Converged = False
+
+----- Step 5 -----
+
+KS Statistics:
+b,Obliquity,final ----- 0.008493176829850176
+
+Converged = False
+
+----- Step 6 -----
+
+KS Statistics:
+b,Obliquity,final ----- 0.007826082777288119
+
+Converged = False
+
+----- Step 7 -----
+
+KS Statistics:
+b,Obliquity,final ----- 0.0035906508386905974
+
+Converged = True
+Number of Consecutive Convergences: 1
+
+----- Step 8 -----
+
+KS Statistics:
+b,Obliquity,final ----- 0.0036002230716287577
+
+Converged = True
+Number of Consecutive Convergences: 2
+
+----- Step 9 -----
+
+KS Statistics:
+b,Obliquity,final ----- 0.0032580426257896923
+
+Converged = True
+Number of Consecutive Convergences: 3
+
+-------------- VCONVERGE STATS ----------------
+
+Number of Steps Taken: 9
+Total Number of Simulations Ran: 5500
+3 Consecutive Convergences Achieved, vconverge run sucessful
+Total Number of Convergences during vconverge run: 3
