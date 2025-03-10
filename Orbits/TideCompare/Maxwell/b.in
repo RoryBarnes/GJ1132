@@ -1,0 +1,46 @@
+# GJ 1132 b Parameters from Xue et al. (2024)
+sName		b				# Body's name
+saModules 	eqtide radheat thermint     	# Modules
+
+# Physical Properties
+dMass			-1.83  	  # Mass, negative -> Earth masses
+dRadius			-1.191  		# Radius, negative -> Earth radii
+bForceEqSpin	0
+dRotPeriod		-1
+dObliquity		23.5      # Obliquity (degrees)
+dRadGyra		0.4       # Radius of gyration (unitless)
+
+# Orbital Properties
+dEcc        0.2		# Eccentricity
+#dSemi       -0.0153          # Semi-major axis, negative -> AU
+dOrbPeriod   -1.62892911
+
+# Eqtide Properties
+dTidalQ     	100              # Tidal phase lag
+dK2           0.3             # Love number of degree 2
+dMaxLockDiff  0.01            # Tidally lock when spin period is within 1% of orbital period
+saTidePerts   star          # Tidally interacting with star
+
+### THERMINT inputs.
+dTSurf	700
+dCoreRadFrac       0.51 # CRF should be 0.51 according to Smrekar (2018)
+dCrustDepth	30000
+dStagLidDepth	50000
+dTMan 2.723317e+03 #
+dTCMB 4.379634e+03 #
+dStagLid	1
+dManHFlowPref	1
+dEruptEff 1.666781e-02
+dViscRef 7.826984e+07
+dViscJumpMan 2.176916e+01
+dWaterViscMan 3.510372e+06
+dElecCondCore 8.509180e+05 #
+dManWaterMass -4.420946e+00 # 4.5 TO in mantle
+dManCO2Mass 5.661425e+20
+dDTChiRef 5.704621e+01
+dTrefLind 5.863653e+03
+
+# RadHeat defaults to Earth levels by mass
+
+#Output
+saOutputOrder Time SemimajorAxis Eccentricity -SurfEnFluxTot TMan TidalQ
