@@ -191,19 +191,36 @@ def par_worker(
 
         # runs vplanet on folder and writes the output to the log file
         with open("vplanet_log", "a+") as vplf:
-            vplanet = sub.Popen(
-                "~/src/vplanet-private/bin/vplanet vpl.in",
-                shell=True,
-                stdout=sub.PIPE,
-                stderr=sub.PIPE,
-                universal_newlines=True,
-            )
-            return_code = vplanet.poll()
-            for line in vplanet.stderr:
-                vplf.write(line)
+            # vplanet = sub.Popen(
+            #     "~/src/vplanet-private/bin/vplanet vpl.in",
+            #     shell=True,
+            #     stdout=sub.PIPE,
+            #     stderr=sub.PIPE,
+            #     universal_newlines=True,
+            # )
+            # return_code = vplanet.poll()
+            try:
+                vplanet = sub.Popen(
+                    "~/src/vplanet-private/bin/vplanet vpl.in",
+                    shell=True,
+                    stdout=sub.PIPE,
+                    stderr=sub.PIPE,
+                    universal_newlines=True,
+                )
+                stdout, stderr = vplanet.communicate(timeout=3600)  # Add appropriate timeout
+                
+                # Write outputs to file
+                vplf.write(stdout)
+                vplf.write(stderr)
 
-            for line in vplanet.stdout:
-                vplf.write(line)
+                return_code = vplanet.returncode
+                success = (return_code == 0)
+
+            except Exception as e:
+                # Log the exception
+                with open("vplanet_error.log", "a+") as error_log:
+                    error_log.write(f"Error in {folder}: {str(e)}\n")
+                success = False
 
         lock.acquire()
         datalist = []
@@ -212,7 +229,7 @@ def par_worker(
             for newline in f:
                 datalist.append(newline.strip().split())
 
-        if return_code is None:
+        if success:
             for l in datalist:
                 if l[0] == folder:
                     l[1] = "1"

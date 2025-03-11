@@ -10,6 +10,7 @@ import json
 import copy
 from scipy.stats import ks_2samp  
 from scipy.special import kl_div
+import time
 #import matplotlib.pyplot as plt
 
 # Parameter sweep until user defined params converge
@@ -347,8 +348,10 @@ def vconverge(vcnvFile):
 			prev_dict = copy.deepcopy(converge_dict) # deep copy so the dictionaries don't refer to the same object
 
 		# Run Multi-planet
+		print("Running vspace.")
 		os.system('python3 vspace.py vconverge_tmp/vspace_tmp.in')
 		#os.system('multi-planet vconverge_tmp/vspace_tmp.in')
+		print("Running multiplanet.")
 		os.system('python3 multiplanet.py vconverge_tmp/vspace_tmp.in')
 
 		# Go through sims on this step and append to the running list of values (converge_dict)
@@ -357,13 +360,14 @@ def vconverge(vcnvFile):
 				shutil.copytree(subdir, os.path.join(dst_fold, subdir.split('/')[len(subdir.split('/'))-1])) # Copy sim into user defined dest folder so they have the data after tmp files are deleted
 				try:
 					curr_file = open(os.path.join(subdir, vplanet_logfile), 'r')
+					time.sleep(0.1)
 				except: 
-					file = subdir+vplanet_logfile
+					file = subdir+'/'+vplanet_logfile
 					raise IOError("Unable to open "+file)
 				try:
 					curr_lines = curr_file.readlines()
 				except:
-					file = subdir+vplanet_logfile
+					file = subdir+'/'+vplanet_logfile
 					raise IOError("Unable to read all lines from "+file)
 				curr_file.close()
 				finithold = None
