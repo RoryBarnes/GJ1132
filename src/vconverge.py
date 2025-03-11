@@ -20,6 +20,7 @@ def extract_info_vcnv(vcnvFile):
 	params_to_conv = []
 	hold = []
 	sConvergenceMethod = 'KL'
+	bExitOnMissingLogFile = 0
 	for i in range(len(lines)):
 		if lines[i].split() == []:
 			pass
@@ -35,6 +36,9 @@ def extract_info_vcnv(vcnvFile):
 			ConvCondit = float(lines[i].split()[1])
 		elif lines[i].split()[0] == 'iNumberOfConvergences':
 			ConvNum = int(lines[i].split()[1])
+		elif lines[i].split()[0] == 'bExitOnMissingLogFile':
+			if lines[i].split()[1].startswith('Y') or lines[i].split()[1].startswith('y') or lines[i].split()[0] == "1":
+				bExitOnMissingLogFile = 1
 		elif lines[i].split()[0] == 'sObjectFile':
 			if hold != [] and len(hold) > 1:
 				params_to_conv.append(hold)
@@ -52,7 +56,7 @@ def extract_info_vcnv(vcnvFile):
 	if hold != [] and len(hold) > 1:
 		params_to_conv.append(hold)
 
-	return vspFi, StepSize, MaxSteps, ConvMethod, ConvCondit, ConvNum, params_to_conv
+	return vspFi, StepSize, MaxSteps, ConvMethod, ConvCondit, ConvNum, params_to_conv, bExitOnMissingLogFile
 
 def extract_info_vsp(vspFile): # Extracts relevant info from vspace.in file for vconverge including srcfolder, destfolder, and predefined prior file info (if applicable)
 	vspog = open(vspFile, 'r')
@@ -192,7 +196,7 @@ def vconverge(vcnvFile):
 	os.mkdir('vconverge_tmp')
 
 	# extract required info from the vconverge.in file and the vspace.in file respectively
-	vspFile, StepSize, MaxSteps, ConvMethod, ConvCondit, ConvNum, params_to_conv = extract_info_vcnv(vcnvFile)
+	vspFile, StepSize, MaxSteps, ConvMethod, ConvCondit, ConvNum, params_to_conv, bExitOnMissingLogFile = extract_info_vcnv(vcnvFile)
 #	src_fold, dst_fold, og_triname, primeFi, pfiles, pvars, pvarscols = extract_info_vsp(vspFile)
 	src_fold, dst_fold, og_triname, primeFi, initialsims = extract_info_vsp(vspFile)
 
@@ -246,10 +250,13 @@ def vconverge(vcnvFile):
 		converge_dict[i] = []
 
 	#Run Vspace on OG
+	print('Running vspace.')
 	os.system('python3 vspace.py '+str(vspFile))
 	#os.system('multi-planet '+str(vspFile))
 	#os.system('python3 -m multiplanet '+str(vspFile))
+	print('Running multiplanet.')
 	os.system('python3 multiplanet.py '+str(vspFile))
+	print('Done with multiplanet.')
 	#Run Multi-planet on OG
 	RunIndex = 1
 	create_tmp_vspin(vspFile, RunIndex, StepSize) # Make the temporary vspace file
@@ -305,13 +312,22 @@ def vconverge(vcnvFile):
 	#								print('In params_to_conv: '+str(np.array(params_to_conv)[index][trueindex]))
 									converge_dict[np.array(params_to_conv)[index][trueindex]].append(float(curr_lines[i].split()[len(curr_lines[i].split()) - 1]))
 			except:
-				print("File "+subdir+"/"+vplanet_logfile+" not found! Ignoring.")
+				print("File "+subdir+"/"+vplanet_logfile+" not found!",end=" ")
+				if bExitOnMissingLogFile:
+					print('This may happen for a few reasons:\n')
+					print('1. There may be an error in your template files causing vplanet to exit before the log file is written.')
+					print('2. The name of your convergence parameter does not match a vplanet output parameter.')
+					print('3. vplanet is not in your path.')
+					exit()
+				else:
+					print("Ignoring.")
 
 	# Check to make sure all requested parameters are real
 	for i in params_to_conv:
 		#print(converge_dict[i])
 		if converge_dict[i] == []:
-			raise IOError('%s is not being simulated by VPLanet, or is not a VPLanet recognizable parameter. Please check spelling, modules used, etc.' % i)
+			print('ERROR: Unable to read in name of convergence paramater "'+i+'" from '+subdir+'/'+vplanet_logfile+' (empty dictionary).')
+			raise IOError()
 
 	# --------------------------------------- LOOP START --------------------------------------------------
 	# At this point, the initial training set has been processed and recorded. Now the loop will begin systematically adding steps of simulations of size StepSize

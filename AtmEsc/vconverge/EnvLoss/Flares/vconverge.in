@@ -4,6 +4,7 @@ iMaxSteps 200
 sConvergenceMethod KS_statistic
 fConvergenceCondition 0.004
 iNumberOfConvergences 3
+bExitOnMissingLogFile Yes
 
 sObjectFile b.in
 

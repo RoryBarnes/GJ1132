@@ -192,7 +192,7 @@ def par_worker(
         # runs vplanet on folder and writes the output to the log file
         with open("vplanet_log", "a+") as vplf:
             vplanet = sub.Popen(
-                "vplanet vpl.in",
+                "~/src/vplanet-private/bin/vplanet vpl.in",
                 shell=True,
                 stdout=sub.PIPE,
                 stderr=sub.PIPE,
