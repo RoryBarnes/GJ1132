@@ -206,7 +206,13 @@ def main():
                         if os.path.exists(prior_files[0]):
 
                             if values[1] == 'npy':
-                                    fprior = np.load(values[0])
+                                    try:
+                                        fprior = np.load(values[0])
+                                    except:
+                                        print(f"ERROR: Unable to load data from {values[0]}!")
+                                        exit()
+                                    printf(fprior)
+
                                     prior_index = np.random.choice(fprior.shape[0], size=randsize, replace=True)
                                     prior_indicies.append(prior_index)
                                     samp = fprior[prior_index]
@@ -463,7 +469,13 @@ def main():
                     colnum = int(values[3]) - 1
                     array_hold = []
                     for q in range(len(samps)):
-                        array_hold.append(samps[q][colnum])
+                        try:
+                            array_hold.append(samps[q][colnum])
+                        except Exception as e:
+                            print("Error processing "+name+f": {e}")
+                            print("\n")
+                            print(samps[q])
+                            exit()
                     array = np.array(array_hold)
             # End Megan's addition -------------------------------
 
