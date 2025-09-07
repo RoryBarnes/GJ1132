@@ -1,0 +1,30 @@
+srcfolder .
+destfolder output
+trialname xuv_
+samplemode random
+randsize 500
+
+file b.in
+
+dMass [-1.66, 0.023, g, max0] b_mass
+dRadius [-1.13, 0.02, g, max0] b_radius
+dEcc [0.0030547, 0.00412, g, min0, max1] b_ecc
+dOrbPeriod [-1.628931, 0.000027, g, max0] b_orbper
+dEnvelopeMass [-1, -0.0001, u] env
+dAtmXAbsEffH  [0.1, 0.3, u] eps
+
+file star.in
+
+dMass [0.1945, 0.0047, g] mass
+dAge [5e6,1e6, g, min1000000] start
+dXUVEngleMidLateA [-0.1456, 0.0911, g] engle_a
+dXUVEngleMidLateB [-2.8876, 0.0439, g] engle_b
+dXUVEngleMidLateC [-1.8187, 0.2412, g] engle_c
+dXUVEngleMidLateD [0.3545, 0.0604, g] engle_d
+dFlareSlopeA1 [-0.07, 0.11, g] dav_a1
+dFlareSlopeA2 [0.79, 0.40, g] dav_a2
+dFlareSlopeA3 [-1.06, 0.36, g] dav_a3
+
+file vpl.in
+
+dStopTime [age_samples.txt, txt, p, 1] age

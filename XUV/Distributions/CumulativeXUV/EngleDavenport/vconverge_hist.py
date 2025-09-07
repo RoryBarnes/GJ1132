@@ -70,6 +70,6 @@ if isinstance(data, dict):
     plt.xlim(lower_bound, upper_bound)
     plt.xscale('log')
     plt.ylim(0, 0.20)
-    plt.savefig('GJ1132b_CumulativeXUVFlux_Engle.png', dpi=300)
+    plt.savefig('GJ1132b_CumulativeXUVFlux_EngleDavenport.png', dpi=300)
 else:
     print("Loaded data is not a dictionary.")

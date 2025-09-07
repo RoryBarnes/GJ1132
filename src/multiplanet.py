@@ -252,7 +252,7 @@ def par_worker(
         else:
             for l in datalist:
                 if l[0] == folder:
-                    l[1] = "-1"
+                    l[1] = "-10"
                     break
             if quiet == False:
                 print(folder, "failed")

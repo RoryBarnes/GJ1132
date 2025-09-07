@@ -15,10 +15,39 @@ import vplanet
 path = pathlib.Path(__file__).parents[0].absolute()
 sys.path.insert(1, str(path.parents[0]))
 
+dEscVel = 13.858
+
+dEngleMean = 401.16
+dEngleLower = 238.48
+dEngleUpper = 564.09
+
+dEngleDavMean = 484.03
+dEngleDavLower = 220.44
+dEngleDavUpper = 1680.99
+
+dRibasMean = 420.6
+dRibasLower = 80.82
+dRibasUpper = 1104.60
+
+dRibasDavMean = 492.00
+dRibasDavLower = 79.17
+dRibasDavUpper = 1609.43
+
+marker=6
+font=24
+tickfont=20
+
+#########
+
 output = vplanet.run(units = False)
 
+def PlotErrorBar(dX,dY,dLower,dUpper,color,alpha=1):
+    yerr = np.array([[dY - dLower], [dUpper - dY]])
+    plt.plot(dX,dY,'o',color=color, markersize=marker,alpha=alpha)
+    plt.errorbar([dX],[dY],yerr=yerr,capsize=5, capthick=3, elinewidth=2, fmt='none',ecolor=color,alpha=alpha)
+
 # Plot!
-fig = plt.figure(figsize=(3.25, 3))
+fig = plt.figure(figsize=(6.5, 6))
 
 
 fxuv_earth = output.log.final.Earth.CumulativeXUVFlux
@@ -55,54 +84,49 @@ shoreliney = []
 shoreliney.append(1e-6)
 shoreliney.append(1e4)
 
-marker=4
-font=10
 
 
-plt.xlabel('Escape Velocity [km/s]')
-plt.ylabel('Normalized Cumulative XUV Flux')
+
+plt.xlabel('Escape Velocity [km/s]',fontsize=font)
+plt.ylabel('Normalized Cumulative XUV Flux',fontsize=font)
 plt.plot(shorelinex,shoreliney,color=vpl.colors.pale_blue,linewidth=marker,zorder=-1)
 plt.plot(escvel,fxuv,'o',color='k',markersize=marker)
 plt.xscale('log')
 plt.yscale('log')
 plt.ylim(1e-4,1e4)
 plt.xlim(1,100)
+plt.xticks(fontsize=tickfont)
+plt.yticks(fontsize=tickfont)
 
-plt.annotate('Mercury',(1.6,9),fontsize=font)
-plt.annotate('Venus',(10.2,2.6),fontsize=font)
-plt.annotate('Earth',(12.5,0.5),fontsize=font)
-plt.annotate('Mars',(5,0.15),fontsize=font)
-plt.annotate('Jupiter',(30,0.05),fontsize=font)
-plt.annotate('Saturn',(38,0.0075),fontsize=font)
-plt.annotate('Uranus',(23,0.002),fontsize=font)
-plt.annotate('Neptune',(26,0.0007),fontsize=font)
-plt.annotate('GJ 1132 b',(4,400),fontsize=font)
+plt.annotate('Mercury',(1.6,9),fontsize=tickfont)
+plt.annotate('Venus',(10.2,2.6),fontsize=tickfont)
+plt.annotate('Earth',(12.5,0.5),fontsize=tickfont)
+plt.annotate('Mars',(5,0.15),fontsize=tickfont)
+plt.annotate('Jupiter',(30,0.05),fontsize=tickfont)
+plt.annotate('Saturn',(38,0.0075),fontsize=tickfont)
+plt.annotate('Uranus',(23,0.002),fontsize=tickfont)
+plt.annotate('Neptune',(26,0.0007),fontsize=tickfont)
+plt.annotate('GJ 1132 b',(4,400),fontsize=tickfont)
 plt.annotate('Cosmic',(1.5,0.0011),fontsize=font,rotation=45,color=vpl.colors.pale_blue)
 plt.annotate('Shoreline',(25,100),fontsize=font,rotation=45,color=vpl.colors.pale_blue)
 
-x=14.81
+# Engle Only
+dX=dEscVel*0.94
+PlotErrorBar(dX,dEngleMean,dEngleLower,dEngleUpper,'grey')
 
-qlower=360
-qupper=1100
-yq=400
-yqerr = np.array([[qlower], [qupper]])
-plt.plot(x,yq,'o',color='gray', markersize=marker)
-plt.errorbar([x],[yq],yerr=[[qlower],[qupper]],capsize=3, capthick=1, elinewidth=1, fmt='none',ecolor='gray')
+# Engle+Davenport
+dX=dEscVel*0.98
+PlotErrorBar(dX,dEngleDavMean,dEngleDavLower,dEngleDavUpper,'k')
 
-x=15.25
+# Ribas+Davenport
+dX=dEscVel*1.02
+PlotErrorBar(dX,dRibasDavMean,dRibasDavLower,dRibasDavUpper,vpl.colors.orange)
 
-flower=110
-fupper=1600
+#Ribas onle
+dX=dEscVel*1.06
+PlotErrorBar(dX,dRibasMean,dRibasLower,dRibasUpper,vpl.colors.orange,0.5)
 
-flower=1190
-yf=1300
-yferr=np.array([[flower], [fupper]])
-plt.plot(x,yf,'o',color='black', markersize=marker)
-plt.errorbar([x],[yf],yerr=[[flower],[fupper]],capsize=3, capthick=1, elinewidth=1, fmt='none',ecolor='k')
-
-#plt.axhline(y=yf+fupper, color='red', linestyle='--', alpha=0.3, label=f'Upper bound: {yf+fupper}')
-#plt.axhline(y=yf-flower, color='blue', linestyle='--', alpha=0.3, label=f'Lower bound: {yf-flower}')
 
 # Save figure
-fig.savefig(path / f"CosmicShoreline.png", bbox_inches="tight", dpi=300)
+fig.savefig(path / f"CosmicShoreline.pdf", bbox_inches="tight", dpi=300)
 #plt.show()
