@@ -63,17 +63,18 @@ def GatherFluxes(file):
     else:
         print("Loaded data is not a dictionary.")
 
-daQuiescentBins, daQuiescentFractions = GatherFluxes("Quiescent/output/Converged_Param_Dictionary.json")
-daFlareBins, daFlareFractions = GatherFluxes("Flares/output/Converged_Param_Dictionary.json")
+daRibasBins, daRibasFractions = GatherFluxes("Ribas/output/Converged_Param_Dictionary.json")
+daEngleBins, daEngleFractions = GatherFluxes("Engle/output/Converged_Param_Dictionary.json")
+#daFlareBins, daFlareFractions = GatherFluxes("Flares/output/Converged_Param_Dictionary.json")
 
-plt.step(daQuiescentBins, daQuiescentFractions, where='mid', color='grey', linestyle='-', label="Quiescent")
-plt.step(daFlareBins, daFlareFractions, where='mid', color='k', linestyle='-', label="w/Flares")
+plt.step(daRibasBins, daRibasFractions, where='mid', color='grey', linestyle='-', label="Ribas")
+plt.step(daEngleBins, daEngleFractions, where='mid', color='k', linestyle='-', label="Engle")
 
 # Set plot parameters
 plt.xlabel('Cumulative XUV Flux\nRelative to Modern Earth')
 plt.ylabel('Fraction')
 plt.xlim(lower_bound, upper_bound)
 plt.xscale('log')
-plt.ylim(0, 0.11)
+plt.ylim(0, 0.25)
 plt.legend(loc='best')
 plt.savefig('GJ1132b_CumulativeXUVFlux.png', dpi=300)
