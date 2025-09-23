@@ -17,6 +17,10 @@ dMass [dynesty_transform_final.npy, npy, p, 1] mass
 dSatXUVFrac [dynesty_transform_final.npy, npy, p, 2] fsat
 dSatXUVTime [dynesty_transform_final.npy, npy, p, 3] tsat
 dXUVBeta [dynesty_transform_final.npy, npy, p, 5] beta
+dAge [5e6,1e6, g, min1000000] start
+dFlareSlopeA1 [-0.07, 0.11, g] dav_a1
+dFlareSlopeA2 [0.79, 0.40, g] dav_a2
+dFlareSlopeA3 [-1.06, 0.36, g] dav_a3
 
 file vpl.in
 

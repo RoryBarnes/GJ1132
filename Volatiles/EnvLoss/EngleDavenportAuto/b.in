@@ -1,0 +1,11 @@
+# Planet b parameters
+sName         b                     # Body's name
+saModules       atmesc
+
+dXFrac                    1.0
+dSurfWaterMass            0
+bHaltEnvelopeGone         1
+sPlanetRadiusModel        lopez
+bAtmEscAuto         1
+
+saOutputOrder Time -Mass -EnvelopeMass Radius -CumulativeXUVFlux
