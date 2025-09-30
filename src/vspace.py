@@ -777,7 +777,12 @@ def main():
                 indexHold.append(int(prior_indicies[j][s]))
             dic[prior_files[j]] = indexHold
         dichold = json.dumps(dic)
-        priorsused = open(os.path.join(dest, trial+'PriorIndicies.json'), 'w')
+        try:
+            print(dest+trial+'PriorIndicies.json')
+            priorsused = open(os.path.join(dest, trial+'PriorIndicies.json'), 'w')
+        except Exception as e:
+            print("Error: Unable to to open "+dest+"/"+"PriorIndicies.json")
+            exit()
         json.dump(dichold, priorsused)
         priorsused.close()
     # End Megans Addition ----------------------------------------------
