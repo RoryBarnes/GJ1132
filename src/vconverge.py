@@ -97,6 +97,7 @@ def extract_info_vsp(vspFile): # Extracts relevant info from vspace.in file for 
 			curr_fi = curr_fi.split('.')[0]
 			if linesog[i].split()[0] == 'sPrimaryFile':
 				PrimeFi = linesog[i].split()[1]
+		
 	# 'elif' below this line handles data for predefined prior mode ------------------------------------------ I think I can delete this but am scared to delete any code ever
 #		elif re.search("\[", linesog[i]) != None:
 #			spl = re.split("[\[\]]", linesog[i])
@@ -126,7 +127,20 @@ def extract_info_vsp(vspFile): # Extracts relevant info from vspace.in file for 
 #		for i in prior_files:
 #			if i[1] != 'npy' and i[1] != 'txt' and i[1] != 'dat':
 #				raise IOError('In predefined prior mode, prior files types must be numpy, ascii formatted txt, or ascii formatted dat. One or more of your predefined prior files violates this requirement')
-	return source_fold, dest_fold, triname, PrimeFi, initial_sim_size#, prior_files, prior_vars, prior_vars_cols
+
+	for i in range(len(linesog)):
+		if re.search("\[", linesog[i]) != None:
+			spl = re.split("[\[\]]", linesog[i])
+			values = spl[1].split(",")
+			for j in range(len(values)):
+				values[j] = values[j].strip()
+			#try:
+			if values[2][0] == 'p':
+				prior_mode = True
+			else:
+				prior_mode = False
+
+	return source_fold, dest_fold, triname, PrimeFi, initial_sim_size, prior_mode#, prior_files, prior_vars, prior_vars_cols
 			
 
 def create_tmp_vspin(vspFile, RunIndex, stepsize): # Creates a temporary vspace.in file to run for steps subsequent to original run
@@ -166,7 +180,11 @@ def create_tmp_vspin(vspFile, RunIndex, stepsize): # Creates a temporary vspace.
 
 def create_tmp_prior_files(RunIndex, og_triname, dst_fold): # Create new prior files deleting previously used priors
 	if RunIndex == 1:
-		prev = open(os.path.join(dst_fold, og_triname+'PriorIndicies.json'), 'r')
+		try:
+			prev = open(os.path.join(dst_fold, og_triname+'PriorIndicies.json'), 'r')
+		except Exception as e:
+			print("ERROR: Unable to open file "+dst_fold+"/"+og_triname+"PriorIndices.json")
+			exit()
 	else:
 		prev = open(os.path.join(dst_fold, 'Step_'+str(RunIndex-1)+'/Step'+str(RunIndex-1)+'_'+og_triname+'PriorIndicies.json'), 'r')
 	prev = json.load(prev)
@@ -199,7 +217,10 @@ def vconverge(vcnvFile):
 	# extract required info from the vconverge.in file and the vspace.in file respectively
 	vspFile, StepSize, MaxSteps, ConvMethod, ConvCondit, ConvNum, params_to_conv, bExitOnMissingLogFile = extract_info_vcnv(vcnvFile)
 #	src_fold, dst_fold, og_triname, primeFi, pfiles, pvars, pvarscols = extract_info_vsp(vspFile)
-	src_fold, dst_fold, og_triname, primeFi, initialsims = extract_info_vsp(vspFile)
+	src_fold, dst_fold, og_triname, primeFi, initialsims, prior_mode = extract_info_vsp(vspFile)
+
+	if (prior_mode == False):
+		print("No prior files required.")
 
 	# Check that vconverge can find the files associated with the bodies that have requested converging parameters
 	# These files should be among the files copied by vspace and should be found in the srcfolder defined in the vspace.in file
@@ -261,7 +282,8 @@ def vconverge(vcnvFile):
 	#Run Multi-planet on OG
 	RunIndex = 1
 	create_tmp_vspin(vspFile, RunIndex, StepSize) # Make the temporary vspace file
-	create_tmp_prior_files(RunIndex, og_triname, dst_fold) # Make the temporary prior files
+	if (prior_mode):
+		create_tmp_prior_files(RunIndex, og_triname, dst_fold) # Make the temporary prior files
 
 	# go through initial set and extract the values of the converging parameters for all sims
 	body = []
@@ -448,7 +470,8 @@ def vconverge(vcnvFile):
 
 		# Create new vspace.in and prior files
 		create_tmp_vspin(vspFile, RunIndex, StepSize) # Make the temporary vspace file
-		create_tmp_prior_files(RunIndex, og_triname, 'vconverge_tmp') # Make the temporary prior files
+		if (prior_mode):
+			create_tmp_prior_files(RunIndex, og_triname, 'vconverge_tmp') # Make the temporary prior files
 
 	if RunIndex >= MaxSteps:
 		print('MaxSteps reached')
