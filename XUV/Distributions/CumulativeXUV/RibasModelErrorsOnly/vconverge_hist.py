@@ -21,8 +21,8 @@ with open("output/Converged_Param_Dictionary.json", 'r') as file:
 # Step 2: Extract and process the array
 key = "b,CumulativeXUVFlux,final"
 if isinstance(data, dict):
-    lower_bound = 50
-    upper_bound = 4e3
+    lower_bound = 20
+    upper_bound = 3e3
     
     # Extract and clean data
     daCumulativeXUVFlux = data.get(key)
@@ -51,15 +51,8 @@ if isinstance(data, dict):
     
     # Calculate histogram
     counts, _ = np.histogram(daCumulativeXUVFlux_filtered, bins=bin_edges)
-
-    try:
-        fractions = counts / len(daCumulativeXUVFlux_filtered)
-    except Exception as e:
-        print("ERROR: "+e)
-        print(counts)
-        print(repr(len(daCumulativeXUVFlux_filtered)))
-        exit()
-
+    fractions = counts / len(daCumulativeXUVFlux_filtered)
+    
     # Plot using the bin centers
     bin_centers = np.sqrt(bin_edges[:-1] * bin_edges[1:])  # Geometric mean for log space
     plt.step(bin_centers, fractions, where='mid', color='k')
@@ -69,7 +62,7 @@ if isinstance(data, dict):
     plt.ylabel('Fraction')
     plt.xlim(lower_bound, upper_bound)
     plt.xscale('log')
-    plt.ylim(0, 0.20)
-    plt.savefig('GJ1132b_CumulativeXUVFlux_EngleBarnes.png', dpi=300)
+    plt.ylim(0, 0.075)
+    plt.savefig('GJ1132b_CumulativeXUVFlux_RibasModelErrorsOnly.png', dpi=300)
 else:
     print("Loaded data is not a dictionary.")

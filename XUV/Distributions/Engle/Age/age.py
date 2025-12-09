@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import numpy as np
 import pandas as pd
+import vplot
 
 sPlotFile = "EngleAgeHist.png"
 iNumBins = 50
@@ -63,7 +64,7 @@ def NormalizedHistogram(daColumn,color,label=None):
 
 def plot_results(y_samples, y_mean, y_std, y_ci):
     """Plot histogram of y values with statistics."""
-    plt.figure(figsize=(12, 8))
+    plt.figure(figsize=(6.5, 6))
     
     # Histogram
     plt.subplot(2, 1, 1)

@@ -21,17 +21,17 @@ dEngleMean = 401.16
 dEngleLower = 238.48
 dEngleUpper = 564.09
 
-dEngleDavMean = 484.03
-dEngleDavLower = 220.44
-dEngleDavUpper = 1680.99
+dEngleDavMean = 478.71
+dEngleDavLower = 275.49
+dEngleDavUpper = 662.63
 
 dRibasMean = 420.6
 dRibasLower = 80.82
 dRibasUpper = 1104.60
 
-dRibasDavMean = 492.00
-dRibasDavLower = 79.17
-dRibasDavUpper = 1609.43
+dRibasDavMean = 478.31
+dRibasDavLower = 141.18
+dRibasDavUpper = 1106.13
 
 marker=6
 font=24
@@ -110,14 +110,6 @@ plt.annotate('GJ 1132 b',(4,400),fontsize=tickfont)
 plt.annotate('Cosmic',(1.5,0.0011),fontsize=font,rotation=45,color=vpl.colors.pale_blue)
 plt.annotate('Shoreline',(25,100),fontsize=font,rotation=45,color=vpl.colors.pale_blue)
 
-# Engle Only
-dX=dEscVel*0.94
-PlotErrorBar(dX,dEngleMean,dEngleLower,dEngleUpper,'grey')
-
-# Engle+Davenport
-dX=dEscVel*0.98
-PlotErrorBar(dX,dEngleDavMean,dEngleDavLower,dEngleDavUpper,'k')
-
 # Ribas+Davenport
 dX=dEscVel*1.02
 PlotErrorBar(dX,dRibasDavMean,dRibasDavLower,dRibasDavUpper,vpl.colors.orange)
@@ -126,7 +118,14 @@ PlotErrorBar(dX,dRibasDavMean,dRibasDavLower,dRibasDavUpper,vpl.colors.orange)
 dX=dEscVel*1.06
 PlotErrorBar(dX,dRibasMean,dRibasLower,dRibasUpper,vpl.colors.orange,0.5)
 
+# Engle Only
+dX=dEscVel*0.94
+PlotErrorBar(dX,dEngleMean,dEngleLower,dEngleUpper,'grey')
+
+# Engle+Davenport
+dX=dEscVel*0.98
+PlotErrorBar(dX,dEngleDavMean,dEngleDavLower,dEngleDavUpper,'k',zorder=-1)
 
 # Save figure
-fig.savefig(path / f"CosmicShoreline.pdf", bbox_inches="tight", dpi=300)
+fig.savefig(path / f"CosmicShoreline.png", bbox_inches="tight", dpi=300)
 #plt.show()

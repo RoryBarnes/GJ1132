@@ -22,6 +22,7 @@ import emcee
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize, differential_evolution
 import corner
+import vplot
 
 def log_flare_rate_model(log_energy, log_age, mass, params):
     """
@@ -502,7 +503,7 @@ def analyze_results(sampler, thin=10, save_samples_flag=True):
     print("\nCreating corner plot...")
     fig = corner.corner(
         samples, 
-        labels=param_names,
+        #labels=param_names,
         quantiles=[0.16, 0.5, 0.84],
         show_titles=True,
         title_kwargs={"fontsize": 12}
