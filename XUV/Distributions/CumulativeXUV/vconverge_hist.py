@@ -5,12 +5,12 @@ import numpy as np
 import vplot
 from scipy import stats
 
-fig = plt.figure(figsize=(3.25, 3))
+fig = plt.figure(figsize=(6.5, 6))
 ymax=0.25
 lower_bound = 20
 upper_bound = 4e3
 dConfidenceInterval = 95
-dirs = ['Engle', 'EngleDavenport', 'Ribas', 'RibasDavenport']
+dirs = ['Engle', 'EngleBarnes', 'Ribas', 'RibasBarnes']
 
 dCumulativeEarthFlux = 9.759583e+15
 dShorelineFlux = 51.43
@@ -80,14 +80,16 @@ def GatherFluxes(file):
         print("Loaded data is not a dictionary.")
 
 daEngleBins, daEngleFractions, dMeanEngle, dLowerEngle, dUpperEngle = GatherFluxes(dirs[0])
-daEngleDavenportBins, daEngleDavenportFractions, dMeanEngleDavenport, dLowerEngleDavenport, dUpperEngleDavenport = GatherFluxes(dirs[1])
+daEngleBarnesBins, daEngleBarnesFractions, dMeanEngleBarnes, dLowerEngleBarnes, dUpperEngleDavenport = GatherFluxes(dirs[1])
 daRibasBins, daRibasFractions, dMeanRibas, dLowerRibas, dUpperRibas = GatherFluxes(dirs[2])
-daRibasDavenportBins, daRibasDavenportFractions, dMeanRibasDavenport, dLowerRibasDavenport, dUpperRibasDavenport = GatherFluxes(dirs[3])
+daRibasBarnesBins, daRibasBarnesFractions, dMeanRibasBarnes, dLowerRibasBarnes, dUpperRibasBarnes = GatherFluxes(dirs[3])
 
-plt.step(daEngleBins, daEngleFractions, where='mid', color='grey', linestyle='-', label="Engle Only")
-plt.step(daEngleDavenportBins, daEngleDavenportFractions, where='mid', color='k', linestyle='-', label="Engle w/Flares")
-plt.step(daRibasBins, daRibasFractions, where='mid', color=vplot.colors.orange, alpha=0.5,linestyle='-', label="Ribas Only")
-plt.step(daRibasDavenportBins, daRibasDavenportFractions, where='mid', color=vplot.colors.orange, linestyle='-', label="Ribas w/Flares")
+plt.axvline(dShorelineFlux, color=vplot.colors.pale_blue, linewidth=6)
+
+plt.step(daEngleBins, daEngleFractions, where='mid', color='grey', linestyle='-', linewidth=2, label="Engle Only")
+plt.step(daEngleBarnesBins, daEngleBarnesFractions, where='mid', color='k', linestyle='-', linewidth=2, label="Engle w/Flares")
+plt.step(daRibasBins, daRibasFractions, where='mid', color=vplot.colors.orange, alpha=0.5,linestyle='-', linewidth=2, label="Ribas Only")
+plt.step(daRibasBarnesBins, daRibasBarnesFractions, where='mid', color=vplot.colors.orange, linestyle='-', linewidth=2, label="Ribas w/Flares")
 
 """
 plt.axvline(dMeanEngle, color='grey', linestyle=':', linewidth=1.5)
@@ -103,17 +105,19 @@ plt.axvline(dLowerRibas, color=vplot.colors.pale_blue, linestyle=':', linewidth=
 plt.axvline(dUpperRibas, color=vplot.colors.pale_blue, linestyle=':', linewidth=1)
 """
 
-plt.xlabel('Cumulative XUV Flux\nRelative to Modern Earth')
-plt.ylabel('Fraction')
+plt.xlabel('Normalized Cumulative XUV Flux',fontsize=20)
+plt.ylabel('Fraction',fontsize=20)
 plt.xlim(lower_bound, upper_bound)
 plt.xscale('log')
+plt.xticks(fontsize=16)
+plt.yticks(fontsize=16)
 plt.ylim(0, ymax)
-plt.legend(loc='upper right',fontsize=6)
-plt.axvline(dShorelineFlux, color=vplot.colors.pale_blue)
-plt.annotate('Cosmic Shoreline',(37,0.06),fontsize=12,rotation=90,color=vplot.colors.pale_blue)
+plt.legend(loc='upper right',fontsize=12)
+
+plt.annotate('Cosmic Shoreline',(40,0.06),fontsize=20,rotation=90,color=vplot.colors.pale_blue)
 plt.savefig('GJ1132b_CumulativeXUV_Multi.png', dpi=300)
 
 print(f"Engle Only - Mean: {dMeanEngle:.2f}, 95% CI: [{dLowerEngle:.2f}, {dUpperEngle:.2f}]")
-print(f"Engle w/Flares - Mean: {dMeanEngleDavenport:.2f}, 95% CI: [{dLowerEngleDavenport:.2f}, {dUpperEngleDavenport:.2f}]")
+print(f"Engle w/Flares - Mean: {dMeanEngleBarnes:.2f}, 95% CI: [{dLowerEngleBarnes:.2f}, {dUpperEngleDavenport:.2f}]")
 print(f"Ribas Only - Mean: {dMeanRibas:.2f}, 95% CI: [{dLowerRibas:.2f}, {dUpperRibas:.2f}]")
-print(f"Ribas w/Flares - Mean: {dMeanRibasDavenport:.2f}, 95% CI: [{dLowerRibasDavenport:.2f}, {dUpperRibasDavenport:.2f}]")
+print(f"Ribas w/Flares - Mean: {dMeanRibasBarnes:.2f}, 95% CI: [{dLowerRibasBarnes:.2f}, {dUpperRibasBarnes:.2f}]")

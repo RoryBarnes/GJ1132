@@ -2,13 +2,14 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import numpy as np
 import pandas as pd
+import vplot
 
-sPlotFile = "EngleAgeHist.png"
+sPlotFile = "EngleAgeHist.pdf"
 iNumBins = 50
 dFigSizeX = 3.25
 dFigSizeY = 3
-xmin=-0.1
-xmax=1.063
+xmin=0
+xmax=13
 ymin=0
 ymax=0.06
 dMaxLogAge = np.log10(13)  # 13 Gyr
@@ -46,10 +47,11 @@ def AnalyticalSolution(daA, daB, daC, daD, daRotationPeriod):
 
 def NormalizedHistogram(daColumn,color,label=None):
     fig = plt.figure(figsize=(dFigSizeX, dFigSizeY))
+    daColumn = 10**daColumn
     counts, bin_edges = np.histogram(daColumn, bins=iNumBins)
     daNormalizedFractions = counts / len(daColumn)
     plt.step(bin_edges[:-1], daNormalizedFractions,where='mid', color=color,label=label)
-    plt.xlabel('Log(Age) [Gyr]',fontsize=12)
+    plt.xlabel('Age [Gyr]',fontsize=12)
     plt.ylabel('Fraction',fontsize=12)
     plt.xlim(xmin,xmax)
     plt.ylim(ymin,ymax)
@@ -63,8 +65,8 @@ def NormalizedHistogram(daColumn,color,label=None):
 
 def plot_results(y_samples, y_mean, y_std, y_ci):
     """Plot histogram of y values with statistics."""
-    plt.figure(figsize=(12, 8))
-    
+    plt.figure(figsize=(6.5, 6))
+
     # Histogram
     plt.subplot(2, 1, 1)
     plt.hist(y_samples, bins=100, density=True, alpha=0.7, color='skyblue', edgecolor='black')
