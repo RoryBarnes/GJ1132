@@ -105,14 +105,14 @@ plt.axvline(dLowerRibas, color=vplot.colors.pale_blue, linestyle=':', linewidth=
 plt.axvline(dUpperRibas, color=vplot.colors.pale_blue, linestyle=':', linewidth=1)
 """
 
-plt.xlabel('Normalized Cumulative XUV Flux',fontsize=20)
-plt.ylabel('Fraction',fontsize=20)
+plt.xlabel('Normalized Cumulative XUV Flux',fontsize=24)
+plt.ylabel('Fraction',fontsize=24)
 plt.xlim(lower_bound, upper_bound)
 plt.xscale('log')
-plt.xticks(fontsize=16)
-plt.yticks(fontsize=16)
+plt.xticks(fontsize=20)
+plt.yticks(fontsize=20)
 plt.ylim(0, ymax)
-plt.legend(loc='upper right',fontsize=12)
+plt.legend(loc='upper left',fontsize=16,  framealpha=0.9)
 
 plt.annotate('Cosmic Shoreline',(40,0.06),fontsize=20,rotation=90,color=vplot.colors.pale_blue)
 plt.savefig('GJ1132b_CumulativeXUV_Multi.png', dpi=300)

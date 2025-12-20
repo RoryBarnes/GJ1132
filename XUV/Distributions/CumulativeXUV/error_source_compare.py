@@ -5,7 +5,7 @@ import numpy as np
 import vplot
 from scipy import stats
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 6))
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 6), sharey=True)
 ymax = 0.6
 lower_bound = 20
 upper_bound = 4e3
@@ -124,7 +124,7 @@ for i, (bins, fractions, mean, lower, upper) in enumerate(ribas_data):
              linewidth=2, label=ribas_labels[i])
 
 ax2.set_xlabel('Normalized Cumulative XUV Flux', fontsize=20)
-ax2.set_ylabel('Fraction', fontsize=20)
+#ax2.set_ylabel('Fraction', fontsize=20)
 ax2.set_xlim(lower_bound, upper_bound)
 ax2.set_xscale('log')
 ax2.tick_params(axis='both', labelsize=16)
