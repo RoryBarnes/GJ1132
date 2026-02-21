@@ -331,8 +331,8 @@ def compute_flare_equivalent_durations(lc, sectors, t_start, t_stop):
     for k in range(len(t_start)):
         flare = np.where((lc[sectors[k]]['time'].value >= t_start[k]) &
                          (lc[sectors[k]]['time'].value <= t_stop[k]))[0]
-        ed[k] = np.trapz(lc[sectors[k]].normalize()['flux'].value[flare] - 1,
-                         lc[sectors[k]]['time'].value[flare]*60*60*24)
+        ed[k] = np.trapezoid(lc[sectors[k]].normalize()['flux'].value[flare] - 1,
+                             lc[sectors[k]]['time'].value[flare]*60*60*24)
         print(f"  Flare {k}: ED = {ed[k]:.2e} s")
     return ed
 

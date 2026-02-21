@@ -124,7 +124,7 @@ PlotErrorBar(dX,dEngleMean,dEngleLower,dEngleUpper,'grey')
 
 # Engle+Davenport
 dX=dEscVel*0.98
-PlotErrorBar(dX,dEngleDavMean,dEngleDavLower,dEngleDavUpper,'k',zorder=-1)
+PlotErrorBar(dX,dEngleDavMean,dEngleDavLower,dEngleDavUpper,'k')
 
 # Save figure
 fig.savefig(path / f"CosmicShoreline.png", bbox_inches="tight", dpi=300)

@@ -80,7 +80,7 @@ def GatherFluxes(file):
         print("Loaded data is not a dictionary.")
 
 daEngleBins, daEngleFractions, dMeanEngle, dLowerEngle, dUpperEngle = GatherFluxes(dirs[0])
-daEngleBarnesBins, daEngleBarnesFractions, dMeanEngleBarnes, dLowerEngleBarnes, dUpperEngleDavenport = GatherFluxes(dirs[1])
+daEngleBarnesBins, daEngleBarnesFractions, dMeanEngleBarnes, dLowerEngleBarnes, dUpperEngleBarnes = GatherFluxes(dirs[1])
 daRibasBins, daRibasFractions, dMeanRibas, dLowerRibas, dUpperRibas = GatherFluxes(dirs[2])
 daRibasBarnesBins, daRibasBarnesFractions, dMeanRibasBarnes, dLowerRibasBarnes, dUpperRibasBarnes = GatherFluxes(dirs[3])
 
@@ -98,7 +98,7 @@ plt.axvline(dUpperEngle, color='grey', linestyle=':', linewidth=1)
 
 plt.axvline(dMeanEngleDavenport, color='k', linestyle=':', linewidth=1.5)
 plt.axvline(dLowerEngleDavenport, color='k', linestyle=':', linewidth=1)
-plt.axvline(dUpperEngleDavenport, color='k', linestyle=':', linewidth=1)
+plt.axvline(dUpperEngleBarnes, color='k', linestyle=':', linewidth=1)
 
 plt.axvline(dMeanRibas, color=vplot.colors.pale_blue, linestyle=':', linewidth=1.5)
 plt.axvline(dLowerRibas, color=vplot.colors.pale_blue, linestyle=':', linewidth=1)
@@ -118,6 +118,6 @@ plt.annotate('Cosmic Shoreline',(40,0.06),fontsize=20,rotation=90,color=vplot.co
 plt.savefig('GJ1132b_CumulativeXUV_Multi.png', dpi=300)
 
 print(f"Engle Only - Mean: {dMeanEngle:.2f}, 95% CI: [{dLowerEngle:.2f}, {dUpperEngle:.2f}]")
-print(f"Engle w/Flares - Mean: {dMeanEngleBarnes:.2f}, 95% CI: [{dLowerEngleBarnes:.2f}, {dUpperEngleDavenport:.2f}]")
+print(f"Engle w/Flares - Mean: {dMeanEngleBarnes:.2f}, 95% CI: [{dLowerEngleBarnes:.2f}, {dUpperEngleBarnes:.2f}]")
 print(f"Ribas Only - Mean: {dMeanRibas:.2f}, 95% CI: [{dLowerRibas:.2f}, {dUpperRibas:.2f}]")
 print(f"Ribas w/Flares - Mean: {dMeanRibasBarnes:.2f}, 95% CI: [{dLowerRibasBarnes:.2f}, {dUpperRibasBarnes:.2f}]")

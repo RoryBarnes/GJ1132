@@ -1,0 +1,64 @@
+{
+  "sOutputDirectory": "Figures",
+  "sVplanetExecutable": "vplanet",
+  "iNumberOfCores": -1,
+  "sTessDataCache": "data/tess_cache",
+
+  "dictFigures": {
+    "figure01": {
+      "sDescription": "CornerVariableSlope.png - Kepler FFD corner plot",
+      "sMode": "plot-only",
+      "bEnabled": true
+    },
+    "figure02": {
+      "sDescription": "ffd_comp.png - FFD comparison at 4 ages",
+      "sMode": "plot-only",
+      "bEnabled": true
+    },
+    "figure03": {
+      "sDescription": "GJ1132_flares.pdf - TESS flare lightcurves",
+      "sMode": "plot-only",
+      "bEnabled": true
+    },
+    "figure04": {
+      "sDescription": "GJ1132_FFD_comp2.pdf - comprehensive FFD comparison",
+      "sMode": "plot-only",
+      "bEnabled": true
+    },
+    "figure05": {
+      "sDescription": "lxuv_hist.pdf + log_lxuv_lbol_hist.pdf - L_XUV distributions",
+      "sMode": "plot-only",
+      "bEnabled": true
+    },
+    "figure06": {
+      "sDescription": "gj1132posteriors.png - alabi/emcee Bayesian posteriors",
+      "sMode": "precomputed",
+      "bEnabled": true
+    },
+    "figure07": {
+      "sDescription": "EngleAgeHist.pdf - Engle age distribution",
+      "sMode": "plot-only",
+      "bEnabled": true
+    },
+    "figure08": {
+      "sDescription": "XUVEvol.pdf - 100 XUV evolution realizations",
+      "sMode": "precomputed",
+      "bEnabled": true
+    },
+    "figure09": {
+      "sDescription": "GJ1132b_CumulativeXUV_Multi.png + CosmicShoreline.png",
+      "sMode": "precomputed",
+      "bEnabled": true
+    },
+    "figure10": {
+      "sDescription": "GJ1132b_ErrorSourceComparison.png - error decomposition",
+      "sMode": "precomputed",
+      "bEnabled": true
+    },
+    "figure11": {
+      "sDescription": "FitComparison.pdf - Kepler vs TESS alpha-beta comparison",
+      "sMode": "plot-only",
+      "bEnabled": true
+    }
+  }
+}
