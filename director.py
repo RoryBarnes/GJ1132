@@ -414,10 +414,8 @@ def fnGenerateFigure08(dictFigConfig, dictGlobalConfig):
         )
 
     if sMode == "full":
-        if not bEngleExists:
-            fnRunVconvergePipeline("EngleBarnes", dictGlobalConfig)
-        if not bRibasExists:
-            fnRunVconvergePipeline("RibasBarnes", dictGlobalConfig)
+        fnRunVconvergePipeline("EngleBarnes", dictGlobalConfig)
+        fnRunVconvergePipeline("RibasBarnes", dictGlobalConfig)
 
     with fcontextWorkingDirectory(CUMULATIVE_XUV_DIR):
         sys.path.insert(0, CUMULATIVE_XUV_DIR)
