@@ -135,7 +135,9 @@ ax2.annotate('Cosmic Shoreline', (40, 0.06), fontsize=20, rotation=90,
              color=vplot.colors.pale_blue)
 
 plt.tight_layout()
-plt.savefig('GJ1132b_ErrorSourceComparison.png', dpi=300)
+import sys
+sOutputPath = sys.argv[1] if len(sys.argv) > 1 else 'GJ1132b_ErrorSourceComparison.png'
+plt.savefig(sOutputPath, dpi=300)
 
 # Print statistics
 print("ENGLE MODEL VARIANTS:")

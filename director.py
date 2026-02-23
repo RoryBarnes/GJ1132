@@ -46,25 +46,27 @@ CUMULATIVE_XUV_DIR = os.path.join(
 COSMIC_SHORELINE_DIR = os.path.join(REPO_ROOT, "XUV", "CosmicShoreline")
 VPLANET_NATIVE_BIN_DIR = "/workspace/vplanet-private/bin"
 
-VALID_MODES = {"plot-only", "precomputed", "full"}
+VALID_MODES = {"plot-only", "precomputed", "full", "standards"}
 
-# Map of figure key -> list of expected output filenames
+# Map of figure key -> list of expected output base names (without extension).
+# Extension is determined by mode via fsResolveOutputExtension(), except for
+# figures whose generators always produce PDF regardless of mode.
 EXPECTED_FILES = {
-    "figure01": ["CornerVariableSlope.png"],
-    "figure02": ["ffd_comp.png"],
-    "figure03": ["GJ1132_flares.pdf"],
-    "figure04": ["GJ1132_FFD_comp2.pdf"],
-    "figure05": ["lxuv_hist.pdf", "log_lxuv_lbol_hist.pdf"],
-    "figure06": ["gj1132posteriors.png"],
-    "figure07": ["EngleAgeHist.pdf"],
-    "figure08": ["XUVEvol.pdf"],
-    "figure09": [
-        "GJ1132b_CumulativeXUV_Multi.png",
-        "CosmicShoreline.png",
-    ],
-    "figure10": ["GJ1132b_ErrorSourceComparison.png"],
-    "figure11": ["FitComparison.pdf"],
+    "figure01": ["CornerVariableSlope"],
+    "figure02": ["ffd_comp"],
+    "figure03": ["GJ1132_flares"],
+    "figure04": ["GJ1132_FFD_comp2"],
+    "figure05": ["lxuv_hist", "log_lxuv_lbol_hist"],
+    "figure06": ["gj1132posteriors"],
+    "figure07": ["EngleAgeHist"],
+    "figure08": ["XUVEvol"],
+    "figure09": ["GJ1132b_CumulativeXUV_Multi", "CosmicShoreline"],
+    "figure10": ["GJ1132b_ErrorSourceComparison"],
+    "figure11": ["FitComparison"],
 }
+
+# Figures whose internal generators always produce PDF output.
+FIXED_PDF_FIGURES = {"figure03", "figure04", "figure05", "figure07", "figure08", "figure11"}
 
 
 # ---------------------------------------------------------------------------
@@ -118,6 +120,13 @@ def fbValidateConfiguration(dictConfig):
 # ---------------------------------------------------------------------------
 
 
+def fsResolveOutputExtension(sMode):
+    """Return the file extension for the given mode."""
+    if sMode == "standards":
+        return ".png"
+    return ".pdf"
+
+
 def fsResolveOutputPath(sOutputDirectory, sFilename):
     """Return the full path inside *sOutputDirectory* for *sFilename*."""
     sDir = os.path.join(REPO_ROOT, sOutputDirectory)
@@ -157,9 +166,11 @@ def fsLocateExecutable(sName):
     raise FileNotFoundError(f"Cannot find executable: {sName}")
 
 
-def fnRunSubprocess(sScriptName, sWorkingDirectory):
+def fnRunSubprocess(sScriptName, sWorkingDirectory, listArgs=None):
     """Execute *sScriptName* in *sWorkingDirectory* via subprocess."""
     listCommand = [sys.executable, sScriptName]
+    if listArgs:
+        listCommand.extend(listArgs)
     result = subprocess.run(
         listCommand,
         cwd=sWorkingDirectory,
@@ -237,17 +248,20 @@ def fdictRunTessAnalysis(dictGlobalConfig):
 
 
 def fnGenerateFigure01(dictFigConfig, dictGlobalConfig):
-    """Figure 1: CornerVariableSlope.png — Kepler FFD corner plot."""
+    """Figure 1: CornerVariableSlope — Kepler FFD corner plot."""
     sMode = dictFigConfig["sMode"]
     sOutDir = dictGlobalConfig["sOutputDirectory"]
-    sOutputFile = fsResolveOutputPath(sOutDir, "CornerVariableSlope.png")
+    sExtension = fsResolveOutputExtension(sMode)
+    sOutputFile = fsResolveOutputPath(sOutDir, "CornerVariableSlope" + sExtension)
 
-    if sMode == "full":
-        fnRunSubprocess("kepler_ffd.py", KEPLER_FLARES_DIR)
-        fnCopyFigureFile(
-            os.path.join(KEPLER_FLARES_DIR, "flare_frequency_ensemble_corner.png"),
-            sOutputFile,
+    if sMode in ("full", "standards"):
+        sGeneratedFile = os.path.join(
+            KEPLER_FLARES_DIR, "CornerVariableSlope" + sExtension
         )
+        fnRunSubprocess(
+            "kepler_ffd.py", KEPLER_FLARES_DIR, [sGeneratedFile]
+        )
+        fnCopyFigureFile(sGeneratedFile, sOutputFile)
         return
 
     # plot-only or precomputed: build corner from saved samples
@@ -266,9 +280,11 @@ def fnGenerateFigure01(dictFigConfig, dictGlobalConfig):
 
 
 def fnGenerateFigure02(dictFigConfig, dictGlobalConfig):
-    """Figure 2: ffd_comp.png — FFD comparison at four ages."""
+    """Figure 2: ffd_comp — FFD comparison at four ages."""
+    sMode = dictFigConfig["sMode"]
+    sExtension = fsResolveOutputExtension(sMode)
     sOutputFile = fsResolveOutputPath(
-        dictGlobalConfig["sOutputDirectory"], "ffd_comp.png"
+        dictGlobalConfig["sOutputDirectory"], "ffd_comp" + sExtension
     )
 
     sSamplesPath = os.path.join(KEPLER_FLARES_DIR, "flare_mcmc_samples.npy")
@@ -284,9 +300,11 @@ def fnGenerateFigure02(dictFigConfig, dictGlobalConfig):
 
 
 def fnGenerateFigure03(dictFigConfig, dictGlobalConfig):
-    """Figure 3: GJ1132_flares.pdf — three TESS flare lightcurves."""
+    """Figure 3: GJ1132_flares — three TESS flare lightcurves."""
+    sMode = dictFigConfig["sMode"]
+    sExtension = fsResolveOutputExtension(sMode)
     sOutputFile = fsResolveOutputPath(
-        dictGlobalConfig["sOutputDirectory"], "GJ1132_flares.pdf"
+        dictGlobalConfig["sOutputDirectory"], "GJ1132_flares" + sExtension
     )
     dictTess = fdictRunTessAnalysis(dictGlobalConfig)
 
@@ -356,16 +374,19 @@ def fnGenerateFigure05(dictFigConfig, dictGlobalConfig):
 
 
 def fnGenerateFigure06(dictFigConfig, dictGlobalConfig):
-    """Figure 6: gj1132posteriors.png — Bayesian posterior corner plot."""
+    """Figure 6: gj1132posteriors — Bayesian posterior corner plot."""
     sMode = dictFigConfig["sMode"]
+    sExtension = fsResolveOutputExtension(sMode)
     sOutputFile = fsResolveOutputPath(
-        dictGlobalConfig["sOutputDirectory"], "gj1132posteriors.png"
+        dictGlobalConfig["sOutputDirectory"], "gj1132posteriors" + sExtension
     )
 
-    if sMode == "full":
-        fnRunSubprocess("gj1132_alabi.py", POSTERIORS_DIR)
+    if sMode in ("full", "standards"):
         sGenerated = os.path.join(
-            POSTERIORS_DIR, "gj1132_results", "gj1132_corner.png"
+            POSTERIORS_DIR, "gj1132_results", "gj1132_corner" + sExtension
+        )
+        fnRunSubprocess(
+            "gj1132_alabi.py", POSTERIORS_DIR, [sGenerated]
         )
         if os.path.exists(sGenerated):
             fnCopyFigureFile(sGenerated, sOutputFile)
@@ -406,14 +427,16 @@ def fnGenerateFigure08(dictFigConfig, dictGlobalConfig):
     bEngleExists = fbCheckVconvergeOutputDirectories(sEngleOutput)
     bRibasExists = fbCheckVconvergeOutputDirectories(sRibasOutput)
 
-    if (not bEngleExists or not bRibasExists) and sMode != "full":
+    bNeedsComputation = sMode in ("full", "standards")
+
+    if (not bEngleExists or not bRibasExists) and not bNeedsComputation:
         raise FileNotFoundError(
             "XUVEvol requires vplanet output subdirectories "
             "(gj1132.star.forward files) in EngleBarnes/output/ and "
-            "RibasBarnes/output/. Set sMode to 'full' to regenerate."
+            "RibasBarnes/output/. Set sMode to 'full' or 'standards' to regenerate."
         )
 
-    if sMode == "full":
+    if bNeedsComputation:
         fnRunVconvergePipeline("EngleBarnes", dictGlobalConfig)
         fnRunVconvergePipeline("RibasBarnes", dictGlobalConfig)
 
@@ -430,36 +453,48 @@ def fnGenerateFigure08(dictFigConfig, dictGlobalConfig):
 
 
 def fnGenerateFigure09(dictFigConfig, dictGlobalConfig):
-    """Figure 9: CumulativeXUV_Multi.png + CosmicShoreline.png."""
+    """Figure 9: CumulativeXUV_Multi + CosmicShoreline."""
+    sMode = dictFigConfig["sMode"]
+    sExtension = fsResolveOutputExtension(sMode)
     sOutDir = dictGlobalConfig["sOutputDirectory"]
 
     # Left panel — cumulative XUV histogram
-    fnRunSubprocess("vconverge_hist.py", CUMULATIVE_XUV_DIR)
+    sHistFile = os.path.join(
+        CUMULATIVE_XUV_DIR, "GJ1132b_CumulativeXUV_Multi" + sExtension
+    )
+    fnRunSubprocess("vconverge_hist.py", CUMULATIVE_XUV_DIR, [sHistFile])
     fnCopyFigureFile(
-        os.path.join(CUMULATIVE_XUV_DIR, "GJ1132b_CumulativeXUV_Multi.png"),
-        fsResolveOutputPath(sOutDir, "GJ1132b_CumulativeXUV_Multi.png"),
+        sHistFile,
+        fsResolveOutputPath(sOutDir, "GJ1132b_CumulativeXUV_Multi" + sExtension),
     )
 
     # Right panel — cosmic shoreline
-    fnRunSubprocess("makeplot.py", COSMIC_SHORELINE_DIR)
+    sShorelineFile = os.path.join(
+        COSMIC_SHORELINE_DIR, "CosmicShoreline" + sExtension
+    )
+    fnRunSubprocess("makeplot.py", COSMIC_SHORELINE_DIR, [sShorelineFile])
     fnCopyFigureFile(
-        os.path.join(COSMIC_SHORELINE_DIR, "CosmicShoreline.png"),
-        fsResolveOutputPath(sOutDir, "CosmicShoreline.png"),
+        sShorelineFile,
+        fsResolveOutputPath(sOutDir, "CosmicShoreline" + sExtension),
     )
     plt.close("all")
 
 
 def fnGenerateFigure10(dictFigConfig, dictGlobalConfig):
-    """Figure 10: ErrorSourceComparison.png — error decomposition."""
+    """Figure 10: ErrorSourceComparison — error decomposition."""
+    sMode = dictFigConfig["sMode"]
+    sExtension = fsResolveOutputExtension(sMode)
+    sErrorFile = os.path.join(
+        CUMULATIVE_XUV_DIR, "GJ1132b_ErrorSourceComparison" + sExtension
+    )
     sOutputFile = fsResolveOutputPath(
         dictGlobalConfig["sOutputDirectory"],
-        "GJ1132b_ErrorSourceComparison.png",
+        "GJ1132b_ErrorSourceComparison" + sExtension,
     )
-    fnRunSubprocess("error_source_compare.py", CUMULATIVE_XUV_DIR)
-    fnCopyFigureFile(
-        os.path.join(CUMULATIVE_XUV_DIR, "GJ1132b_ErrorSourceComparison.png"),
-        sOutputFile,
+    fnRunSubprocess(
+        "error_source_compare.py", CUMULATIVE_XUV_DIR, [sErrorFile]
     )
+    fnCopyFigureFile(sErrorFile, sOutputFile)
     plt.close("all")
 
 
@@ -664,12 +699,17 @@ def fbVerifyAllFigures(dictConfig):
     """Return True when every expected file exists and is non-trivial."""
     sOutputDir = dictConfig["sOutputDirectory"]
     iMissing = 0
-    for sKey, listFiles in EXPECTED_FILES.items():
+    for sKey, listBaseNames in EXPECTED_FILES.items():
         dictFigure = dictConfig["dictFigures"].get(sKey, {})
         if not dictFigure.get("bEnabled", True):
             continue
-        for sFile in listFiles:
-            sPath = os.path.join(REPO_ROOT, sOutputDir, sFile)
+        sMode = dictFigure.get("sMode", "full")
+        for sBaseName in listBaseNames:
+            if sKey in FIXED_PDF_FIGURES:
+                sExtension = ".pdf"
+            else:
+                sExtension = fsResolveOutputExtension(sMode)
+            sPath = os.path.join(REPO_ROOT, sOutputDir, sBaseName + sExtension)
             if not os.path.exists(sPath):
                 print(f"  MISSING: {sPath}")
                 iMissing += 1
@@ -686,6 +726,8 @@ def fbVerifyAllFigures(dictConfig):
 
 def main():
     """Parse arguments and run the orchestration pipeline."""
+    os.environ["PATH"] = VPLANET_NATIVE_BIN_DIR + ":" + os.environ.get("PATH", "")
+
     parser = argparse.ArgumentParser(
         description="Generate all figures for the GJ 1132 XUV paper."
     )

@@ -16,6 +16,8 @@ Where:
 - b1, b2, b3: Control the normalization (intercept dependence)
 """
 
+import sys
+
 import numpy as np
 import pandas as pd
 import emcee
@@ -509,7 +511,8 @@ def analyze_results(sampler, thin=10, save_samples_flag=True):
         title_kwargs={"fontsize": 12}
     )
     
-    plt.savefig('flare_frequency_ensemble_corner.png', dpi=150, bbox_inches='tight')
+    sCornerOutput = sys.argv[1] if len(sys.argv) > 1 else 'flare_frequency_ensemble_corner.png'
+    plt.savefig(sCornerOutput, dpi=150, bbox_inches='tight')
     plt.close()
     
     # Plot chains

@@ -127,5 +127,6 @@ dX=dEscVel*0.98
 PlotErrorBar(dX,dEngleDavMean,dEngleDavLower,dEngleDavUpper,'k')
 
 # Save figure
-fig.savefig(path / f"CosmicShoreline.png", bbox_inches="tight", dpi=300)
+sOutputPath = sys.argv[1] if len(sys.argv) > 1 else str(path / "CosmicShoreline.png")
+fig.savefig(sOutputPath, bbox_inches="tight", dpi=300)
 #plt.show()

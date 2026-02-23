@@ -115,7 +115,9 @@ plt.ylim(0, ymax)
 plt.legend(loc='upper left',fontsize=16,  framealpha=0.9)
 
 plt.annotate('Cosmic Shoreline',(40,0.06),fontsize=20,rotation=90,color=vplot.colors.pale_blue)
-plt.savefig('GJ1132b_CumulativeXUV_Multi.png', dpi=300)
+import sys
+sOutputPath = sys.argv[1] if len(sys.argv) > 1 else 'GJ1132b_CumulativeXUV_Multi.png'
+plt.savefig(sOutputPath, dpi=300)
 
 print(f"Engle Only - Mean: {dMeanEngle:.2f}, 95% CI: [{dLowerEngle:.2f}, {dUpperEngle:.2f}]")
 print(f"Engle w/Flares - Mean: {dMeanEngleBarnes:.2f}, 95% CI: [{dLowerEngleBarnes:.2f}, {dUpperEngleBarnes:.2f}]")

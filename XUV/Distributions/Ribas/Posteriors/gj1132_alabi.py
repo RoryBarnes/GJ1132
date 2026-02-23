@@ -9,6 +9,7 @@ from sklearn import preprocessing
 import matplotlib.pyplot as plt
 import corner
 import os
+import sys
 import vplot
 import multiprocessing
 
@@ -44,10 +45,10 @@ def plot_1to1_test_error(sm):
 
 inpath = os.path.join(vpi.INFILE_DIR, "stellar")
 
-inparams  = {"star.dMass": u.Msun,          
-            "star.dSatXUVFrac": u.dex(u.dimensionless_unscaled),   
-            "star.dSatXUVTime": u.Gyr,    
-            "vpl.dStopTime": u.Gyr,       
+inparams  = {"star.dMass": u.Msun,
+            "star.dSatXUVFrac": u.dex(u.dimensionless_unscaled),
+            "star.dSatXUVTime": -u.Gyr,
+            "vpl.dStopTime": u.Gyr,
             "star.dXUVBeta": -u.dimensionless_unscaled}
 
 outparams = {"final.star.Luminosity": u.Lsun,
@@ -83,8 +84,22 @@ bounds = [(0.1, 0.3),
 # Prior transform - dynesty format
 prior_transform = partial(ut.prior_transform_normal, bounds=bounds, data=prior_data)
 
+def flnprior(theta):
+    theta = np.asarray(theta).flatten()
+    for i in range(len(theta)):
+        if float(theta[i]) < bounds[i][0] or float(theta[i]) > bounds[i][1]:
+            return -np.inf
+    fLogPrior = 0.0
+    for i, (fMu, fSigma) in enumerate(prior_data):
+        if fMu is not None:
+            fLogPrior += -0.5 * ((float(theta[i]) - fMu) / fSigma)**2
+    return fLogPrior
+
 def lnlike(theta):
+    theta = np.asarray(theta).flatten()
     out = vpm.run_model(theta, remove=True)
+    if np.any(np.isnan(out)) or out[0] <= 0 or out[1] <= 0:
+        return -1e4
     mdl = np.array([out[0], np.log10(out[1]/out[0])])
     lnl = -0.5 * np.sum(((mdl - like_data.T[0])/like_data.T[1])**2)
     return lnl
@@ -105,6 +120,8 @@ labels = [r"$m_{\star}$ [M$_{\odot}$]", r"$f_{sat}$", r"$t_{sat}$ [Gyr]", r"Age 
 
 # optimize hyperparameters using cross-validation
 gp_kwargs = {"kernel": "ExpSquaredKernel",
+             "theta_scaler": preprocessing.StandardScaler(),
+             "y_scaler": preprocessing.StandardScaler(),
              "fit_amp": True,
              "fit_mean": False,
              "fit_white_noise": False,
@@ -136,23 +153,21 @@ if __name__ == '__main__':
 # Run alabi
 # ===========================================================================
 
-        sm = SurrogateModel(lnlike_fn=lnlike,
-            bounds=bounds,
-            theta_scaler=preprocessing.StandardScaler(),
-            y_scaler=preprocessing.StandardScaler(),
-            savedir=savedir,
-            cache=True,
-            verbose=True,
-            ncore=ncore)
+        sCacheFile = os.path.join(savedir, "surrogate_model.pkl")
+        if os.path.exists(sCacheFile):
+            sm = alabi.load_model_cache(savedir)
+        else:
+            sm = SurrogateModel(lnlike_fn=lnlike,
+                bounds=bounds,
+                savedir=savedir,
+                cache=True,
+                verbose=True,
+                ncore=ncore)
 
-        sm.init_samples(ntrain=ntrain, ntest=ntest, reload=True, sampler="lhs")
-        sm.init_gp(**gp_kwargs)
-        sm.active_train(niter=nactive, **al_kwargs)
-
-        # ------------------------------------------------------------------
-        # If alabi is already trained, comment out the section above and reload the surrogate model
-
-        sm = alabi.load_model_cache(savedir)
+            sm.init_samples(ntrain=ntrain, ntest=ntest, sampler="lhs")
+            sm.init_gp(**gp_kwargs)
+            sm.active_train(niter=nactive, **al_kwargs)
+            sm = alabi.load_model_cache(savedir)
 
         # Plot 1-1 test error
         fig = plot_1to1_test_error(sm)
@@ -164,19 +179,17 @@ if __name__ == '__main__':
         # # create a cached version of the trained likelihood for quicker evaluation
         surrogate_fn = sm.create_cached_surrogate_likelihood(iter=nactive)
 
-        dynesty_sampler_kwargs = {"bound": "single",
-                                "nlive": 100*ndim,
-                                "sample": "auto"}
+        dynesty_sampler_kwargs = {"bound": "multi",
+                                "nlive": 10*ndim,
+                                "sample": "rslice",
+                                "bootstrap": 0}
 
-        dynesty_run_kwargs = {"wt_kwargs": {"pfrac": 1.0}, 
-                        "stop_kwargs": {"pfrac": 1.0}, 
-                        "maxiter": None, 
-                        "dlogz_init": 0.5, 
-                        "n_effective": int(1e4)*ndim}
+        dynesty_run_kwargs = {"dlogz": 1.0,
+                        "print_progress": True}
 
-        emcee_kwargs = {"nwalkers": 50*ndim,
-                        "nsteps": int(1e5),
-                        "burn": int(1e4)}
+        emcee_kwargs = {"nwalkers": 20*ndim,
+                        "nsteps": int(2e4),
+                        "burn": int(5e3)}
 
         pymultinest_kwargs = {"n_live_points": 100*ndim,
                         "sampling_efficiency": 0.8,
@@ -189,27 +202,20 @@ if __name__ == '__main__':
                         "dlogz": 0.5,
                         "dKL": 0.5}
 
-        sm.run_dynesty(like_fn=surrogate_fn,  
-                prior_transform=prior_transform, 
-                sampler_kwargs=dynesty_sampler_kwargs,  
-                run_kwargs=dynesty_run_kwargs,  
-                        multi_proc=False,
-                samples_file=f"dynesty_samples_final_custom_iter_{nactive}.npz")
+        sm.run_emcee(like_fn=surrogate_fn,
+                prior_fn=flnprior,
+                nwalkers=emcee_kwargs["nwalkers"],
+                nsteps=emcee_kwargs["nsteps"],
+                burn=emcee_kwargs["burn"],
+                opt_init=False,
+                multi_proc=False,
+                samples_file=f"emcee_samples_final_custom_iter_{nactive}.npz",
+                min_ess=0)
 
-
-        # sm.run_pymultinest(like_fn=surrogate_fn,
-        #                    prior_transform=prior_transform,
-        #                    sampler_kwargs=pymultinest_kwargs,
-        #                    samples_file=f"pymultinest_samples_final_custom_iter_{nactive}.npz")
-
-        # sm.run_ultranest(like_fn=surrogate_fn,
-        #                  prior_transform=prior_transform,
-        #                  run_kwargs=ultranest_kwargs,
-        #                  samples_file=f"ultranest_samples_final_custom_iter_{nactive}.npz")
-        
         # # ------------------------------------------------------------------
         # # Plot corner
 
-        fig = corner.corner(sm.dynesty_samples, color="k", labels=labels, range=sm.bounds, bins=30, hist_kwargs={"density":True}, label_kwargs={"fontsize":20})
-        fig.savefig(savedir + f"gj1132_corner.png", dpi=300)
+        fig = corner.corner(sm.emcee_samples, color="k", labels=labels, range=sm.bounds, bins=30, hist_kwargs={"density":True}, label_kwargs={"fontsize":20})
+        sOutputPath = sys.argv[1] if len(sys.argv) > 1 else savedir + "gj1132_corner.png"
+        fig.savefig(sOutputPath, dpi=300)
 
