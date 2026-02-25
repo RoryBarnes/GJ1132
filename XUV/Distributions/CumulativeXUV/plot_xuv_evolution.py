@@ -2,159 +2,112 @@
 """
 Plot XUV luminosity evolution for 100 random samples from Engle and Ribas models.
 
-This script randomly selects 100 vplanet outputs from each of the EngleBarnes
-and RibasBarnes directories and creates a two-panel plot comparing XUV luminosity
-evolution over time.
+Randomly selects 100 vplanet outputs from each of the EngleBarnes and RibasBarnes
+directories and creates a two-panel plot comparing XUV luminosity evolution over time.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
 import glob
 import os
 import random
+import sys
 from pathlib import Path
-import vplot
 
-def load_xuv_data(filepath):
-    """
-    Load XUV luminosity data from gj1132.star.forward file.
+import matplotlib.pyplot as plt
+import numpy as np
 
-    Parameters
-    ----------
-    filepath : str
-        Path to gj1132.star.forward file
+I_LABEL_FONT = 20
+I_TICK_FONT = 14
+I_NUM_SAMPLES = 100
+S_FORWARD_FILE = "gj1132.star.forward"
 
-    Returns
-    -------
-    time : np.ndarray
-        Time array in years
-    xuv_tot : np.ndarray
-        Total XUV luminosity in LSUN (column 5)
-    """
+
+def ftLoadXuvData(sFilepath):
+    """Load time and total XUV luminosity from a vplanet forward file."""
     try:
-        data = np.loadtxt(filepath)
-        time = data[:, 0]  # Column 1: Time
-        xuv_tot = data[:, 4]  # Column 5: LXUVTot (0-indexed as column 4)
-        return time, xuv_tot
-    except Exception as e:
-        print(f"Error loading {filepath}: {e}")
+        daData = np.loadtxt(sFilepath)
+        daTime = daData[:, 0]
+        daXuvTotal = daData[:, 4]
+        return daTime, daXuvTotal
+    except Exception as error:
+        print(f"Error loading {sFilepath}: {error}")
         return None, None
 
 
-def get_output_subdirectories(output_dir):
-    """
-    Get all subdirectories in the output directory.
-
-    Parameters
-    ----------
-    output_dir : str
-        Path to output directory
-
-    Returns
-    -------
-    subdirs : list
-        List of subdirectory paths
-    """
-    subdirs = [d for d in glob.glob(os.path.join(output_dir, '*'))
-               if os.path.isdir(d)]
-    return subdirs
+def flistGetOutputSubdirectories(sOutputDirectory):
+    """Return all subdirectory paths under *sOutputDirectory*."""
+    return [sPath for sPath in glob.glob(os.path.join(sOutputDirectory, '*'))
+            if os.path.isdir(sPath)]
 
 
-def main():
-    """Main function to create XUV evolution comparison plot."""
+def fiPlotEvolutionCurves(ax, listSubdirectories):
+    """Plot XUV evolution curves on *ax*, returning the count of plotted runs."""
+    iCount = 0
+    for sSubdir in listSubdirectories:
+        sFilepath = os.path.join(sSubdir, S_FORWARD_FILE)
+        if not os.path.exists(sFilepath):
+            continue
+        daTime, daXuvTotal = ftLoadXuvData(sFilepath)
+        if daTime is not None and daXuvTotal is not None:
+            ax.plot(daTime, daXuvTotal, color='k', alpha=0.15, linewidth=0.8)
+            iCount += 1
+    return iCount
 
-    # Set random seed for reproducibility
+
+def fnFormatPanel(ax, sTitle, bShowYlabel=False):
+    """Apply log-log formatting and labels to a single panel."""
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.set_xlabel('Time [years]', fontsize=I_LABEL_FONT)
+    if bShowYlabel:
+        ax.set_ylabel(r'Total XUV Luminosity [$L_\odot$]', fontsize=I_LABEL_FONT)
+    ax.set_title(sTitle, fontsize=I_LABEL_FONT)
+    ax.tick_params(axis='both', labelsize=I_TICK_FONT)
+
+
+def fnMatchYlimits(ax1, ax2):
+    """Set matching y-axis limits across two panels."""
+    dYmin = min(ax1.get_ylim()[0], ax2.get_ylim()[0])
+    dYmax = max(ax1.get_ylim()[1], ax2.get_ylim()[1])
+    ax1.set_ylim(dYmin, dYmax)
+    ax2.set_ylim(dYmin, dYmax)
+
+
+def flistSampleSubdirectories(sModelDirectory):
+    """Get subdirectories and randomly sample up to I_NUM_SAMPLES."""
+    sOutputDirectory = str(Path(__file__).parent / sModelDirectory / "output")
+    listSubdirs = flistGetOutputSubdirectories(sOutputDirectory)
+    print(f"Found {len(listSubdirs)} {sModelDirectory} directories")
+    if len(listSubdirs) == 0:
+        raise FileNotFoundError(
+            f"No output subdirectories found in {sOutputDirectory}")
+    return random.sample(listSubdirs, min(I_NUM_SAMPLES, len(listSubdirs)))
+
+
+def main(sOutputPath=None):
+    """Generate the XUV evolution comparison figure."""
     random.seed(42)
     np.random.seed(42)
 
-    # Get the directory of this script
-    script_dir = Path(__file__).parent
+    listEngleSample = flistSampleSubdirectories("EngleBarnes")
+    listRibasSample = flistSampleSubdirectories("RibasBarnes")
 
-    # Define output directories
-    engle_output_dir = script_dir / "EngleBarnes" / "output"
-    ribas_output_dir = script_dir / "RibasBarnes" / "output"
-
-    # Get all subdirectories
-    print("Getting subdirectories...")
-    engle_subdirs = get_output_subdirectories(str(engle_output_dir))
-    ribas_subdirs = get_output_subdirectories(str(ribas_output_dir))
-
-    print(f"Found {len(engle_subdirs)} EngleBarnes directories")
-    print(f"Found {len(ribas_subdirs)} RibasBarnes directories")
-
-    # Randomly sample 100 from each
-    engle_sample = random.sample(engle_subdirs, min(100, len(engle_subdirs)))
-    ribas_sample = random.sample(ribas_subdirs, min(100, len(ribas_subdirs)))
-
-    print(f"Sampling {len(engle_sample)} EngleBarnes and {len(ribas_sample)} RibasBarnes runs")
-
-    # Create figure with two subplots
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5), sharey=True)
 
-    # Plot EngleBarnes data
-    print("\nPlotting EngleBarnes data...")
-    engle_count = 0
-    for subdir in engle_sample:
-        filepath = os.path.join(subdir, "gj1132.star.forward")
-        if os.path.exists(filepath):
-            time, xuv_tot = load_xuv_data(filepath)
-            if time is not None and xuv_tot is not None:
-                ax1.plot(time, xuv_tot, color='k', alpha=0.15, linewidth=0.8)
-                engle_count += 1
+    iEngleCount = fiPlotEvolutionCurves(ax1, listEngleSample)
+    iRibasCount = fiPlotEvolutionCurves(ax2, listRibasSample)
+    print(f"Plotted {iEngleCount} EngleBarnes, {iRibasCount} RibasBarnes runs")
 
-    # Plot RibasBarnes data
-    print("Plotting RibasBarnes data...")
-    ribas_count = 0
-    for subdir in ribas_sample:
-        filepath = os.path.join(subdir, "gj1132.star.forward")
-        if os.path.exists(filepath):
-            time, xuv_tot = load_xuv_data(filepath)
-            if time is not None and xuv_tot is not None:
-                ax2.plot(time, xuv_tot, color='k', alpha=0.15, linewidth=0.8)
-                ribas_count += 1
-
-    labelfont=20
-    tickfont=14
-    # Format left panel (EngleBarnes)
-    ax1.set_xscale('log')
-    ax1.set_yscale('log')
-    ax1.set_xlabel('Time [years]', fontsize=labelfont)
-    ax1.set_ylabel(r'Total XUV Luminosity [$L_\odot$]', fontsize=labelfont)
-    ax1.set_title('Engle (2024)', fontsize=labelfont)
-    ax1.tick_params(axis='both',labelsize=tickfont)
-    #ax1.grid(True, alpha=0.3)
-    #ax1.text(0.98, 0.02, f'N = {engle_count}', transform=ax1.transAxes,
-    #         fontsize=10, ha='right', va='bottom',
-    #         bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
-
-    # Format right panel (RibasBarnes)
-    ax2.set_xscale('log')
-    ax2.set_yscale('log')
-    ax2.set_xlabel('Time [years]', fontsize=labelfont)
-    #ax2.set_ylabel(r'Total XUV Luminosity [$L_\odot$]', fontsize=labelfont)
-    ax2.set_title('Ribas et al. (2005)', fontsize=labelfont)
-    ax2.tick_params(axis='both',labelsize=tickfont)
-    #ax2.grid(True, alpha=0.3)
-    #ax2.text(0.98, 0.02, f'N = {ribas_count}', transform=ax2.transAxes,
-    #         fontsize=10, ha='right', va='bottom',
-    #         bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
-
-    # Set matching y-axis limits for easy comparison
-    y_min = min(ax1.get_ylim()[0], ax2.get_ylim()[0])
-    y_max = max(ax1.get_ylim()[1], ax2.get_ylim()[1])
-    ax1.set_ylim(y_min, y_max)
-    ax2.set_ylim(y_min, y_max)
+    fnFormatPanel(ax1, 'Engle (2024)', bShowYlabel=True)
+    fnFormatPanel(ax2, 'Ribas et al. (2005)')
+    fnMatchYlimits(ax1, ax2)
 
     plt.tight_layout()
-
-    # Save figure
-    output_path = script_dir / "XUVEvol.pdf"
-    print(f"\nSaving figure to {output_path}")
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-
-    print("Done! Figure saved.")
-    #plt.show()
+    sPath = sOutputPath if sOutputPath else str(Path(__file__).parent / "XUVEvol.pdf")
+    plt.savefig(sPath, dpi=300, bbox_inches='tight')
+    plt.close()
+    print(f"Saved figure to {sPath}")
 
 
 if __name__ == "__main__":
-    main()
+    sOutputPath = sys.argv[1] if len(sys.argv) > 1 else None
+    main(sOutputPath=sOutputPath)

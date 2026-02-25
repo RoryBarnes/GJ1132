@@ -120,4 +120,6 @@ if __name__ == "__main__":
         print("Could not load MCMC results!")
         exit()
 
-    Plot(fitted_params, mass=0.5)
+    import sys
+    sOutputPath = sys.argv[1] if len(sys.argv) > 1 else "ffd_comp.pdf"
+    Plot(fitted_params, mass=0.5, filename=sOutputPath)

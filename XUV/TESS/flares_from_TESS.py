@@ -337,8 +337,8 @@ def compute_flare_equivalent_durations(lc, sectors, t_start, t_stop):
     return ed
 
 
-def plot_flare_lightcurves(lc, sectors, t_start, t_stop):
-    """Create 3-panel flare lightcurve plot"""
+def plot_flare_lightcurves(lc, sectors, t_start, t_stop, sOutputPath=None):
+    """Create 3-panel flare lightcurve plot."""
     fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharey=True)
     for k in range(len(t_start)):
         flare = np.where((lc[sectors[k]]['time'].value >= t_start[k]) &
@@ -354,8 +354,10 @@ def plot_flare_lightcurves(lc, sectors, t_start, t_stop):
         if k == 0:
             ax.set_ylabel('Relative Flux', fontsize=20)
     plt.tight_layout()
-    plt.savefig('GJ1132_flares.pdf', dpi=300, bbox_inches='tight',
+    sFile = sOutputPath if sOutputPath else 'GJ1132_flares.pdf'
+    plt.savefig(sFile, dpi=300, bbox_inches='tight',
                 pad_inches=0.25, facecolor='w')
+    plt.close()
 
 
 # ===== FFD Analysis Functions =====
@@ -442,8 +444,8 @@ def plot_ilin_reproduction(cluster_data):
     plt.ylabel('Flare Rate (year$^{-1}$)')
 
 
-def plot_comprehensive_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data, cluster_data):
-    """Create comprehensive FFD comparison plot with clusters"""
+def plot_comprehensive_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data, cluster_data, sOutputPath=None):
+    """Create comprehensive FFD comparison plot with clusters."""
     params = cluster_data['params']
     plt.figure()
     plt.errorbar(ffd_x, ffd_y, yerr=ffd_yerr, linestyle='none', color='k')
@@ -478,11 +480,13 @@ def plot_comprehensive_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data,
     plt.xlabel('log Flare Energy [erg]')
     plt.ylabel('log Flare Rate [day$^{-1}$]')
     plt.legend(fontsize=10)
-    plt.savefig('GJ1132_FFD_comp2.pdf', dpi=300, bbox_inches='tight',
+    sFile = sOutputPath if sOutputPath else 'GJ1132_FFD_comp2.pdf'
+    plt.savefig(sFile, dpi=300, bbox_inches='tight',
                 pad_inches=0.25, facecolor='w')
+    plt.close()
 
 
-def plot_alpha_beta_comparison(alpha, beta, fit_results):
+def plot_alpha_beta_comparison(alpha, beta, fit_results, sOutputPath=None):
     """Plot alpha-beta parameter space comparison: Kepler vs GJ 1132"""
     print("\n" + "="*60)
     print("Generating alpha-beta parameter space comparison...")
@@ -514,8 +518,10 @@ def plot_alpha_beta_comparison(alpha, beta, fit_results):
     plt.legend(fontsize=14, loc='best')
     #plt.grid(True, alpha=0.3)
     plt.tick_params(axis='both', labelsize=14)
-    plt.savefig('FitComparison.pdf', dpi=300, bbox_inches='tight',
+    sFile = sOutputPath if sOutputPath else 'FitComparison.pdf'
+    plt.savefig(sFile, dpi=300, bbox_inches='tight',
                 pad_inches=0.25, facecolor='w')
+    plt.close()
 
     print(f"Kepler prediction (8 Gyr): alpha = {np.mean(kepler_alphas):.4f} ± {np.std(kepler_alphas):.4f}, "
           f"beta = {np.mean(kepler_betas):.4f} ± {np.std(kepler_betas):.4f}")
@@ -748,5 +754,68 @@ def main():
     print("  - GJ1132_age_distribution_beta.pdf")
 
 
+def ftRunPipeline():
+    """Run the shared TESS flare analysis pipeline.
+
+    Returns a tuple of all intermediate results needed by any plot function.
+    """
+    lc = download_tess_data()
+    totexp = calculate_total_exposure(lc)
+    print(f"Total exposure time: {totexp:.2f} days")
+    print(f"Number of sectors: {len(lc)}")
+
+    sectors, t_start, t_stop, lumin = get_flare_parameters()
+    ed = compute_flare_equivalent_durations(lc, sectors, t_start, t_stop)
+
+    ffd_x, ffd_y, ffd_xerr, ffd_yerr, fit_results = compute_and_fit_ffd(
+        ed, totexp, lumin, lc, t_start, t_stop)
+    print_ffd_results(fit_results)
+
+    dAlpha = fit_results['alpha']
+    dBeta = fit_results['beta']
+    dictLiterature = get_literature_comparison_data()
+    dictCluster = get_cluster_data()
+
+    return (lc, sectors, t_start, t_stop, ffd_x, ffd_y, ffd_xerr,
+            ffd_yerr, fit_results, dAlpha, dBeta, dictLiterature, dictCluster)
+
+
 if __name__ == '__main__':
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="GJ 1132 TESS flare analysis and plotting.")
+    parser.add_argument('--plot-flares', metavar='PATH',
+                        help="Generate 3-panel flare lightcurve plot.")
+    parser.add_argument('--plot-comprehensive', metavar='PATH',
+                        help="Generate comprehensive FFD comparison plot.")
+    parser.add_argument('--plot-fit-comparison', metavar='PATH',
+                        help="Generate Kepler vs TESS alpha-beta comparison.")
+    parser.add_argument('--tess-cache-dir', metavar='PATH',
+                        help="Set lightkurve cache directory.")
+    args = parser.parse_args()
+
+    bHasPlotFlag = (args.plot_flares or args.plot_comprehensive
+                    or args.plot_fit_comparison)
+
+    if args.tess_cache_dir:
+        import os
+        os.environ['LIGHTKURVE_CACHE_DIR'] = args.tess_cache_dir
+
+    if bHasPlotFlag:
+        tPipeline = ftRunPipeline()
+        (lc, sectors, t_start, t_stop, ffd_x, ffd_y, ffd_xerr,
+         ffd_yerr, fit_results, dAlpha, dBeta, dictLit, dictCluster) = tPipeline
+
+        if args.plot_flares:
+            plot_flare_lightcurves(lc, sectors, t_start, t_stop,
+                                  sOutputPath=args.plot_flares)
+        if args.plot_comprehensive:
+            plot_comprehensive_comparison(ffd_x, ffd_y, ffd_yerr, dAlpha,
+                                         dBeta, dictLit, dictCluster,
+                                         sOutputPath=args.plot_comprehensive)
+        if args.plot_fit_comparison:
+            plot_alpha_beta_comparison(dAlpha, dBeta, fit_results,
+                                      sOutputPath=args.plot_fit_comparison)
+    else:
+        main()

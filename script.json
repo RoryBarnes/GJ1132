@@ -1,0 +1,177 @@
+{
+  "sPlotDirectory": "Plot",
+  "sVplanetBinaryDirectory": "/workspace/vplanet-private/bin",
+  "sFigureType": "pdf",
+  "iNumberOfCores": -1,
+  "sTessDataCache": "data/tess_cache",
+
+  "listScenes": [
+    {
+      "sName": "Kepler FFD Corner",
+      "sDirectory": "XUV/KeplerFlares",
+      "bEnabled": true,
+      "bPlotOnly": true,
+      "saSetupCommands": [],
+      "saCommands": [
+        "python kepler_ffd.py {sPlotDirectory}/CornerVariableSlope.{sFigureType}"
+      ],
+      "saOutputFiles": [
+        "{sPlotDirectory}/CornerVariableSlope.{sFigureType}",
+        "flare_mcmc_samples.npy"
+      ]
+    },
+    {
+      "sName": "FFD Age Comparison",
+      "sDirectory": "XUV/KeplerFlares",
+      "bEnabled": true,
+      "bPlotOnly": true,
+      "saSetupCommands": [],
+      "saCommands": [
+        "python ffd_age.py {sPlotDirectory}/ffd_comp.{sFigureType}"
+      ],
+      "saOutputFiles": [
+        "{sPlotDirectory}/ffd_comp.{sFigureType}"
+      ]
+    },
+    {
+      "sName": "TESS Flare Lightcurves",
+      "sDirectory": "XUV/TESS",
+      "bEnabled": true,
+      "bPlotOnly": true,
+      "saSetupCommands": [],
+      "saCommands": [
+        "python flares_from_TESS.py --plot-flares {sPlotDirectory}/GJ1132_flares.{sFigureType}"
+      ],
+      "saOutputFiles": [
+        "{sPlotDirectory}/GJ1132_flares.{sFigureType}"
+      ]
+    },
+    {
+      "sName": "Comprehensive FFD Comparison",
+      "sDirectory": "XUV/TESS",
+      "bEnabled": true,
+      "bPlotOnly": true,
+      "saSetupCommands": [],
+      "saCommands": [
+        "python flares_from_TESS.py --plot-comprehensive {sPlotDirectory}/GJ1132_FFD_comp2.{sFigureType}"
+      ],
+      "saOutputFiles": [
+        "{sPlotDirectory}/GJ1132_FFD_comp2.{sFigureType}"
+      ]
+    },
+    {
+      "sName": "XUV Luminosity Distribution",
+      "sDirectory": "XUV/Distributions/Ribas/LXUV",
+      "bEnabled": true,
+      "bPlotOnly": true,
+      "saSetupCommands": [],
+      "saCommands": [
+        "python lxuv.py --output-directory {sPlotDirectory} --figure-type {sFigureType}"
+      ],
+      "saOutputFiles": [
+        "{sPlotDirectory}/lxuv_hist.{sFigureType}",
+        "{sPlotDirectory}/log_lxuv_lbol_hist.{sFigureType}",
+        "lxuv_samples.txt"
+      ]
+    },
+    {
+      "sName": "Bayesian Posteriors",
+      "sDirectory": "XUV/Distributions/Ribas/Posteriors/alabi",
+      "bEnabled": true,
+      "bPlotOnly": true,
+      "saSetupCommands": [
+        "cd {sRepoRoot}/XUV/EvolutionPlots/MaximumLikelihood && maxlev gj1132_ribas.json --workers {iNumberOfCores}",
+        "python gj1132_alabi.py {sPlotDirectory}/sampler_comparison.{sFigureType}"
+      ],
+      "saCommands": [
+        "python compare_samplers.py {sPlotDirectory}/sampler_comparison.{sFigureType}"
+      ],
+      "saOutputFiles": [
+        "{sPlotDirectory}/sampler_comparison.{sFigureType}"
+      ]
+    },
+    {
+      "sName": "Engle Age Distribution",
+      "sDirectory": "XUV/Distributions/Engle/Age",
+      "bEnabled": true,
+      "bPlotOnly": true,
+      "saSetupCommands": [],
+      "saCommands": [
+        "python age.py {sPlotDirectory}/EngleAgeHist.{sFigureType}"
+      ],
+      "saOutputFiles": [
+        "{sPlotDirectory}/EngleAgeHist.{sFigureType}",
+        "age_samples.txt"
+      ]
+    },
+    {
+      "sName": "XUV Evolution",
+      "sDirectory": "XUV/Distributions/CumulativeXUV",
+      "bEnabled": true,
+      "bPlotOnly": true,
+      "saSetupCommands": [
+        "cp {Scene01.flare_mcmc_samples} EngleBarnes/flares_variable_slope.npy",
+        "cp {Scene07.age_samples} EngleBarnes/age_samples.txt",
+        "cp {sRepoRoot}/priors/dynesty_transform_final.npy EngleBarnes/dynesty_transform_final.npy",
+        "cp EngleBarnes/output/Converged_Param_Dictionary.json EngleBarnes/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
+        "cd EngleBarnes && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
+        "rm -f EngleBarnes/.Converged_Param_Dictionary.json.bak",
+        "cp {Scene01.flare_mcmc_samples} RibasBarnes/flares_variable_slope.npy",
+        "cp {Scene07.age_samples} RibasBarnes/age_samples.txt",
+        "cp {sRepoRoot}/priors/dynesty_transform_final.npy RibasBarnes/dynesty_transform_final.npy",
+        "cp RibasBarnes/output/Converged_Param_Dictionary.json RibasBarnes/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
+        "cd RibasBarnes && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
+        "rm -f RibasBarnes/.Converged_Param_Dictionary.json.bak"
+      ],
+      "saCommands": [
+        "python plot_xuv_evolution.py {sPlotDirectory}/XUVEvol.{sFigureType}"
+      ],
+      "saOutputFiles": [
+        "{sPlotDirectory}/XUVEvol.{sFigureType}",
+        "EngleBarnes/output/Converged_Param_Dictionary.json",
+        "RibasBarnes/output/Converged_Param_Dictionary.json"
+      ]
+    },
+    {
+      "sName": "Cumulative XUV and Cosmic Shoreline",
+      "sDirectory": "XUV/Distributions/CumulativeXUV",
+      "bEnabled": true,
+      "bPlotOnly": true,
+      "saSetupCommands": [],
+      "saCommands": [
+        "python vconverge_hist.py {sPlotDirectory}/GJ1132b_CumulativeXUV_Multi.{sFigureType}",
+        "python {sRepoRoot}/XUV/CosmicShoreline/makeplot.py {sPlotDirectory}/CosmicShoreline.{sFigureType}"
+      ],
+      "saOutputFiles": [
+        "{sPlotDirectory}/GJ1132b_CumulativeXUV_Multi.{sFigureType}",
+        "{sPlotDirectory}/CosmicShoreline.{sFigureType}"
+      ]
+    },
+    {
+      "sName": "Error Source Comparison",
+      "sDirectory": "XUV/Distributions/CumulativeXUV",
+      "bEnabled": true,
+      "bPlotOnly": true,
+      "saSetupCommands": [],
+      "saCommands": [
+        "python error_source_compare.py {sPlotDirectory}/GJ1132b_ErrorSourceComparison.{sFigureType}"
+      ],
+      "saOutputFiles": [
+        "{sPlotDirectory}/GJ1132b_ErrorSourceComparison.{sFigureType}"
+      ]
+    },
+    {
+      "sName": "Kepler vs TESS Comparison",
+      "sDirectory": "XUV/TESS",
+      "bEnabled": true,
+      "bPlotOnly": true,
+      "saSetupCommands": [],
+      "saCommands": [
+        "python flares_from_TESS.py --plot-fit-comparison {sPlotDirectory}/FitComparison.{sFigureType}"
+      ],
+      "saOutputFiles": [
+        "{sPlotDirectory}/FitComparison.{sFigureType}"
+      ]
+    }
+  ]
+}

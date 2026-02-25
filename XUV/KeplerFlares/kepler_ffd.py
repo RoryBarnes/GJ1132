@@ -534,58 +534,43 @@ def analyze_results(sampler, thin=10, save_samples_flag=True):
     
     return samples
 
-if __name__ == "__main__":
-    # Example usage
-    print("Stellar Flare Frequency Ensemble MCMC Analysis")
-    print("=" * 50)
-    print("Based on Davenport et al. 2019 (ApJ 871, 241) Equation (3)")
-    print("CORRECTED parameter roles:")
-    print("  a1, a2, a3: Control energy slope (power-law index)")  
-    print("  b1, b2, b3: Control normalization (intercept)")
-    print("=" * 50)
-    
-    # Run MCMC on the full ensemble dataset
-    sampler = run_mcmc_ensemble("ensemble_FFD.csv", nwalkers=32, nsteps=8000, burn_in=1000)
-    
-    # Analyze results  
-    samples = analyze_results(sampler)
-    
-    print("\nAnalysis complete!")
-    print("Output files:")
-    print("- flare_frequency_ensemble_corner.png: Corner plot with parameter posteriors")
-    print("- flare_frequency_ensemble_traces.png: MCMC trace plots")
-    print("- flare_mcmc_samples.txt: MCMC samples (tab-separated)")
-    print("- flare_mcmc_samples.csv: MCMC samples (CSV format)")
-    print("- flare_mcmc_samples.npy: MCMC samples (NumPy binary)")
-    print("- flare_mcmc_samples_param_names.txt: Parameter name reference")
-    
-    # Example of using the fitted model
-    print("\nExample: Predicting flare rate for a specific case")
-    median_params = np.median(samples, axis=0)
-    
-    # Note: In Davenport et al. 2019 Eq. (3):
-    # a1, a2, a3 control the energy slope (power-law index)
-    # b1, b2, b3 control the normalization (intercept)
-    
-    # Example stellar parameters
-    example_log_energy = 35.0  # log10(erg)
-    example_log_age = -0.3     # log10(Gyr) 
-    example_mass = 0.7         # solar masses
-    
-    predicted_log_rate = log_flare_rate_model(
-        example_log_energy, example_log_age, example_mass, median_params
+def fnPlotCornerFromSamples(daSamples, sOutputPath):
+    """Generate a corner plot from a pre-existing samples array."""
+    fig = corner.corner(
+        daSamples,
+        quantiles=[0.16, 0.5, 0.84],
+        show_titles=True,
+        title_kwargs={"fontsize": 12},
     )
-    
-    print(f"For a star with:")
-    print(f"  Mass = {example_mass} M☉")
-    print(f"  Age = {10**example_log_age:.1f} Gyr")
-    print(f"  Flare energy = 10^{example_log_energy} erg")
-    print(f"Predicted flare rate: 10^{predicted_log_rate:.2f} flares/day")
-    
-    print(f"\nFitted parameters (median values):")
-    print("Slope parameters (energy dependence):")
-    for i, name in enumerate(['a1', 'a2', 'a3']):
-        print(f"  {name} = {median_params[i]:.4f}")
-    print("Intercept parameters (normalization):")
-    for i, name in enumerate(['b1', 'b2', 'b3']):
-        print(f"  {name} = {median_params[i+3]:.4f}")
+    plt.savefig(sOutputPath, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f"Corner plot saved to: {sOutputPath}")
+
+
+if __name__ == "__main__":
+    import os
+
+    sCornerOutput = sys.argv[1] if len(sys.argv) > 1 else 'CornerVariableSlope.pdf'
+    sCachedSamples = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "flare_mcmc_samples.npy"
+    )
+
+    if os.path.exists(sCachedSamples):
+        print("Loading cached MCMC samples...")
+        daSamples = np.load(sCachedSamples)
+        print(f"Loaded {daSamples.shape[0]} samples with {daSamples.shape[1]} parameters")
+        fnPlotCornerFromSamples(daSamples, sCornerOutput)
+    else:
+        print("Stellar Flare Frequency Ensemble MCMC Analysis")
+        print("=" * 50)
+        print("Based on Davenport et al. 2019 (ApJ 871, 241) Equation (3)")
+        print("CORRECTED parameter roles:")
+        print("  a1, a2, a3: Control energy slope (power-law index)")
+        print("  b1, b2, b3: Control normalization (intercept)")
+        print("=" * 50)
+
+        sampler = run_mcmc_ensemble(
+            "ensemble_FFD.csv", nwalkers=32, nsteps=8000, burn_in=1000
+        )
+        samples = analyze_results(sampler)
+        fnPlotCornerFromSamples(samples, sCornerOutput)
