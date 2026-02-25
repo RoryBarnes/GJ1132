@@ -31,7 +31,7 @@
       "bEnabled": true
     },
     "figure06": {
-      "sDescription": "gj1132posteriors.png - alabi/emcee Bayesian posteriors",
+      "sDescription": "sampler_comparison - emcee + dynesty Bayesian posteriors",
       "sMode": "full",
       "bEnabled": true
     },

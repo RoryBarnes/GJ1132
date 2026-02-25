@@ -35,7 +35,7 @@ KEPLER_FLARES_DIR = os.path.join(REPO_ROOT, "XUV", "KeplerFlares")
 TESS_DIR = os.path.join(REPO_ROOT, "XUV", "TESS")
 LXUV_DIR = os.path.join(REPO_ROOT, "XUV", "Distributions", "Ribas", "LXUV")
 POSTERIORS_DIR = os.path.join(
-    REPO_ROOT, "XUV", "Distributions", "Ribas", "Posteriors"
+    REPO_ROOT, "XUV", "Distributions", "Ribas", "Posteriors", "alabi"
 )
 ENGLE_AGE_DIR = os.path.join(
     REPO_ROOT, "XUV", "Distributions", "Engle", "Age"
@@ -44,6 +44,7 @@ CUMULATIVE_XUV_DIR = os.path.join(
     REPO_ROOT, "XUV", "Distributions", "CumulativeXUV"
 )
 COSMIC_SHORELINE_DIR = os.path.join(REPO_ROOT, "XUV", "CosmicShoreline")
+MAXLEV_DIR = os.path.join(REPO_ROOT, "XUV", "EvolutionPlots", "MaximumLikelihood")
 VPLANET_NATIVE_BIN_DIR = "/workspace/vplanet-private/bin"
 
 VALID_MODES = {"plot-only", "precomputed", "full", "standards"}
@@ -57,7 +58,7 @@ EXPECTED_FILES = {
     "figure03": ["GJ1132_flares"],
     "figure04": ["GJ1132_FFD_comp2"],
     "figure05": ["lxuv_hist", "log_lxuv_lbol_hist"],
-    "figure06": ["gj1132posteriors"],
+    "figure06": ["sampler_comparison"],
     "figure07": ["EngleAgeHist"],
     "figure08": ["XUVEvol"],
     "figure09": ["GJ1132b_CumulativeXUV_Multi", "CosmicShoreline"],
@@ -373,28 +374,51 @@ def fnGenerateFigure05(dictFigConfig, dictGlobalConfig):
     plt.close("all")
 
 
+def fnEnsureMaxLevResults():
+    """Run MaxLEV MAP estimation if results file does not already exist."""
+    sResultsFile = os.path.join(MAXLEV_DIR, "maxlike_results.txt")
+    if os.path.exists(sResultsFile):
+        print(f"  MaxLEV results already exist: {sResultsFile}")
+        return
+    print("  Running MaxLEV for MAP estimation...")
+    dictEnv = fnBuildNativeBinaryEnvironment()
+    subprocess.run(
+        [fsLocateExecutable("maxlev"), "gj1132_ribas.json", "--workers", "-1"],
+        cwd=MAXLEV_DIR,
+        check=True,
+        env=dictEnv,
+    )
+    print("  MaxLEV completed.")
+
+
 def fnGenerateFigure06(dictFigConfig, dictGlobalConfig):
-    """Figure 6: gj1132posteriors — Bayesian posterior corner plot."""
+    """Figure 6: sampler_comparison — emcee + dynesty posterior corner plot."""
     sMode = dictFigConfig["sMode"]
     sExtension = fsResolveOutputExtension(sMode)
     sOutputFile = fsResolveOutputPath(
-        dictGlobalConfig["sOutputDirectory"], "gj1132posteriors" + sExtension
+        dictGlobalConfig["sOutputDirectory"], "sampler_comparison" + sExtension
     )
 
     if sMode in ("full", "standards"):
+        fnEnsureMaxLevResults()
         sGenerated = os.path.join(
-            POSTERIORS_DIR, "gj1132_results", "gj1132_corner" + sExtension
+            POSTERIORS_DIR, "output", "sampler_comparison" + sExtension
         )
-        fnRunSubprocess(
-            "gj1132_alabi.py", POSTERIORS_DIR, [sGenerated]
-        )
-        if os.path.exists(sGenerated):
-            fnCopyFigureFile(sGenerated, sOutputFile)
+        fnRunSubprocess("gj1132_alabi.py", POSTERIORS_DIR, [sGenerated])
+        fnCopyFigureFile(sGenerated, sOutputFile)
+        return
+
+    for sCandidate in [
+        os.path.join(POSTERIORS_DIR, "output", "sampler_comparison.pdf"),
+        os.path.join(POSTERIORS_DIR, "output", "sampler_comparison.png"),
+    ]:
+        if os.path.exists(sCandidate):
+            fnCopyFigureFile(sCandidate, sOutputFile)
             return
 
-    # precomputed or plot-only fallback
-    sExisting = os.path.join(POSTERIORS_DIR, "emcee_posterior.jpg")
-    fnCopyFigureFile(sExisting, sOutputFile)
+    raise FileNotFoundError(
+        "No sampler_comparison figure found. Set sMode to 'full' to generate."
+    )
 
 
 def fnGenerateFigure07(dictFigConfig, dictGlobalConfig):
