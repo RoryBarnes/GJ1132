@@ -253,6 +253,39 @@ def ffnSafeSurrogate(fnSurrogateFunction, dFloorValue=-1e4):
     return fnWrapper
 
 
+def ffnVarianceAwareSurrogate(fnSurrogateWithVariance, dFloorValue=-1e4,
+                               dMaxVariance=100.0):
+    """Clamp GP surrogate output and reject high-variance extrapolations.
+
+    Unlike ffnSafeSurrogate, this wrapper also checks the GP predictive
+    variance.  Points where the GP is highly uncertain (variance >
+    dMaxVariance) are floored, preventing walkers from drifting into
+    untrained regions where the GP may extrapolate wildly.
+    """
+    def fnWrapper(daTheta):
+        dMean, dVariance = fnSurrogateWithVariance(daTheta)
+        if not np.isfinite(dMean) or dMean > 0 or dVariance > dMaxVariance:
+            return dFloorValue
+        return max(dMean, dFloorValue)
+    return fnWrapper
+
+
+def fdaGenerateWalkerPositions(daMapParams, iNumWalkers):
+    """Generate emcee walker starting positions centred on MAP parameters.
+
+    Each walker is displaced from daMapParams by a small Gaussian perturbation
+    (1% of the bound width per dimension), then clipped to stay within bounds.
+    """
+    iNumDim = len(daMapParams)
+    daBoundWidths = np.array([dUpper - dLower
+                              for dLower, dUpper in listBounds])
+    daScatter = 0.01 * daBoundWidths
+    daPositions = daMapParams + daScatter * np.random.randn(iNumWalkers, iNumDim)
+    for i, (dLower, dUpper) in enumerate(listBounds):
+        daPositions[:, i] = np.clip(daPositions[:, i], dLower, dUpper)
+    return daPositions
+
+
 # ===========================================================================
 # MaxLEV Results Reader
 # ===========================================================================
@@ -355,8 +388,15 @@ def fsmLoadOrResumeSurrogate():
 # ===========================================================================
 
 
-def fnRunEmcee(sm):
-    """Run emcee posterior sampling on the trained surrogate."""
+def fnRunEmcee(sm, daMapParams):
+    """Run emcee posterior sampling on the trained surrogate.
+
+    Uses MAP-centred walker initialization, variance-aware GP clamping,
+    and differential-evolution proposal moves for efficient sampling of
+    the narrow, high-failure-rate likelihood surface.
+    """
+    import emcee
+
     sEmceePath = os.path.join(sSaveDir, "emcee_samples.npz")
     if os.path.exists(sEmceePath):
         print(f"\nLoading cached emcee samples from {sEmceePath}...")
@@ -364,15 +404,24 @@ def fnRunEmcee(sm):
         print(f"  Emcee samples: {sm.emcee_samples.shape}")
         return
     print("\nRunning emcee...")
-    surrogateFunction = sm.create_cached_surrogate_likelihood(iter=iActiveIterations)
+    fnSurrogateWithVariance = sm.create_cached_surrogate_likelihood(
+        iter=iActiveIterations, return_var=True)
+    fnSafeLikelihood = ffnVarianceAwareSurrogate(fnSurrogateWithVariance)
+    daWalkerPositions = fdaGenerateWalkerPositions(
+        daMapParams, dictEmceeConfig["nwalkers"])
     sm.run_emcee(
-        like_fn=surrogateFunction,
+        like_fn=fnSafeLikelihood,
         prior_fn=fdLogPrior,
+        p0=daWalkerPositions,
         nwalkers=dictEmceeConfig["nwalkers"],
         nsteps=dictEmceeConfig["nsteps"],
         min_ess=dictEmceeConfig["min_ess"],
         multi_proc=False,
         samples_file="emcee_samples.npz",
+        sampler_kwargs={
+            "moves": [(emcee.moves.DEMove(), 0.8),
+                      (emcee.moves.DESnookerMove(), 0.2)],
+        },
     )
     print(f"  Emcee samples: {sm.emcee_samples.shape}")
 
@@ -597,7 +646,13 @@ if __name__ == "__main__":
 
     sm = fsmLoadOrResumeSurrogate()
 
-    fnRunEmcee(sm)
+    if daMaxLikeParams is None:
+        raise RuntimeError(
+            "MAP parameters required for emcee walker initialization. "
+            "Run MaxLEV first: cd ../../EvolutionPlots/MaximumLikelihood && "
+            "maxlev gj1132_ribas.json --workers -1"
+        )
+    fnRunEmcee(sm, daMaxLikeParams)
     fnRunDynesty(sm)
 
     sColorDynesty = vplot.colors.sPaleBlue
