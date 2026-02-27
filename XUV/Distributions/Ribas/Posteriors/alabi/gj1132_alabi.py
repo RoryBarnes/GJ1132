@@ -2,8 +2,8 @@
 Posterior inference for GJ 1132 XUV luminosity evolution (Ribas model).
 
 Trains a GP surrogate of the VPLanet likelihood via alabi, then samples
-posteriors with both emcee and dynesty. Reads MAP parameters from MaxLEV
-output and generates a comparison corner plot.
+posteriors with emcee, dynesty, PyMultiNest, and UltraNest. Reads MAP
+parameters from MaxLEV output and generates a comparison corner plot.
 
 Usage:
     python gj1132_alabi.py
@@ -17,7 +17,9 @@ Output (all in sSaveDir):
     surrogate_model.pkl       Trained GP surrogate
     emcee_samples.npz         Emcee posterior samples
     dynesty_samples.npz       Dynesty posterior samples
-    sampler_comparison.pdf    Corner plot comparing both samplers
+    multinest_samples.npz     PyMultiNest posterior samples
+    ultranest_samples.npz     UltraNest posterior samples
+    sampler_comparison.pdf    Corner plot comparing all four samplers
 """
 
 import os
@@ -33,6 +35,7 @@ import re
 import multiprocessing
 import numpy as np
 from functools import partial
+from itertools import product
 from pathlib import Path
 
 import matplotlib
@@ -97,28 +100,27 @@ sMaxLevResultsPath = str(
     / "MaximumLikelihood" / "maxlike_results.txt"
 )
 
-# GP hyperparameter configuration
-dictGPConfig = {
-    "kernel": "ExpSquaredKernel",
+# Base GP configuration (fixed settings for grid search)
+dictBaseGPConfig = {
     "fit_amp": True,
-    "fit_mean": False,
+    "fit_mean": True,
     "fit_white_noise": False,
     "white_noise": -12,
     "uniform_scales": False,
-    "theta_scaler": preprocessing.StandardScaler(),
-    "y_scaler": preprocessing.StandardScaler(),
-    "hyperopt_method": "cv",
+    "hyperopt_method": "ml",
     "gp_opt_method": "l-bfgs-b",
     "gp_scale_rng": [-2, 6],
     "gp_amp_rng": [-1, 1],
-    "cv_folds": 20,
-    "cv_n_candidates": 400,
-    "cv_stage2_candidates": 200,
-    "cv_stage2_width": 0.3,
-    "cv_stage3_candidates": 100,
-    "cv_stage3_width": 0.1,
-    "cv_weighted_factor": 1.0,
     "multi_proc": True,
+}
+
+# Hyperparameter combinations to grid-search (3 x 3 x 4 = 36 combos)
+dictGPSearchGrid = {
+    "kernel": ["ExpSquaredKernel", "Matern32Kernel", "Matern52Kernel"],
+    "theta_scaler": [ut.no_scaler, preprocessing.MinMaxScaler(),
+                     preprocessing.StandardScaler()],
+    "y_scaler": [ut.no_scaler, ut.nlog_scaler, preprocessing.MinMaxScaler(),
+                 preprocessing.StandardScaler()],
 }
 
 dictMLOptConfig = {
@@ -146,8 +148,8 @@ dictActiveLearningConfig = {
 }
 
 dictEmceeConfig = {
-    "nwalkers": 50 * iNumDimensions,
-    "nsteps": int(1e5),
+    "nwalkers": 20 * iNumDimensions,
+    "nsteps": int(2e4),
     "min_ess": int(1e4),
 }
 
@@ -161,6 +163,26 @@ dictDynestyConfig = {
     "run_kwargs": {
         "dlogz_init": 1.0,
         "print_progress": True,
+    },
+    "min_ess": int(1e4),
+}
+
+dictMultinestConfig = {
+    "sampler_kwargs": {
+        "n_live_points": 100 * iNumDimensions,
+        "sampling_efficiency": 0.8,
+        "evidence_tolerance": 0.5,
+    },
+    "min_ess": int(1e4),
+}
+
+dictUltranestConfig = {
+    "run_kwargs": {
+        "min_num_live_points": 100 * iNumDimensions,
+        "dlogz": 0.5,
+        "dKL": 0.5,
+        "frac_remain": 0.01,
+        "show_status": True,
     },
     "min_ess": int(1e4),
 }
@@ -211,11 +233,11 @@ def fdLogLikelihood(daTheta):
     try:
         daOutput = vpm.run_model(daTheta, remove=True)
     except Exception:
-        return -1e10
+        return -1e2
     dLbol = daOutput[1]
     dLxuv = daOutput[0]
     if not (np.isfinite(dLbol) and np.isfinite(dLxuv) and dLbol > 0 and dLxuv > 0):
-        return -1e10
+        return -1e2
     daModel = np.array([dLbol, np.log10(dLxuv / dLbol)])
     return -0.5 * np.sum(((daModel - daLikeData[:, 0]) / daLikeData[:, 1]) ** 2)
 
@@ -346,6 +368,47 @@ def fiReadActiveIterations(sSaveDir):
         return 0
 
 
+def flistDictCartesianProduct(dictOptions):
+    """Generate all combinations of dictionary values as a list of dicts."""
+    listKeys = list(dictOptions.keys())
+    listValues = list(dictOptions.values())
+    return [dict(zip(listKeys, tCombo)) for tCombo in product(*listValues)]
+
+
+def fdTestGPConfig(sm, dictConfig):
+    """Evaluate a single GP configuration, returning test MSE or NaN."""
+    try:
+        return sm.init_gp(**dictConfig, overwrite=True)
+    except Exception:
+        return np.nan
+
+
+def fdictSelectBestGPConfig(sm, dictBaseConfig, dictSearchGrid):
+    """Grid-search kernel and scaler combinations, return the best by test MSE.
+
+    Tests each combination via sm.init_gp(overwrite=True) and selects the
+    configuration with the lowest test set mean squared error.
+    """
+    listCombinations = flistDictCartesianProduct(dictSearchGrid)
+    iTotal = len(listCombinations)
+    print(f"\nTesting {iTotal} GP hyperparameter combinations...")
+    dBestMSE = np.inf
+    dictBestConfig = None
+    for iIdx, dictVariable in enumerate(listCombinations):
+        dictConfig = {**dictBaseConfig, **dictVariable}
+        dTestMSE = fdTestGPConfig(sm, dictConfig)
+        bIsBest = np.isfinite(dTestMSE) and dTestMSE < dBestMSE
+        sSuffix = "  <-- best" if bIsBest else ""
+        print(f"  [{iIdx+1}/{iTotal}] MSE={dTestMSE:.4e}{sSuffix}")
+        if bIsBest:
+            dBestMSE = dTestMSE
+            dictBestConfig = dictConfig
+    if dictBestConfig is None:
+        raise RuntimeError("All GP configurations failed during grid search")
+    print(f"\n  Best test MSE: {dBestMSE:.4e}")
+    return dictBestConfig
+
+
 def fnTrainSurrogate(sSaveDir):
     """Train a new GP surrogate model from scratch with active learning."""
     print("\nTraining new surrogate model...")
@@ -355,10 +418,13 @@ def fnTrainSurrogate(sSaveDir):
         savedir=sSaveDir,
         cache=True,
         verbose=True,
+        show_warnings=True,
         ncore=iNumCores,
+        pool_method="fork",
     )
     sm.init_samples(ntrain=iNumTraining, ntest=iNumTest, sampler="lhs")
-    sm.init_gp(**dictGPConfig)
+    dictBestConfig = fdictSelectBestGPConfig(sm, dictBaseGPConfig, dictGPSearchGrid)
+    sm.init_gp(**dictBestConfig, overwrite=True)
     sm.active_train(niter=iActiveIterations, **dictActiveLearningConfig)
     return sm
 
@@ -404,9 +470,9 @@ def fnRunEmcee(sm, daMapParams):
         print(f"  Emcee samples: {sm.emcee_samples.shape}")
         return
     print("\nRunning emcee...")
-    fnSurrogateWithVariance = sm.create_cached_surrogate_likelihood(
-        iter=iActiveIterations, return_var=True)
-    fnSafeLikelihood = ffnVarianceAwareSurrogate(fnSurrogateWithVariance)
+    fnSurrogate = sm.create_cached_surrogate_likelihood(
+        iter=iActiveIterations, return_var=False)
+    fnSafeLikelihood = ffnSafeSurrogate(fnSurrogate)
     daWalkerPositions = fdaGenerateWalkerPositions(
         daMapParams, dictEmceeConfig["nwalkers"])
     sm.run_emcee(
@@ -450,6 +516,59 @@ def fnRunDynesty(sm):
         samples_file="dynesty_samples.npz",
     )
     print(f"  Dynesty samples: {sm.dynesty_samples.shape}")
+
+
+def fnRunMultinest(sm):
+    """Run PyMultiNest nested sampling on the trained surrogate."""
+    sMultinestPath = os.path.join(sSaveDir, "multinest_samples.npz")
+    if os.path.exists(sMultinestPath):
+        print(f"\nLoading cached multinest samples from {sMultinestPath}...")
+        sm.pymultinest_samples = np.load(sMultinestPath)["samples"]
+        print(f"  MultiNest samples: {sm.pymultinest_samples.shape}")
+        return
+    print("\nRunning PyMultiNest...")
+    surrogateFunction = sm.create_cached_surrogate_likelihood(
+        iter=iActiveIterations)
+    safeSurrogateFunction = ffnSafeSurrogate(surrogateFunction)
+    priorTransform = partial(
+        ut.prior_transform_normal, bounds=listBounds, data=listPriorData
+    )
+    sm.run_pymultinest(
+        like_fn=safeSurrogateFunction,
+        prior_transform=priorTransform,
+        sampler_kwargs=dictMultinestConfig["sampler_kwargs"],
+        min_ess=dictMultinestConfig["min_ess"],
+        multi_proc=False,
+        samples_file="multinest_samples.npz",
+    )
+    print(f"  MultiNest samples: {sm.pymultinest_samples.shape}")
+
+
+def fnRunUltranest(sm):
+    """Run UltraNest nested sampling on the trained surrogate."""
+    sUltranestPath = os.path.join(sSaveDir, "ultranest_samples.npz")
+    if os.path.exists(sUltranestPath):
+        print(f"\nLoading cached ultranest samples from {sUltranestPath}...")
+        sm.ultranest_samples = np.load(sUltranestPath)["samples"]
+        print(f"  UltraNest samples: {sm.ultranest_samples.shape}")
+        return
+    print("\nRunning UltraNest...")
+    surrogateFunction = sm.create_cached_surrogate_likelihood(
+        iter=iActiveIterations)
+    safeSurrogateFunction = ffnSafeSurrogate(surrogateFunction)
+    priorTransform = partial(
+        ut.prior_transform_normal, bounds=listBounds, data=listPriorData
+    )
+    sm.run_ultranest(
+        like_fn=safeSurrogateFunction,
+        prior_transform=priorTransform,
+        run_kwargs=dictUltranestConfig["run_kwargs"],
+        min_ess=dictUltranestConfig["min_ess"],
+        samples_file="ultranest_samples.npz",
+        resume="overwrite",
+    )
+    print(f"  UltraNest samples: {sm.ultranest_samples.shape}")
+
 
 # ===========================================================================
 # Plotting
@@ -552,9 +671,12 @@ def fdaAsymmetricGaussian(daX, dMean, dStdPos, dStdNeg):
     return daResult
 
 
-def fnAddLegendAndSave(fig, sOutputFile, sColorDynesty, sColorEmcee,
+def fnAddLegendAndSave(fig, sOutputFile, listSamplerEntries,
                        bShowMaxLikelihood=True):
-    """Add manual legend via figure coordinates, adjust spacing, and save."""
+    """Add manual legend via figure coordinates, adjust spacing, and save.
+
+    listSamplerEntries is a list of (sColor, sLabel) tuples, one per sampler.
+    """
     fig.subplots_adjust(
         hspace=0.05, wspace=0.05,
         left=0.12, right=0.98, bottom=0.10, top=0.95,
@@ -564,13 +686,11 @@ def fnAddLegendAndSave(fig, sOutputFile, sColorDynesty, sColorEmcee,
     dLineLength = 0.03
     dTextOffset = 0.01
     dYspacing = 0.04
-    listEntries = [
-        (sColorDynesty, "-", 1.0, None, "Dynesty"),
-        (sColorEmcee, "-", 1.0, None, "Emcee"),
-        ("grey", "--", 0.7, None, "Prior"),
-    ]
+    listEntries = [(sColor, "-", 1.0, None, sLabel)
+                   for sColor, sLabel in listSamplerEntries]
+    listEntries.append(("grey", "--", 0.7, None, "Prior"))
     if bShowMaxLikelihood:
-        listEntries.append(("k", None, 0.8, "o", "Maximum Likelihood"))
+        listEntries.append(("k", None, 0.8, "o", "Max. Likelihood"))
     for iEntry, (sColor, sLinestyle, dAlpha, sMarker, sLabel) in enumerate(listEntries):
         dY = dLegendY - iEntry * dYspacing
         if sMarker:
@@ -597,29 +717,44 @@ def fnAddLegendAndSave(fig, sOutputFile, sColorDynesty, sColorEmcee,
 # ===========================================================================
 
 
-def fnPrintPosteriorComparison(daDynesty, daEmcee):
-    """Print comparison statistics between dynesty and emcee posteriors."""
+def fsQualifyAgreement(dDeltaSigma):
+    """Return a qualitative label for a delta/sigma agreement statistic."""
+    if dDeltaSigma < 0.5:
+        return "excellent"
+    if dDeltaSigma < 1.0:
+        return "good"
+    if dDeltaSigma < 2.0:
+        return "moderate"
+    return "poor"
+
+
+def fnPrintPosteriorComparison(listSamplerResults):
+    """Print pairwise comparison statistics for all samplers.
+
+    listSamplerResults is a list of (sName, daSamples) tuples.
+    """
     print("\n" + "=" * 70)
     print("POSTERIOR COMPARISON")
     print("=" * 70)
     for i, sLabel in enumerate(listParamLabels):
-        dDynestyMean = np.mean(daDynesty[:, i])
-        dDynestyStd = np.std(daDynesty[:, i])
-        dEmceeMean = np.mean(daEmcee[:, i])
-        dEmceeStd = np.std(daEmcee[:, i])
-        dAgreement = abs(dDynestyMean - dEmceeMean) / ((dDynestyStd + dEmceeStd) / 2)
-        if dAgreement < 0.5:
-            sQuality = "excellent agreement"
-        elif dAgreement < 1.0:
-            sQuality = "good agreement"
-        elif dAgreement < 2.0:
-            sQuality = "moderate agreement"
-        else:
-            sQuality = "poor agreement"
         print(f"\n{sLabel}:")
-        print(f"  Dynesty: {dDynestyMean:.6f} +/- {dDynestyStd:.6f}")
-        print(f"  Emcee:   {dEmceeMean:.6f} +/- {dEmceeStd:.6f}")
-        print(f"  Delta/sigma: {dAgreement:.2f} ({sQuality})")
+        for sName, daSamples in listSamplerResults:
+            dMean = np.mean(daSamples[:, i])
+            dStd = np.std(daSamples[:, i])
+            print(f"  {sName:12s}: {dMean:.6f} +/- {dStd:.6f}")
+        iNumSamplers = len(listSamplerResults)
+        for iA in range(iNumSamplers):
+            for iB in range(iA + 1, iNumSamplers):
+                sNameA, daSamplesA = listSamplerResults[iA]
+                sNameB, daSamplesB = listSamplerResults[iB]
+                dMeanA = np.mean(daSamplesA[:, i])
+                dStdA = np.std(daSamplesA[:, i])
+                dMeanB = np.mean(daSamplesB[:, i])
+                dStdB = np.std(daSamplesB[:, i])
+                dDeltaSigma = abs(dMeanA - dMeanB) / ((dStdA + dStdB) / 2)
+                sQuality = fsQualifyAgreement(dDeltaSigma)
+                print(f"  {sNameA} vs {sNameB}: "
+                      f"delta/sigma={dDeltaSigma:.2f} ({sQuality})")
     print("\n" + "=" * 70)
 
 # ===========================================================================
@@ -654,24 +789,40 @@ if __name__ == "__main__":
         )
     fnRunEmcee(sm, daMaxLikeParams)
     fnRunDynesty(sm)
+    fnRunMultinest(sm)
+    fnRunUltranest(sm)
 
-    sColorDynesty = vplot.colors.sPaleBlue
     sColorEmcee = vplot.colors.sOrange
+    sColorDynesty = vplot.colors.sPaleBlue
+    sColorMultinest = vplot.colors.sPurple
+    sColorUltranest = vplot.colors.sDarkBlue
     sOutputFile = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
         sSaveDir, "sampler_comparison.pdf"
     )
 
-    fig = ffigCreateCornerBase(sm.dynesty_samples, sColorDynesty)
-    fnOverlayCornerSamples(fig, sm.emcee_samples, sColorEmcee)
+    listSamplerPlot = [
+        (sColorEmcee, "Emcee", sm.emcee_samples),
+        (sColorDynesty, "Dynesty", sm.dynesty_samples),
+        (sColorMultinest, "MultiNest", sm.pymultinest_samples),
+        (sColorUltranest, "UltraNest", sm.ultranest_samples),
+    ]
+    fig = ffigCreateCornerBase(
+        listSamplerPlot[0][2], listSamplerPlot[0][0])
+    for sColor, _, daSamples in listSamplerPlot[1:]:
+        fnOverlayCornerSamples(fig, daSamples, sColor)
     fnSetTickFontsize(fig)
     if daMaxLikeParams is not None:
         fnAddMaxLikelihoodPoints(fig, daMaxLikeParams)
     fnAddPriorsToCorner(fig)
+    listLegendEntries = [(sColor, sLabel)
+                         for sColor, sLabel, _ in listSamplerPlot]
     fnAddLegendAndSave(
-        fig, sOutputFile, sColorDynesty, sColorEmcee,
+        fig, sOutputFile, listLegendEntries,
         bShowMaxLikelihood=(daMaxLikeParams is not None),
     )
 
-    fnPrintPosteriorComparison(sm.dynesty_samples, sm.emcee_samples)
+    listSamplerResults = [(sLabel, daSamples)
+                          for _, sLabel, daSamples in listSamplerPlot]
+    fnPrintPosteriorComparison(listSamplerResults)
 
     print("\nDone.")

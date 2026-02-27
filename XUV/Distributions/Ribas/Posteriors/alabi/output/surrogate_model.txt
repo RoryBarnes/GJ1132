@@ -1,0 +1,42 @@
+==================================================================
+GP summary 
+==================================================================
+
+Configuration: 
+-------------- 
+Kernel: Matern52Kernel 
+Function bounds: [[ 0.17  0.22]
+ [-4.   -2.15]
+ [ 0.1   5.  ]
+ [ 1.   13.  ]
+ [ 0.4   2.1 ]] 
+fit mean: True 
+fit amplitude: True 
+fit white_noise: False 
+GP white noise: -12 
+Hyperparameter bounds: [[ 0.71716095  1.02018341]
+ [-2.30258509  2.30258509]
+ [-4.60517019 13.81551056]
+ [-4.60517019 13.81551056]
+ [-4.60517019 13.81551056]
+ [-4.60517019 13.81551056]
+ [-4.60517019 13.81551056]] 
+Active learning algorithm: bape 
+Number of total training samples: 1000 
+Number of initial training samples: 500 
+Number of active training samples: 500 
+Number of test samples: 500 
+
+Results: 
+-------- 
+GP final hyperparameters: 
+   [mean:value] 	0.7171609514163187 
+   [kernel:k1:log_constant] 	2.302585092994046 
+   [kernel:k2:metric:log_M_0_0] 	7.7145840525445495 
+   [kernel:k2:metric:log_M_1_1] 	5.986214286553181 
+   [kernel:k2:metric:log_M_2_2] 	1.9551460149223496 
+   [kernel:k2:metric:log_M_3_3] 	4.043624836553096 
+   [kernel:k2:metric:log_M_4_4] 	5.148126079057132 
+
+Final test error (MSE): 3.0978041809464627 
+
