@@ -75,22 +75,6 @@
       ]
     },
     {
-      "sName": "Bayesian Posteriors",
-      "sDirectory": "XUV/Distributions/Ribas/Posteriors/alabi",
-      "bEnabled": true,
-      "bPlotOnly": true,
-      "saSetupCommands": [
-        "cd {sRepoRoot}/XUV/EvolutionPlots/MaximumLikelihood && maxlev gj1132_ribas.json --workers {iNumberOfCores}",
-        "python gj1132_alabi.py {sPlotDirectory}/sampler_comparison.{sFigureType}"
-      ],
-      "saCommands": [
-        "python compare_samplers.py {sPlotDirectory}/sampler_comparison.{sFigureType}"
-      ],
-      "saOutputFiles": [
-        "{sPlotDirectory}/sampler_comparison.{sFigureType}"
-      ]
-    },
-    {
       "sName": "Engle Age Distribution",
       "sDirectory": "XUV/Distributions/Engle/Age",
       "bEnabled": true,
@@ -105,21 +89,41 @@
       ]
     },
     {
+      "sName": "Bayesian Posteriors",
+      "sDirectory": "XUV/Distributions/Ribas/Posteriors/alabi",
+      "bEnabled": true,
+      "bPlotOnly": false,
+      "saSetupCommands": [
+        "cd {sRepoRoot}/XUV/EvolutionPlots/MaximumLikelihood && maxlev gj1132_ribas.json",
+        "python gj1132_alabi.py {sPlotDirectory}/sampler_comparison.{sFigureType}"
+      ],
+      "saCommands": [
+        "python gj1132_alabi.py {sPlotDirectory}/sampler_comparison.{sFigureType}"
+      ],
+      "saOutputFiles": [
+        "{sPlotDirectory}/sampler_comparison.{sFigureType}"
+      ]
+    },
+    {
       "sName": "XUV Evolution",
       "sDirectory": "XUV/Distributions/CumulativeXUV",
       "bEnabled": true,
-      "bPlotOnly": true,
+      "bPlotOnly": false,
       "saSetupCommands": [
+        "echo '--- EngleBarnes: copying priors ---'",
         "cp {Scene01.flare_mcmc_samples} EngleBarnes/flares_variable_slope.npy",
-        "cp {Scene07.age_samples} EngleBarnes/age_samples.txt",
+        "cp {Scene06.age_samples} EngleBarnes/age_samples.txt",
         "cp {sRepoRoot}/priors/dynesty_transform_final.npy EngleBarnes/dynesty_transform_final.npy",
         "cp EngleBarnes/output/Converged_Param_Dictionary.json EngleBarnes/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
+        "echo '--- EngleBarnes: running vconverge ---'",
         "cd EngleBarnes && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
         "rm -f EngleBarnes/.Converged_Param_Dictionary.json.bak",
+        "echo '--- RibasBarnes: copying priors ---'",
         "cp {Scene01.flare_mcmc_samples} RibasBarnes/flares_variable_slope.npy",
-        "cp {Scene07.age_samples} RibasBarnes/age_samples.txt",
+        "cp {Scene06.age_samples} RibasBarnes/age_samples.txt",
         "cp {sRepoRoot}/priors/dynesty_transform_final.npy RibasBarnes/dynesty_transform_final.npy",
         "cp RibasBarnes/output/Converged_Param_Dictionary.json RibasBarnes/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
+        "echo '--- RibasBarnes: running vconverge ---'",
         "cd RibasBarnes && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
         "rm -f RibasBarnes/.Converged_Param_Dictionary.json.bak"
       ],

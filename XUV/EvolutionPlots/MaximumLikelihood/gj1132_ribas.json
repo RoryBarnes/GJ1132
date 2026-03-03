@@ -105,7 +105,7 @@
     "tol": 0.01,
     "de_settings": {
       "strategy": "best1bin",
-      "popsize": 10,
+      "popsize": 3,
       "mutation": [0.5, 1.0],
       "recombination": 0.7,
       "workers": 1,

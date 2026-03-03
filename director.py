@@ -144,10 +144,12 @@ def fnExecuteCommand(sCommand, sWorkingDirectory, sSceneName):
     sPrefix = f"[{sSceneName}][{sExecutable}]"
     print(f"  Running: {sCommand}")
 
+    dictEnv = os.environ.copy()
+    dictEnv["PYTHONUNBUFFERED"] = "1"
     process = subprocess.Popen(
         sCommand, shell=True, cwd=sWorkingDirectory,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-        text=True, env=os.environ.copy(),
+        text=True, env=dictEnv,
     )
     threadOut = threading.Thread(
         target=fnStreamPrefixedOutput, args=(process.stdout, sPrefix))
@@ -298,9 +300,13 @@ def fnRunPipeline(dictScript, dictVariables):
 
 def fnConfigureEnvironment(dictScript):
     """Set PATH and LIGHTKURVE_CACHE_DIR from script.json."""
+    sUserBinDir = os.path.join(os.path.expanduser("~"), ".local", "bin")
     sVplanetDir = dictScript.get("sVplanetBinaryDirectory", "")
-    if sVplanetDir:
-        os.environ["PATH"] = sVplanetDir + ":" + os.environ.get("PATH", "")
+    listPrependPaths = [sDir for sDir in [sVplanetDir, sUserBinDir]
+                        if sDir and os.path.isdir(sDir)]
+    if listPrependPaths:
+        sExistingPath = os.environ.get("PATH", "")
+        os.environ["PATH"] = ":".join(listPrependPaths + [sExistingPath])
     sTessCache = dictScript.get("sTessDataCache", "data/tess_cache")
     os.environ["LIGHTKURVE_CACHE_DIR"] = os.path.abspath(
         os.path.join(REPO_ROOT, sTessCache))

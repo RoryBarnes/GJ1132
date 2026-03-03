@@ -1,0 +1,10 @@
+# Parameter names for MCMC samples
+# From Davenport et al. 2019 Eq. (3)
+# a1, a2, a3: energy slope parameters
+# b1, b2, b3: normalization parameters
+0	a1
+1	a2
+2	a3
+3	b1
+4	b2
+5	b3

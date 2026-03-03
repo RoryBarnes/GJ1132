@@ -1,0 +1,187 @@
+
+----- Step 1 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.019666666666666666
+
+Converged = False
+
+----- Step 2 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.018333333333333333
+
+Converged = False
+
+----- Step 3 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.012321428571428572
+
+Converged = False
+
+----- Step 4 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.0077777777777777776
+
+Converged = False
+
+----- Step 5 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.005888888888888889
+
+Converged = False
+
+----- Step 6 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.005090909090909091
+
+Converged = False
+
+----- Step 7 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.006818181818181818
+
+Converged = False
+
+----- Step 8 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.005128205128205128
+
+Converged = False
+
+----- Step 9 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.00478021978021978
+
+Converged = False
+
+----- Step 10 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.0057619047619047615
+
+Converged = False
+
+----- Step 11 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.006416666666666667
+
+Converged = False
+
+----- Step 12 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.00786764705882353
+
+Converged = False
+
+----- Step 13 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.004575163398692811
+
+Converged = False
+
+----- Step 14 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.00631578947368421
+
+Converged = False
+
+----- Step 15 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.004657894736842106
+
+Converged = False
+
+----- Step 16 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.005142857142857143
+
+Converged = False
+
+----- Step 17 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.005735930735930736
+
+Converged = False
+
+----- Step 18 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.004565217391304348
+
+Converged = False
+
+----- Step 19 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.0052173913043478265
+
+Converged = False
+
+----- Step 20 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.0027
+
+Converged = True
+Number of Consecutive Convergences: 1
+
+----- Step 21 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.0034615384615384616
+
+Converged = True
+Number of Consecutive Convergences: 2
+
+----- Step 22 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.004515669515669516
+
+Converged = False
+
+----- Step 23 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.003624338624338624
+
+Converged = True
+Number of Consecutive Convergences: 1
+
+----- Step 24 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.002413793103448276
+
+Converged = True
+Number of Consecutive Convergences: 2
+
+----- Step 25 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.0024367816091954023
+
+Converged = True
+Number of Consecutive Convergences: 3
+
+-------------- VCONVERGE STATS ----------------
+
+Number of Steps Taken: 25
+Total Number of Simulations Ran: 3000
+3 Consecutive Convergences Achieved, vconverge run sucessful
+Total Number of Convergences during vconverge run: 5

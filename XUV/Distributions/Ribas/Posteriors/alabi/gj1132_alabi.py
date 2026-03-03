@@ -34,9 +34,10 @@ os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 import re
 import multiprocessing
 import numpy as np
-from functools import partial
 from itertools import product
 from pathlib import Path
+from scipy.stats import gaussian_kde, norm
+from scipy.interpolate import interp1d
 
 import matplotlib
 import vplot
@@ -77,7 +78,7 @@ listPriorData = [
     (0.1945, 0.0048, 0.0046),  # mass - asymmetric Gaussian
     (-2.92, 0.26),              # log(fsat) - symmetric Gaussian
     (None, None),               # tsat - uniform (no prior)
-    (5.75, 1.38),               # age - symmetric Gaussian
+    "empirical",                # age - Engle gyrochronology (age_samples.txt)
     (1.18, 0.31),               # beta - symmetric Gaussian
 ]
 
@@ -98,6 +99,31 @@ sSaveDir = "output/"
 sMaxLevResultsPath = str(
     Path(sInpath).parent.parent.parent.parent / "EvolutionPlots"
     / "MaximumLikelihood" / "maxlike_results.txt"
+)
+sAgeSamplesPath = str(
+    Path(sInpath).parent.parent.parent / "Engle" / "Age" / "age_samples.txt"
+)
+
+
+def ftBuildEmpiricalPrior(sSamplesPath, tBounds):
+    """Load age samples (in years) and return (KDE, inverse CDF interpolator).
+
+    Samples are filtered to tBounds before building the KDE and inverse CDF.
+    """
+    daAgeGyr = np.loadtxt(sSamplesPath) / 1e9
+    daAgeGyr = daAgeGyr[(daAgeGyr >= tBounds[0]) & (daAgeGyr <= tBounds[1])]
+    kdeAge = gaussian_kde(daAgeGyr)
+    daSorted = np.sort(daAgeGyr)
+    daCDF = (np.arange(len(daSorted)) + 0.5) / len(daSorted)
+    fnInverseCDF = interp1d(
+        daCDF, daSorted, bounds_error=False,
+        fill_value=(daSorted[0], daSorted[-1]),
+    )
+    return kdeAge, fnInverseCDF
+
+
+kdeAgePrior, fnAgePriorInverseCDF = ftBuildEmpiricalPrior(
+    sAgeSamplesPath, listBounds[3]
 )
 
 # Base GP configuration (fixed settings for grid search)
@@ -242,14 +268,25 @@ def fdLogLikelihood(daTheta):
     return -0.5 * np.sum(((daModel - daLikeData[:, 0]) / daLikeData[:, 1]) ** 2)
 
 
+def fdLogDensityEmpirical(dValue):
+    """Evaluate log-density of the empirical age prior via KDE."""
+    dDensity = kdeAgePrior(dValue)[0]
+    if dDensity <= 0:
+        return -np.inf
+    return float(np.log(dDensity))
+
+
 def fdLogPrior(daTheta):
-    """Evaluate log-prior with Gaussian (symmetric/asymmetric) and uniform priors."""
+    """Evaluate log-prior with Gaussian, empirical, and uniform priors."""
     daTheta = np.atleast_1d(daTheta).flatten()
     for i, (dLower, dUpper) in enumerate(listBounds):
         if not (dLower <= float(daTheta[i]) <= dUpper):
             return -np.inf
     dLogPrior = 0.0
     for i, tPrior in enumerate(listPriorData):
+        if tPrior == "empirical":
+            dLogPrior += fdLogDensityEmpirical(float(daTheta[i]))
+            continue
         if tPrior[0] is None:
             continue
         dValue = float(daTheta[i])
@@ -259,6 +296,26 @@ def fdLogPrior(daTheta):
             dStd = tPrior[1] if dValue >= tPrior[0] else tPrior[2]
             dLogPrior += -0.5 * ((dValue - tPrior[0]) / dStd) ** 2
     return dLogPrior
+
+
+def fdaPriorTransform(daX):
+    """Transform unit hypercube to parameter space with mixed priors.
+
+    Handles uniform, symmetric/asymmetric Gaussian, and empirical
+    (interpolated inverse CDF) priors per dimension.
+    """
+    daX = np.asarray(daX, dtype=float)
+    daResult = np.zeros(iNumDimensions)
+    for i in range(iNumDimensions):
+        tPrior = listPriorData[i]
+        if tPrior == "empirical":
+            daResult[i] = float(fnAgePriorInverseCDF(daX[i]))
+        elif tPrior[0] is None:
+            dLower, dUpper = listBounds[i]
+            daResult[i] = dLower + (dUpper - dLower) * daX[i]
+        else:
+            daResult[i] = norm.ppf(daX[i], tPrior[0], tPrior[1])
+    return daResult
 
 
 def ffnSafeSurrogate(fnSurrogateFunction, dFloorValue=-1e4):
@@ -503,12 +560,9 @@ def fnRunDynesty(sm):
     print("\nRunning dynesty...")
     surrogateFunction = sm.create_cached_surrogate_likelihood(iter=iActiveIterations)
     safeSurrogateFunction = ffnSafeSurrogate(surrogateFunction)
-    priorTransform = partial(
-        ut.prior_transform_normal, bounds=listBounds, data=listPriorData
-    )
     sm.run_dynesty(
         like_fn=safeSurrogateFunction,
-        prior_transform=priorTransform,
+        prior_transform=fdaPriorTransform,
         sampler_kwargs=dictDynestyConfig["sampler_kwargs"],
         run_kwargs=dictDynestyConfig["run_kwargs"],
         min_ess=dictDynestyConfig["min_ess"],
@@ -530,12 +584,9 @@ def fnRunMultinest(sm):
     surrogateFunction = sm.create_cached_surrogate_likelihood(
         iter=iActiveIterations)
     safeSurrogateFunction = ffnSafeSurrogate(surrogateFunction)
-    priorTransform = partial(
-        ut.prior_transform_normal, bounds=listBounds, data=listPriorData
-    )
     sm.run_pymultinest(
         like_fn=safeSurrogateFunction,
-        prior_transform=priorTransform,
+        prior_transform=fdaPriorTransform,
         sampler_kwargs=dictMultinestConfig["sampler_kwargs"],
         min_ess=dictMultinestConfig["min_ess"],
         multi_proc=False,
@@ -556,12 +607,9 @@ def fnRunUltranest(sm):
     surrogateFunction = sm.create_cached_surrogate_likelihood(
         iter=iActiveIterations)
     safeSurrogateFunction = ffnSafeSurrogate(surrogateFunction)
-    priorTransform = partial(
-        ut.prior_transform_normal, bounds=listBounds, data=listPriorData
-    )
     sm.run_ultranest(
         like_fn=safeSurrogateFunction,
-        prior_transform=priorTransform,
+        prior_transform=fdaPriorTransform,
         run_kwargs=dictUltranestConfig["run_kwargs"],
         min_ess=dictUltranestConfig["min_ess"],
         samples_file="ultranest_samples.npz",
@@ -637,6 +685,19 @@ def fnSetTickFontsize(fig):
                 axes[i, j].tick_params(axis="both", labelsize=dTickFontsize)
 
 
+def fdaPriorDensity(iDimension, daXrange):
+    """Evaluate the prior density for a single dimension over daXrange."""
+    tPrior = listPriorData[iDimension]
+    if tPrior == "empirical":
+        return kdeAgePrior(daXrange)
+    if tPrior[0] is None:
+        dXmin, dXmax = listBounds[iDimension]
+        return np.ones_like(daXrange) / (dXmax - dXmin)
+    if len(tPrior) == 2:
+        return fdaGaussian(daXrange, tPrior[0], tPrior[1])
+    return fdaAsymmetricGaussian(daXrange, *tPrior)
+
+
 def fnAddPriorsToCorner(fig):
     """Overlay prior distributions (grey dashed) on the diagonal panels."""
     axes = np.array(fig.axes).reshape((iNumDimensions, iNumDimensions))
@@ -644,13 +705,7 @@ def fnAddPriorsToCorner(fig):
         ax = axes[i, i]
         dXmin, dXmax = listBounds[i]
         daXrange = np.linspace(dXmin, dXmax, 1000)
-        if listPriorData[i][0] is None:
-            daYprior = np.ones_like(daXrange) / (dXmax - dXmin)
-        elif len(listPriorData[i]) == 2:
-            dMean, dStd = listPriorData[i]
-            daYprior = fdaGaussian(daXrange, dMean, dStd)
-        else:
-            daYprior = fdaAsymmetricGaussian(daXrange, *listPriorData[i])
+        daYprior = fdaPriorDensity(i, daXrange)
         ax.plot(daXrange, daYprior, color="grey", linewidth=2.0,
                 linestyle="--", alpha=0.7, zorder=0)
 
@@ -761,7 +816,26 @@ def fnPrintPosteriorComparison(listSamplerResults):
 # Main
 # ===========================================================================
 
-if __name__ == "__main__":
+def ftParseArguments():
+    """Parse CLI arguments: optional --sampler=name and output file path."""
+    setSamplers = {"emcee", "dynesty", "multinest", "ultranest"}
+    sSamplerOnly = None
+    sOutputFile = None
+    for sArg in sys.argv[1:]:
+        if sArg.startswith("--sampler="):
+            sSamplerOnly = sArg.split("=", 1)[1].lower()
+            if sSamplerOnly not in setSamplers:
+                raise ValueError(f"Unknown sampler '{sSamplerOnly}'. "
+                                 f"Choose from: {sorted(setSamplers)}")
+        else:
+            sOutputFile = sArg
+    return sSamplerOnly, sOutputFile
+
+
+def fnMain():
+    """Run posterior inference pipeline with optional single-sampler mode."""
+    sSamplerOnly, sOutputFile = ftParseArguments()
+
     print("=" * 70)
     print("GJ 1132 Ribas XUV Model - Posterior Inference")
     print("=" * 70)
@@ -769,36 +843,52 @@ if __name__ == "__main__":
     os.makedirs(sSaveDir, exist_ok=True)
     fnInitVplanetModel()
 
-    daMaxLikeParams = None
+    daMaxLikeParams = fdaReadMapParameters()
+    sm = fsmLoadOrResumeSurrogate()
+
+    fnRunSelectedSamplers(sm, daMaxLikeParams, sSamplerOnly)
+    if sSamplerOnly is None:
+        fnPlotSamplerComparison(sm, daMaxLikeParams, sOutputFile)
+    return sm
+
+
+def fdaReadMapParameters():
+    """Read MAP parameters from MaxLEV results file."""
     if os.path.exists(sMaxLevResultsPath):
         print(f"\nReading MAP results from {sMaxLevResultsPath}...")
         daMaxLikeParams, dNegLogPost = ftReadMaxLevResults(sMaxLevResultsPath)
         print(f"  MAP parameters: {daMaxLikeParams}")
         print(f"  -ln(Posterior): {dNegLogPost:.6e}")
-    else:
-        print(f"\nWARNING: MaxLEV results not found at {sMaxLevResultsPath}")
-        print("  Skipping MAP point overlay. Run MaxLEV first for the full figure.")
+        return daMaxLikeParams
+    print(f"\nWARNING: MaxLEV results not found at {sMaxLevResultsPath}")
+    return None
 
-    sm = fsmLoadOrResumeSurrogate()
 
-    if daMaxLikeParams is None:
-        raise RuntimeError(
-            "MAP parameters required for emcee walker initialization. "
-            "Run MaxLEV first: cd ../../EvolutionPlots/MaximumLikelihood && "
-            "maxlev gj1132_ribas.json --workers -1"
-        )
-    fnRunEmcee(sm, daMaxLikeParams)
-    fnRunDynesty(sm)
-    fnRunMultinest(sm)
-    fnRunUltranest(sm)
+def fnRunSelectedSamplers(sm, daMaxLikeParams, sSamplerOnly):
+    """Run either all samplers or a single sampler specified by name."""
+    bRunAll = sSamplerOnly is None
+    if (bRunAll or sSamplerOnly == "emcee"):
+        if daMaxLikeParams is None:
+            raise RuntimeError(
+                "MAP parameters required for emcee walker initialization. "
+                "Run MaxLEV first.")
+        fnRunEmcee(sm, daMaxLikeParams)
+    if bRunAll or sSamplerOnly == "dynesty":
+        fnRunDynesty(sm)
+    if bRunAll or sSamplerOnly == "multinest":
+        fnRunMultinest(sm)
+    if bRunAll or sSamplerOnly == "ultranest":
+        fnRunUltranest(sm)
 
+
+def fnPlotSamplerComparison(sm, daMaxLikeParams, sOutputFile=None):
+    """Generate corner plot comparing all four samplers."""
     sColorEmcee = vplot.colors.sOrange
     sColorDynesty = vplot.colors.sPaleBlue
     sColorMultinest = vplot.colors.sPurple
     sColorUltranest = vplot.colors.sDarkBlue
-    sOutputFile = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
-        sSaveDir, "sampler_comparison.pdf"
-    )
+    if sOutputFile is None:
+        sOutputFile = os.path.join(sSaveDir, "sampler_comparison.pdf")
 
     listSamplerPlot = [
         (sColorEmcee, "Emcee", sm.emcee_samples),
@@ -821,8 +911,16 @@ if __name__ == "__main__":
         bShowMaxLikelihood=(daMaxLikeParams is not None),
     )
 
-    listSamplerResults = [(sLabel, daSamples)
-                          for _, sLabel, daSamples in listSamplerPlot]
+
+if __name__ == "__main__":
+    smResult = fnMain()
+
+    listSamplerResults = [
+        ("Emcee", smResult.emcee_samples),
+        ("Dynesty", smResult.dynesty_samples),
+        ("MultiNest", smResult.pymultinest_samples),
+        ("UltraNest", smResult.ultranest_samples),
+    ]
     fnPrintPosteriorComparison(listSamplerResults)
 
     print("\nDone.")

@@ -4,7 +4,7 @@ GP summary
 
 Configuration: 
 -------------- 
-Kernel: Matern52Kernel 
+Kernel: ExpSquaredKernel 
 Function bounds: [[ 0.17  0.22]
  [-4.   -2.15]
  [ 0.1   5.  ]
@@ -14,7 +14,7 @@ fit mean: True
 fit amplitude: True 
 fit white_noise: False 
 GP white noise: -12 
-Hyperparameter bounds: [[ 0.71716095  1.02018341]
+Hyperparameter bounds: [[ 0.63643831  1.02029377]
  [-2.30258509  2.30258509]
  [-4.60517019 13.81551056]
  [-4.60517019 13.81551056]
@@ -30,13 +30,13 @@ Number of test samples: 500
 Results: 
 -------- 
 GP final hyperparameters: 
-   [mean:value] 	0.7171609514163187 
-   [kernel:k1:log_constant] 	2.302585092994046 
-   [kernel:k2:metric:log_M_0_0] 	7.7145840525445495 
-   [kernel:k2:metric:log_M_1_1] 	5.986214286553181 
-   [kernel:k2:metric:log_M_2_2] 	1.9551460149223496 
-   [kernel:k2:metric:log_M_3_3] 	4.043624836553096 
-   [kernel:k2:metric:log_M_4_4] 	5.148126079057132 
+   [mean:value] 	0.6364383091782776 
+   [kernel:k1:log_constant] 	0.16081101136731094 
+   [kernel:k2:metric:log_M_0_0] 	-2.239139132560966 
+   [kernel:k2:metric:log_M_1_1] 	3.0781470196801783 
+   [kernel:k2:metric:log_M_2_2] 	0.6452533432367391 
+   [kernel:k2:metric:log_M_3_3] 	3.774921528505227 
+   [kernel:k2:metric:log_M_4_4] 	1.3312064738614777 
 
-Final test error (MSE): 3.0978041809464627 
+Final test error (MSE): 2.2251660219992724 
 
