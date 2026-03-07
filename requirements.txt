@@ -1,0 +1,10 @@
+astropy
+corner
+emcee
+lightkurve
+matplotlib
+numpy
+pandas
+scipy
+scikit-learn
+seaborn
