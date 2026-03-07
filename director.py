@@ -15,6 +15,7 @@ Usage:
 """
 
 import argparse
+import io
 import json
 import multiprocessing
 import os
@@ -25,6 +26,37 @@ import threading
 
 
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+
+# ---------------------------------------------------------------------------
+# Log file tee
+# ---------------------------------------------------------------------------
+
+
+class TeeWriter(io.TextIOBase):
+    """Write to both a terminal stream and a log file simultaneously."""
+
+    def __init__(self, streamTerminal, fileLog):
+        self._streamTerminal = streamTerminal
+        self._fileLog = fileLog
+
+    def write(self, sText):
+        self._streamTerminal.write(sText)
+        self._fileLog.write(sText)
+        self._fileLog.flush()
+        return len(sText)
+
+    def flush(self):
+        self._streamTerminal.flush()
+        self._fileLog.flush()
+
+
+def fnSetupLogFile(sLogPath):
+    """Redirect stdout and stderr to both the terminal and a log file."""
+    fileLog = open(sLogPath, "w")
+    sys.stdout = TeeWriter(sys.__stdout__, fileLog)
+    sys.stderr = TeeWriter(sys.__stderr__, fileLog)
+    return fileLog
 
 
 # ---------------------------------------------------------------------------
@@ -322,7 +354,12 @@ def main():
     parser.add_argument(
         "--verify-only", action="store_true",
         help="Only verify that all expected output files exist.")
+    parser.add_argument(
+        "--log", default=os.path.join(REPO_ROOT, "director.log"),
+        help="Path to log file (default: director.log in repo root).")
     args = parser.parse_args()
+
+    fileLog = fnSetupLogFile(args.log)
 
     sScriptPath = os.path.join(REPO_ROOT, args.config)
     dictScript = fdictLoadScript(sScriptPath)
@@ -333,6 +370,7 @@ def main():
         bSuccess = fnRunVerifyOnly(dictScript, dictVariables)
     else:
         bSuccess = fnRunPipeline(dictScript, dictVariables)
+    fileLog.close()
     sys.exit(0 if bSuccess else 1)
 
 

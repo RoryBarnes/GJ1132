@@ -14,6 +14,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import vplot
 
 I_LABEL_FONT = 20
 I_TICK_FONT = 14

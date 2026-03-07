@@ -7,7 +7,7 @@ from cumulative_xuv import (D_LOWER_BOUND, D_UPPER_BOUND, D_SHORELINE_FLUX,
                              ftGatherFluxes)
 
 
-def fnPlotPanel(ax, saDirectories, saLabels, saColors, sTitle):
+def flistPlotPanel(ax, saDirectories, saLabels, saColors, sTitle):
     """Plot one panel of the error source comparison."""
     listData = [ftGatherFluxes(sDir) for sDir in saDirectories]
     ax.axvline(D_SHORELINE_FLUX, color=vplot.colors.pale_blue, linewidth=6)
@@ -50,11 +50,11 @@ def main():
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 6), sharey=True)
 
     saEngleDirs = ['Engle', 'EngleModelErrorsOnly', 'EngleStellarErrorsOnly']
-    listEngle = fnPlotPanel(ax1, saEngleDirs, saLabels, saColors, 'Engle (2024)')
+    listEngle = flistPlotPanel(ax1, saEngleDirs, saLabels, saColors, 'Engle (2024)')
     ax1.set_ylabel('Fraction', fontsize=20)
 
     saRibasDirs = ['Ribas', 'RibasModelErrorsOnly', 'RibasStellarErrorsOnly']
-    listRibas = fnPlotPanel(ax2, saRibasDirs, saLabels, saColors, 'Ribas et al. (2005)')
+    listRibas = flistPlotPanel(ax2, saRibasDirs, saLabels, saColors, 'Ribas et al. (2005)')
 
     plt.tight_layout()
     plt.savefig(sOutputPath, dpi=300)

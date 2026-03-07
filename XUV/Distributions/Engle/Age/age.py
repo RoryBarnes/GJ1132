@@ -3,6 +3,7 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
+import vplot
 
 I_NUM_BINS = 50
 D_FIG_SIZE_X = 3.25
@@ -33,7 +34,7 @@ def ftComputeAgeDistribution(daA, daB, daC, daD, daRotationPeriod,
     return daLogAge, dMean, dStdDev, daCI
 
 
-def dAnalyticalMeanAge(daA, daB, daC, daD, daRotationPeriod):
+def fdComputeAnalyticalMeanAge(daA, daB, daC, daD, daRotationPeriod):
     """Return the analytical mean log(age) for comparison."""
     return ((daA[0] + daC[0]) * daRotationPeriod[0]
             + daB[0] - daC[0] * daD[0])
@@ -49,7 +50,7 @@ def fnPlotNormalizedHistogram(daLogAge, sOutputPath):
     plt.xlabel('Age [Gyr]', fontsize=12)
     plt.ylabel('Fraction', fontsize=12)
     plt.xlim(0, 13)
-    plt.ylim(0, 0.06)
+    plt.ylim(0, 0.04)
     plt.xticks(fontsize=8)
     plt.yticks(fontsize=8)
     plt.tight_layout()
@@ -89,7 +90,7 @@ if __name__ == "__main__":
 
     daLogAge, dMean, dStdDev, daCI = ftComputeAgeDistribution(
         daA, daB, daC, daD, daRotationPeriod)
-    dAnalytical = dAnalyticalMeanAge(daA, daB, daC, daD, daRotationPeriod)
+    dAnalytical = fdComputeAnalyticalMeanAge(daA, daB, daC, daD, daRotationPeriod)
 
     fnPrintStatistics(daLogAge, dMean, dStdDev, daCI, dAnalytical)
     fnPlotNormalizedHistogram(daLogAge, sPlotFile)

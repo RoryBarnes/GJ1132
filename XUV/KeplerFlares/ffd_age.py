@@ -10,8 +10,7 @@ import matplotlib.pyplot as plt
 import vplot
 
 
-
-def old_constants():
+def ftOldConstants():
     a1 = -0.06596571
     a2 =  0.77855978
     a3 = -1.0475149
@@ -19,107 +18,74 @@ def old_constants():
     b2 = -24.57936264
     b3 = 33.65312658
 
-    return a1,a2,a3,b1,b2,b3
+    return a1, a2, a3, b1, b2, b3
 
-def PlotFFD(log_age,params,log_energies,ages_myr,mass,description,linestyle):
-    colors = [vplot.colors.pale_blue,vplot.colors.purple,vplot.colors.orange,vplot.colors.red,vplot.colors.dark_blue,'k']
 
-    a1, a2, a3, b1, b2, b3 = params
+def fnPlotFFD(daLogAge, daParams, daLogEnergies, daAgesMyr, dMass,
+              sDescription, sLinestyle):
+    """Plot FFD curves at multiple ages for one parameter set."""
+    listColors = [vplot.colors.pale_blue, vplot.colors.purple,
+                  vplot.colors.orange, vplot.colors.red,
+                  vplot.colors.dark_blue, 'k']
+    a1, a2, a3, b1, b2, b3 = daParams
+    for iAge in range(len(daLogAge)):
+        dSlope = a1 * daLogAge[iAge] + a2 * dMass + a3
+        dIntercept = b1 * daLogAge[iAge] + b2 * dMass + b3
+        daFfd = 10**(dSlope * daLogEnergies + dIntercept)
+        daEnergies = 10**daLogEnergies
+        sLabel = repr(daAgesMyr[iAge]) + ' Myr (' + sDescription + ')'
+        plt.plot(daEnergies, daFfd, color=listColors[iAge],
+                 linestyle=sLinestyle, label=sLabel)
 
-    for iAge in range(len(log_age)):
-        slope = a1 * log_age[iAge] + a2 * mass + a3
-        intercept = b1 * log_age[iAge] + b2 * mass + b3
 
-        ffd = 10**(slope*log_energies + intercept)
-        energies = 10**log_energies
-        label = repr(ages_myr[iAge])+' Myr ('+description+')'
-        plt.plot(energies,ffd,color=colors[iAge],linestyle=linestyle,label = label)
+def fnPlot(daParams, dMass=0.5, sFilename='ffd_comp.png'):
+    """Create Figure 10 comparing old and new fitted parameters."""
+    daLogEnergies = np.linspace(33, 36, 100)
+    listAgesMyr = [10, 100, 1000, 10000]
+    daLogAge = np.log10(listAgesMyr)
 
-def Plot(params, mass=0.5, filename='ffd_comp.png'):
-    """
-    Simple function to recreate Figure 10 with your fitted parameters.
-    
-    Parameters:
-    -----------
-    params : list or array
-        Your fitted parameters [a1, a2, a3, b1, b2, b3]
-    mass : float
-        Stellar mass in solar masses (default: 0.5)
-    filename : str
-        Output filename
-    """
-    
-    # Energy range
-    log_energies = np.linspace(33, 36, 100)
-    
-    # Ages to show
-    ages_myr = [10,100,1000,10000]
-    log_age = np.log10(ages_myr)
+    plt.figure(figsize=(6.5, 6))
 
-    # Create plot
-    fig = plt.figure(figsize=(6.5, 6))
+    tOldParams = ftOldConstants()
 
-    old_params = old_constants()
+    fnPlotFFD(daLogAge, tOldParams, daLogEnergies, listAgesMyr,
+              dMass, 'old', 'dashed')
+    fnPlotFFD(daLogAge, daParams, daLogEnergies, listAgesMyr,
+              dMass, 'new', 'solid')
 
-    PlotFFD(log_age,old_params,log_energies,ages_myr,mass,'old','dashed')
-    PlotFFD(log_age,params,log_energies,ages_myr,mass,'new','solid')
-
-    # Formatting
     plt.xlabel('log Flare Energy (erg)', fontsize=18)
     plt.ylabel('Cumulative Flare Freq (#/day)', fontsize=18)
-    
     plt.xlim(8e32, 1.05e36)
     plt.ylim(3e-5, 3e-1)
-    #plt.ylim(1e-3, 1)
     plt.xscale('log')
     plt.yscale('log')
-    plt.xticks([1e33,1e34,1e35,1e36],['33','34','35','36'],fontsize=14)
+    plt.xticks([1e33, 1e34, 1e35, 1e36], ['33', '34', '35', '36'],
+               fontsize=14)
     plt.yticks(fontsize=14)
-    plt.legend(loc='lower left',fontsize=14)
-    
-    plt.annotate(f'M = 0.5 M$_\odot$', [2e33,2.5e-3],fontsize=14)
-
+    plt.legend(loc='lower left', fontsize=14)
+    plt.annotate(f'M = 0.5 M$_\\odot$', [2e33, 2.5e-3], fontsize=14)
     plt.tight_layout()
-    plt.savefig(filename, dpi=300, bbox_inches='tight')
-    #plt.show()
-    
-    print(f"Figure saved as {filename}")
+    plt.savefig(sFilename, dpi=300, bbox_inches='tight')
+    print(f"Figure saved as {sFilename}")
+
 
 if __name__ == "__main__":
-    
-    # Try to load parameters from MCMC results first
     try:
-        param_samples = np.load('flare_mcmc_samples.npy')
-        
-        # Calculate median parameters
-        fitted_params = [
-            np.median(param_samples[:, 0]),  # a1: Age dependence of energy slope  
-            np.median(param_samples[:, 1]),  # a2: Mass dependence of energy slope
-            np.median(param_samples[:, 2]),  # a3: Baseline energy slope
-            np.median(param_samples[:, 3]),  # b1: Age dependence of normalization
-            np.median(param_samples[:, 4]),  # b2: Mass dependence of normalization  
-            np.median(param_samples[:, 5])   # b3: Baseline normalization
-        ]
-        
-        # Also calculate uncertainties (standard deviation of posterior)
-        uncertainties = [
-            np.std(param_samples[:, 0]),
-            np.std(param_samples[:, 1]), 
-            np.std(param_samples[:, 2]),
-            np.std(param_samples[:, 3]),
-            np.std(param_samples[:, 4]),
-            np.std(param_samples[:, 5])
-        ]
-        
-        print("Parameter values (median ± std):")
-        param_names = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3']
-        for name, value, error in zip(param_names, fitted_params, uncertainties):
-            print(f"  {name}: {value:.4f} ± {error:.4f}")
-        
+        daSamples = np.load('flare_mcmc_samples.npy')
+
+        listFittedParams = [np.median(daSamples[:, i]) for i in range(6)]
+        listUncertainties = [np.std(daSamples[:, i]) for i in range(6)]
+
+        print("Parameter values (median +/- std):")
+        listParamNames = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3']
+        for sName, dValue, dError in zip(listParamNames, listFittedParams,
+                                         listUncertainties):
+            print(f"  {sName}: {dValue:.4f} +/- {dError:.4f}")
+
     except (FileNotFoundError, ImportError):
         print("Could not load MCMC results!")
         exit()
 
     import sys
     sOutputPath = sys.argv[1] if len(sys.argv) > 1 else "ffd_comp.pdf"
-    Plot(fitted_params, mass=0.5, filename=sOutputPath)
+    fnPlot(listFittedParams, dMass=0.5, sFilename=sOutputPath)

@@ -4,6 +4,7 @@ import json
 
 import numpy as np
 import pandas as pd
+import vplot
 
 
 D_CUMULATIVE_EARTH_FLUX = 9.759583e+15

@@ -21,7 +21,6 @@ def fnPlotHistograms(listData):
         plt.step(daBins, daFractions, where='mid', color=SA_COLORS[i],
                  alpha=DA_ALPHAS[i], linestyle='-', linewidth=2,
                  label=SA_LABELS[i])
-    return fig
 
 
 def fnFormatAxes():

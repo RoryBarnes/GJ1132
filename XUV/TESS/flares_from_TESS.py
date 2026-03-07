@@ -7,6 +7,8 @@ flares, computes their equivalent durations and energies, and builds a
 flare frequency distribution (FFD) for comparison with other M dwarf stars.
 """
 
+import json
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -27,12 +29,12 @@ matplotlib.rcParams.update({'font.size': 18})
 matplotlib.rcParams.update({'font.family': 'serif'})
 
 
-def ffd_fit(x, alpha, beta):
+def fdFfdFit(x, alpha, beta):
     """FFD fitting function with both slope and intercept as free parameters"""
     return beta + (x * alpha)
 
 
-def compute_ffd_bestfit(ffd_x, ffd_y, ffd_yerr):
+def fdictComputeFfdBestfit(ffd_x, ffd_y, ffd_yerr):
     """
     Compute best-fit FFD parameters and uncertainties for GJ 1132
 
@@ -64,7 +66,7 @@ def compute_ffd_bestfit(ffd_x, ffd_y, ffd_yerr):
     """
     # Perform weighted least-squares fit with initial guess
     p0 = [-1.0, 30.0]  # Initial guess: alpha=-1, beta=30
-    popt, pcov = curve_fit(ffd_fit, ffd_x, ffd_y, p0=p0, sigma=ffd_yerr, absolute_sigma=True)
+    popt, pcov = curve_fit(fdFfdFit, ffd_x, ffd_y, p0=p0, sigma=ffd_yerr, absolute_sigma=True)
 
     # Extract best-fit parameters and uncertainties
     alpha = popt[0]
@@ -74,7 +76,7 @@ def compute_ffd_bestfit(ffd_x, ffd_y, ffd_yerr):
     beta_err = param_err[1]
 
     # Compute reduced chi-squared
-    residuals = ffd_y - ffd_fit(ffd_x, alpha, beta)
+    residuals = ffd_y - fdFfdFit(ffd_x, alpha, beta)
     chi2 = np.sum((residuals / ffd_yerr)**2)
     dof = len(ffd_x) - 2  # Number of data points minus number of free parameters
     reduced_chi2 = chi2 / dof if dof > 0 else np.nan
@@ -94,7 +96,7 @@ def compute_ffd_bestfit(ffd_x, ffd_y, ffd_yerr):
     return results
 
 
-def FlareEqn(X, a1, a2, a3, b1, b2, b3):
+def fdFlareEquation(X, a1, a2, a3, b1, b2, b3):
     """
     FFD fitting equation with powerlaw slope and intercept as functions of mass and age
 
@@ -118,7 +120,7 @@ def FlareEqn(X, a1, a2, a3, b1, b2, b3):
     return logR
 
 
-def IFFD(E, alpha, beta):
+def fdaInverseFfd(E, alpha, beta):
     """
     Compute flare frequency from Ilin+2020 parameterization
 
@@ -140,12 +142,12 @@ def IFFD(E, alpha, beta):
     return f
 
 
-def compute_age_from_ffd(alpha, beta, fit_results, params, stellar_mass=0.2,
+def fdictComputeAgeFromFfd(alpha, beta, fit_results, params, stellar_mass=0.2,
                          log_energy=31.5, n_samples=10000):
     """
     Compute stellar age from FFD parameters using Monte Carlo sampling
 
-    Uses the FlareEqn model to infer age from observed flare activity.
+    Uses the fdFlareEquation model to infer age from observed flare activity.
     The model relates alpha (slope) and beta (intercept) to stellar age and mass.
     Solves for age using both alpha and beta equations independently.
 
@@ -158,7 +160,7 @@ def compute_age_from_ffd(alpha, beta, fit_results, params, stellar_mass=0.2,
     fit_results : dict
         Dictionary containing alpha_err, beta_err, and pcov
     params : array-like
-        FlareEqn model parameters [a1, a2, a3, b1, b2, b3]
+        fdFlareEquation model parameters [a1, a2, a3, b1, b2, b3]
     stellar_mass : float, optional
         Stellar mass in solar masses (default: 0.2)
     log_energy : float, optional
@@ -188,7 +190,7 @@ def compute_age_from_ffd(alpha, beta, fit_results, params, stellar_mass=0.2,
     alpha_samples = samples[:, 0]
     beta_samples = samples[:, 1]
 
-    # Unpack FlareEqn parameters
+    # Unpack fdFlareEquation parameters
     a1, a2, a3, b1, b2, b3 = params
 
     ages_from_alpha_myr = []
@@ -198,7 +200,7 @@ def compute_age_from_ffd(alpha, beta, fit_results, params, stellar_mass=0.2,
         alpha_i = alpha_samples[i]
         beta_i = beta_samples[i]
 
-        # From FlareEqn:
+        # From fdFlareEquation:
         # alpha = a1 * logt + a2 * m + a3
         # beta = b1 * logt + b2 * m + b3
         #
@@ -272,13 +274,13 @@ def compute_age_from_ffd(alpha, beta, fit_results, params, stellar_mass=0.2,
 
 # ===== Data Acquisition Functions =====
 
-def download_tess_data():
+def flistDownloadTessData():
     """Download TESS lightcurve data for GJ 1132"""
     print("Downloading TESS lightcurve data for GJ 1132...")
     return lk.search_lightcurve('GJ 1132', mission='TESS', author='SPOC', exptime=120).download_all()
 
 
-def calculate_total_exposure(lc):
+def fdCalculateTotalExposure(lc):
     """Calculate total exposure time from lightcurve collection"""
     totexp = 0
     for k in range(len(lc)):
@@ -287,7 +289,7 @@ def calculate_total_exposure(lc):
     return totexp
 
 
-def get_flare_parameters():
+def ftGetFlareParameters():
     """Return flare detection parameters and stellar properties for GJ 1132"""
     sectors = [2, 2, 3]
     t_start = np.array([2284.8817, 2291.2813, 3029.6533])
@@ -298,7 +300,7 @@ def get_flare_parameters():
 
 # ===== Literature Data Functions =====
 
-def get_literature_comparison_data():
+def fdictGetLiteratureData():
     """Return GJ 4083 and GJ 1243 FFD data from Hawley+2014"""
     gj4083_x = np.array([30.746478873239436, 31.184663536776213])
     gj4083_y = np.array([0.03380728065018358, 0.017198670673630925])
@@ -308,9 +310,79 @@ def get_literature_comparison_data():
             'gj1243_x': gj1243_x, 'gj1243_y': gj1243_y}
 
 
-def get_cluster_data():
-    """Return Ilin+2020 cluster data and Barnes+2026 model parameters"""
-    params = np.array([-0.148, 0.517, -0.618, 4.69, -16.45, 19.446])
+def fdictLoadKeplerPosterior(sFilePath):
+    """Load Kepler FFD posterior statistics from JSON."""
+    with open(sFilePath, "r") as fileHandle:
+        dictRaw = json.load(fileHandle)
+    dictRaw["daMedians"] = np.array(dictRaw["daMedians"])
+    dictRaw["daCovarianceMatrix"] = np.array(dictRaw["daCovarianceMatrix"])
+    return dictRaw
+
+
+def fdaComputeProjectionJacobian(dLogAge, dMass):
+    """Return the 2x6 Jacobian projecting (a1..b3) to (alpha, beta).
+
+    The Davenport model is linear in the six parameters:
+      alpha = a1*logAge + a2*mass + a3
+      beta  = b1*logAge + b2*mass + b3
+    so the Jacobian is exact (no approximation).
+    """
+    daJacobian = np.array([
+        [dLogAge, dMass, 1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, dLogAge, dMass, 1.0],
+    ])
+    return daJacobian
+
+
+def fnPrintParameterTension(sName, dPredicted, dPredVariance,
+                            dObserved, dObsVariance):
+    """Print the tension between predicted and observed values in sigma."""
+    dTotalVariance = dPredVariance + dObsVariance
+    if dTotalVariance <= 0:
+        print(f"  {sName}: variance is zero, cannot compute tension")
+        return
+    dSigma = abs(dPredicted - dObserved) / np.sqrt(dTotalVariance)
+    print(f"  {sName}: predicted={dPredicted:.4f}, observed={dObserved:.4f}, "
+          f"tension={dSigma:.2f} sigma")
+
+
+def fnPrintKeplerTessDiscrepancy(dictFitResults, daMedians, daCovarianceMatrix):
+    """Quantify Kepler-predicted vs TESS-measured alpha/beta discrepancy."""
+    dLogAge = np.log10(8000)  # 8 Gyr in Myr
+    dMass = 0.2
+
+    daJacobian = fdaComputeProjectionJacobian(dLogAge, dMass)
+    daProjectedCovariance = daJacobian @ daCovarianceMatrix @ daJacobian.T
+
+    dPredAlpha = (daMedians[0] * dLogAge + daMedians[1] * dMass
+                  + daMedians[2])
+    dPredBeta = (daMedians[3] * dLogAge + daMedians[4] * dMass
+                 + daMedians[5])
+
+    print("\n" + "=" * 60)
+    print("Kepler vs TESS discrepancy")
+    print("=" * 60)
+    fnPrintParameterTension(
+        "alpha", dPredAlpha, daProjectedCovariance[0, 0],
+        dictFitResults["alpha"], dictFitResults["alpha_err"] ** 2,
+    )
+    fnPrintParameterTension(
+        "beta", dPredBeta, daProjectedCovariance[1, 1],
+        dictFitResults["beta"], dictFitResults["beta_err"] ** 2,
+    )
+    print("=" * 60 + "\n")
+
+
+def fdictGetClusterData(dictKeplerPosterior=None):
+    """Return Ilin+2020 cluster data and Barnes+2026 model parameters.
+
+    If dictKeplerPosterior is provided, use its medians instead of
+    hard-coded values.
+    """
+    if dictKeplerPosterior is not None:
+        params = dictKeplerPosterior["daMedians"]
+    else:
+        params = np.array([-0.148, 0.517, -0.618, 4.69, -16.45, 19.446])
     cluster = ['Hyades (690Myr)', 'Pleiades (130Myr)', 'Praesepe (750Myr)']
     Iages = np.array([690, 130, 750])
     Ialpha = np.array([1.89, 2.06, 2.00])
@@ -324,7 +396,7 @@ def get_cluster_data():
 
 # ===== Flare Analysis Functions =====
 
-def compute_flare_equivalent_durations(lc, sectors, t_start, t_stop):
+def fdaComputeFlareEquivalentDurations(lc, sectors, t_start, t_stop):
     """Compute equivalent durations for detected flares"""
     print("\nComputing flare equivalent durations...")
     ed = np.zeros(len(t_start), dtype=float)
@@ -337,7 +409,7 @@ def compute_flare_equivalent_durations(lc, sectors, t_start, t_stop):
     return ed
 
 
-def plot_flare_lightcurves(lc, sectors, t_start, t_stop, sOutputPath=None):
+def fnPlotFlareLightcurves(lc, sectors, t_start, t_stop, sOutputPath=None):
     """Create 3-panel flare lightcurve plot."""
     fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharey=True)
     for k in range(len(t_start)):
@@ -362,7 +434,7 @@ def plot_flare_lightcurves(lc, sectors, t_start, t_stop, sOutputPath=None):
 
 # ===== FFD Analysis Functions =====
 
-def compute_and_fit_ffd(ed, totexp, lumin, lc, t_start, t_stop):
+def ftComputeAndFitFfd(ed, totexp, lumin, lc, t_start, t_stop):
     """Compute FFD and fit power law"""
     print("\nComputing flare frequency distribution...")
     ffd_x, ffd_y, ffd_xerr, ffd_yerr = FFD(ed, TOTEXP=totexp,
@@ -370,11 +442,11 @@ def compute_and_fit_ffd(ed, totexp, lumin, lc, t_start, t_stop):
                                             fluxerr=np.nanmedian(lc[0].normalize()['flux_err']),
                                             dur=t_stop - t_start, logY=True)
     print("\nFitting FFD power law...")
-    fit_results = compute_ffd_bestfit(ffd_x, ffd_y, ffd_yerr)
+    fit_results = fdictComputeFfdBestfit(ffd_x, ffd_y, ffd_yerr)
     return ffd_x, ffd_y, ffd_xerr, ffd_yerr, fit_results
 
 
-def print_ffd_results(fit_results):
+def fnPrintFfdResults(fit_results):
     """Print formatted FFD fitting results"""
     print("\n" + "="*60)
     print("GJ 1132 Flare Frequency Distribution Best-Fit Results")
@@ -390,12 +462,12 @@ def print_ffd_results(fit_results):
 
 # ===== Plotting Functions =====
 
-def plot_basic_ffd(ffd_x, ffd_y, ffd_yerr, alpha, beta):
+def fnPlotBasicFfd(ffd_x, ffd_y, ffd_yerr, alpha, beta):
     """Plot basic FFD with power-law fit"""
     plt.figure()
     plt.errorbar(ffd_x, ffd_y, yerr=ffd_yerr, linestyle='none', color='k')
     plt.scatter(ffd_x, ffd_y, c='k')
-    plt.plot([31.5, 32.5], ffd_fit(np.array([31.5, 32.5]), alpha, beta),
+    plt.plot([31.5, 32.5], fdFfdFit(np.array([31.5, 32.5]), alpha, beta),
              label=r'$\alpha$=' + f'{alpha:.2f}' + r', $\beta$=' + f'{beta:.2f}')
     plt.xlabel('log Flare Energy (erg)')
     plt.ylabel('log Flare Rate (day$^{-1}$)')
@@ -404,12 +476,12 @@ def plot_basic_ffd(ffd_x, ffd_y, ffd_yerr, alpha, beta):
                 pad_inches=0.25, facecolor='w')
 
 
-def plot_ffd_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data):
+def fnPlotFfdComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data):
     """Plot FFD comparison with GJ 4083 and GJ 1243"""
     plt.figure()
     plt.errorbar(ffd_x, ffd_y, yerr=ffd_yerr, linestyle='none', color='k')
     plt.scatter(ffd_x, ffd_y, c='k')
-    plt.plot([31.5, 32.5], ffd_fit(np.array([31.5, 32.5]), alpha, beta),
+    plt.plot([31.5, 32.5], fdFfdFit(np.array([31.5, 32.5]), alpha, beta),
              label=r'GJ 1132: $\alpha$=' + f'{alpha:.2f}' + r', $\beta$=' + f'{beta:.2f}')
     plt.plot(lit_data['gj4083_x'], np.log10(lit_data['gj4083_y']), marker='s',
              linestyle='--', label='GJ 4083 (M3, Hawley+2014)')
@@ -422,20 +494,20 @@ def plot_ffd_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data):
                 pad_inches=0.25, facecolor='w')
 
 
-def plot_ilin_reproduction(cluster_data):
+def fnPlotIlinReproduction(cluster_data):
     """Reproduce Ilin+2020 Fig 5b"""
     params = cluster_data['params']
     plt.figure()
     for k in [1, 0, 2]:
         plt.plot([cluster_data['Emin'][k], cluster_data['Emax'][k]],
-                 IFFD([cluster_data['Emin'][k], cluster_data['Emax'][k]],
+                 fdaInverseFfd([cluster_data['Emin'][k], cluster_data['Emax'][k]],
                       cluster_data['alpha'][k], cluster_data['beta'][k]),
                  c=cluster_data['colors'][k], label=cluster_data['cluster'][k])
         X = (np.log10([cluster_data['Emin'][k], cluster_data['Emax'][k]]),
              np.log10([cluster_data['ages'][k], cluster_data['ages'][k]]),
              np.array([0.2, 0.2]))
         plt.plot([cluster_data['Emin'][k], cluster_data['Emax'][k]],
-                 10**FlareEqn(X, *params)*365.25, c=cluster_data['colors'][k], linestyle='--')
+                 10**fdFlareEquation(X, *params)*365.25, c=cluster_data['colors'][k], linestyle='--')
     plt.plot([], c='k', linestyle='--', label='Davenport+2019 model')
     plt.legend(fontsize=10)
     plt.xscale('log')
@@ -444,13 +516,13 @@ def plot_ilin_reproduction(cluster_data):
     plt.ylabel('Flare Rate (year$^{-1}$)')
 
 
-def plot_comprehensive_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data, cluster_data, sOutputPath=None):
+def fnPlotComprehensiveComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data, cluster_data, sOutputPath=None):
     """Create comprehensive FFD comparison plot with clusters."""
     params = cluster_data['params']
     plt.figure()
     plt.errorbar(ffd_x, ffd_y, yerr=ffd_yerr, linestyle='none', color='k')
     plt.scatter(ffd_x, ffd_y, c='k')
-    plt.plot([31.0, 32.5], ffd_fit(np.array([31.5, 32.5]), alpha, beta), c='k')
+    plt.plot([31.0, 32.5], fdFfdFit(np.array([31.5, 32.5]), alpha, beta), c='k')
     plt.text(31.5, -2.4, 'GJ 1132\n(actual)', color='k', fontsize=10)
 
     plt.plot(lit_data['gj4083_x'], np.log10(lit_data['gj4083_y']), marker='s',
@@ -463,18 +535,18 @@ def plot_comprehensive_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data,
 
     for k in [1, 0, 2]:
         plt.plot(np.log10([cluster_data['Emin'][k], cluster_data['Emax'][k]]),
-                 np.log10(IFFD([cluster_data['Emin'][k], cluster_data['Emax'][k]],
+                 np.log10(fdaInverseFfd([cluster_data['Emin'][k], cluster_data['Emax'][k]],
                                cluster_data['alpha'][k], cluster_data['beta'][k])) - np.log10(365.25),
                  c=cluster_data['colors'][k], label=cluster_data['cluster'][k])
         X = (np.log10([cluster_data['Emin'][k], cluster_data['Emax'][k]]),
              np.log10([cluster_data['ages'][k], cluster_data['ages'][k]]),
              np.array([0.2, 0.2]))
         plt.plot(np.log10([cluster_data['Emin'][k], cluster_data['Emax'][k]]),
-                 FlareEqn(X, *params), c=cluster_data['colors'][k], linestyle='--')
+                 fdFlareEquation(X, *params), c=cluster_data['colors'][k], linestyle='--')
 
     plt.plot([], c='k', linestyle='--', label='Fit at Cluster Ages')
     X = (np.array([31.5, 32.5]), np.log10([8000, 8000]), np.array([0.2, 0.2]))
-    plt.plot([31.5, 32.5], FlareEqn(X, *params), color=vplot.colors.purple, label='Fits at 8 Gyr')
+    plt.plot([31.5, 32.5], fdFlareEquation(X, *params), color=vplot.colors.purple, label='Fits at 8 Gyr')
     plt.text(31.4, -1, 'GJ 1132\n(fit prediction)', color=vplot.colors.purple, fontsize=10)
 
     plt.xlabel('log Flare Energy [erg]')
@@ -486,56 +558,67 @@ def plot_comprehensive_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data,
     plt.close()
 
 
-def plot_alpha_beta_comparison(alpha, beta, fit_results, sOutputPath=None):
+def fnPlotAlphaBetaComparison(alpha, beta, fit_results, sOutputPath=None,
+                               dictKeplerPosterior=None):
     """Plot alpha-beta parameter space comparison: Kepler vs GJ 1132"""
     print("\n" + "="*60)
     print("Generating alpha-beta parameter space comparison...")
     print("="*60)
 
-    kepler_means = np.array([-0.148, 0.517, -0.618, 4.69, -16.45, 19.446])
-    kepler_uncertainties = np.array([0.000529, 0.00244, 0.00231, 0.0180, 0.0824, 0.0779])
-    kepler_cov = np.diag(kepler_uncertainties**2)
+    if dictKeplerPosterior is not None:
+        kepler_means = dictKeplerPosterior["daMedians"]
+        kepler_cov = dictKeplerPosterior["daCovarianceMatrix"]
+    else:
+        kepler_means = np.array([-0.148, 0.517, -0.618, 4.69, -16.45, 19.446])
+        kepler_uncertainties = np.array([0.000529, 0.00244, 0.00231, 0.0180, 0.0824, 0.0779])
+        kepler_cov = np.diag(kepler_uncertainties**2)
 
-    n_samples = 100
-    kepler_samples = np.random.multivariate_normal(kepler_means, kepler_cov, size=n_samples)
+    iNumDraws = 100
+    kepler_samples = np.random.multivariate_normal(kepler_means, kepler_cov,
+                                                   size=iNumDraws)
 
     logt_kepler = np.log10(8000)  # 8 Gyr in Myr
     mass = 0.2
     kepler_alphas = kepler_samples[:, 0] * logt_kepler + kepler_samples[:, 1] * mass + kepler_samples[:, 2]
     kepler_betas = kepler_samples[:, 3] * logt_kepler + kepler_samples[:, 4] * mass + kepler_samples[:, 5]
 
-    gj1132_samples = np.random.multivariate_normal([alpha, beta], fit_results['pcov'], size=n_samples)
+    gj1132_samples = np.random.multivariate_normal([alpha, beta],
+                                                   fit_results['pcov'],
+                                                   size=iNumDraws)
 
     plt.figure(figsize=(10, 8))
     plt.scatter(kepler_alphas, kepler_betas, c=vplot.colors.orange, alpha=0.6, s=50,
                 label=r'$Kepler$ (8 Gyr)', edgecolors='k', linewidths=0.5)
     plt.scatter(gj1132_samples[:, 0], gj1132_samples[:, 1], c=vplot.colors.pale_blue,
                 alpha=0.6, s=50, label=r'GJ 1132 ($TESS$)', edgecolors='k', linewidths=0.5)
-    plt.scatter([-0.32],[8.54],label='Best fit',marker='+',color='k',s=100)
+    plt.scatter([-0.32],[8.54],label='Best fit',marker='^',color='red',s=100)
     plt.xlabel(r'Slope ($a$)', fontsize=18)
     plt.ylabel(r'Intercept ($b$)', fontsize=18)
-    #plt.title('FFD Parameter Space: Kepler vs GJ 1132', fontsize=20)
     plt.legend(fontsize=14, loc='best')
-    #plt.grid(True, alpha=0.3)
     plt.tick_params(axis='both', labelsize=14)
     sFile = sOutputPath if sOutputPath else 'FitComparison.pdf'
     plt.savefig(sFile, dpi=300, bbox_inches='tight',
                 pad_inches=0.25, facecolor='w')
     plt.close()
 
-    print(f"Kepler prediction (8 Gyr): alpha = {np.mean(kepler_alphas):.4f} ± {np.std(kepler_alphas):.4f}, "
-          f"beta = {np.mean(kepler_betas):.4f} ± {np.std(kepler_betas):.4f}")
-    print(f"GJ 1132 measurement: alpha = {alpha:.4f} ± {fit_results['alpha_err']:.4f}, "
-          f"beta = {beta:.4f} ± {fit_results['beta_err']:.4f}")
+    print(f"Kepler prediction (8 Gyr): alpha = {np.mean(kepler_alphas):.4f} +/- {np.std(kepler_alphas):.4f}, "
+          f"beta = {np.mean(kepler_betas):.4f} +/- {np.std(kepler_betas):.4f}")
+    print(f"GJ 1132 measurement: alpha = {alpha:.4f} +/- {fit_results['alpha_err']:.4f}, "
+          f"beta = {beta:.4f} +/- {fit_results['beta_err']:.4f}")
+
+    if dictKeplerPosterior is not None:
+        fnPrintKeplerTessDiscrepancy(
+            fit_results, kepler_means, kepler_cov)
+
     print("="*60 + "\n")
 
 
-def plot_proxima_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data):
+def fnPlotProximaComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data):
     """Plot FFD comparison with Proxima Centauri"""
     plt.figure()
     plt.errorbar(ffd_x, ffd_y, yerr=ffd_yerr, linestyle='none', color='k')
     plt.scatter(ffd_x, ffd_y, c='k')
-    plt.plot([31.5, 32.5], ffd_fit(np.array([31.5, 32.5]), alpha, beta), c='k')
+    plt.plot([31.5, 32.5], fdFfdFit(np.array([31.5, 32.5]), alpha, beta), c='k')
     plt.text(32.5, -2, 'GJ 1132', color='k', fontsize=10)
 
     plt.plot(lit_data['gj4083_x'], np.log10(lit_data['gj4083_y']),
@@ -554,7 +637,7 @@ def plot_proxima_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data):
     plt.ylabel('log Flare Rate (day$^{-1}$)')
 
 
-def plot_age_activity_relation(alpha, beta, lit_data):
+def fnPlotAgeActivityRelation(alpha, beta, lit_data):
     """Plot age-activity relationship"""
     m4083 = float(np.diff(np.log10(lit_data['gj4083_y'])) / np.diff(lit_data['gj4083_x']))
     b4083 = float((np.log10(lit_data['gj4083_y'])[0] - (m4083*lit_data['gj4083_x'][0])))
@@ -565,7 +648,7 @@ def plot_age_activity_relation(alpha, beta, lit_data):
 
     ages = np.array([50e6, 4.853e9, 8e9, 10e9])
     f313 = np.array([m1243*31.3 + b1243, -1.22*31.3+38.1,
-                     float(ffd_fit(np.array([31.3]), alpha, beta)), m4083*31.3 + b4083])
+                     float(fdFfdFit(np.array([31.3]), alpha, beta)), m4083*31.3 + b4083])
 
     plt.figure()
     plt.scatter(ages, f313)
@@ -576,19 +659,19 @@ def plot_age_activity_relation(alpha, beta, lit_data):
 
 # ===== Age Analysis Functions =====
 
-def run_age_analysis(alpha, beta, fit_results, params, stellar_mass=0.2):
+def fdictRunAgeAnalysis(alpha, beta, fit_results, params, stellar_mass=0.2):
     """Run age computation from FFD"""
     print("\n" + "="*60)
     print("Computing age of GJ 1132 from flare activity...")
     print("="*60)
     print(f"Assumed stellar mass: {stellar_mass} M_sun")
 
-    age_results = compute_age_from_ffd(alpha, beta, fit_results, params,
+    age_results = fdictComputeAgeFromFfd(alpha, beta, fit_results, params,
                                         stellar_mass=stellar_mass, n_samples=10000)
     return age_results
 
 
-def print_age_results(age_results):
+def fnPrintAgeResults(age_results):
     """Print formatted age analysis results"""
     print(f"\nMonte Carlo sampling complete:")
     print(f"  Valid samples from alpha: {age_results['n_valid_samples_alpha']} / 10000")
@@ -612,7 +695,7 @@ def print_age_results(age_results):
     print("="*60 + "\n")
 
 
-def plot_age_histograms(age_results):
+def fnPlotAgeHistograms(age_results):
     """Create age distribution histograms for both alpha and beta"""
     # Alpha histogram
     plt.figure(figsize=(10, 6))
@@ -651,13 +734,13 @@ def plot_age_histograms(age_results):
                 pad_inches=0.25, facecolor='w')
 
 
-def save_age_data(age_results, stellar_mass):
+def fnSaveAgeData(age_results, stellar_mass):
     """Save age estimates to text file"""
     output_filename = 'GJ1132_plausible_ages.txt'
     with open(output_filename, 'w') as f:
         # Write header with metadata and column descriptions
         f.write("# Age estimates for GJ 1132 from flare frequency distribution analysis\n")
-        f.write("# Derived using Barnes et al. 2026 FlareEqn model\n")
+        f.write("# Derived using Barnes et al. 2026 fdFlareEquation model\n")
         f.write(f"# Assumed stellar mass: {stellar_mass} M_sun\n")
         f.write(f"# Number of Monte Carlo samples: 10000\n#\n")
 
@@ -707,42 +790,42 @@ def save_age_data(age_results, stellar_mass):
 def main():
     """Main analysis workflow - orchestrates GJ 1132 flare analysis"""
     # Download and process TESS data
-    lc = download_tess_data()
-    totexp = calculate_total_exposure(lc)
+    lc = flistDownloadTessData()
+    totexp = fdCalculateTotalExposure(lc)
     print(f"Total exposure time: {totexp:.2f} days")
     print(f"Number of sectors: {len(lc)}")
 
     # Get flare parameters and stellar properties
-    sectors, t_start, t_stop, lumin = get_flare_parameters()
+    sectors, t_start, t_stop, lumin = ftGetFlareParameters()
     print(f"GJ 1132 log luminosity: {np.log10(lumin.value):.2f}")
 
     # Compute flare equivalent durations and plot lightcurves
-    ed = compute_flare_equivalent_durations(lc, sectors, t_start, t_stop)
-    plot_flare_lightcurves(lc, sectors, t_start, t_stop)
+    ed = fdaComputeFlareEquivalentDurations(lc, sectors, t_start, t_stop)
+    fnPlotFlareLightcurves(lc, sectors, t_start, t_stop)
 
     # Compute and fit FFD
-    ffd_x, ffd_y, ffd_xerr, ffd_yerr, fit_results = compute_and_fit_ffd(
+    ffd_x, ffd_y, ffd_xerr, ffd_yerr, fit_results = ftComputeAndFitFfd(
         ed, totexp, lumin, lc, t_start, t_stop)
-    print_ffd_results(fit_results)
+    fnPrintFfdResults(fit_results)
     alpha, beta = fit_results['alpha'], fit_results['beta']
 
     # Create all FFD plots
-    plot_basic_ffd(ffd_x, ffd_y, ffd_yerr, alpha, beta)
-    lit_data = get_literature_comparison_data()
-    plot_ffd_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data)
-    cluster_data = get_cluster_data()
-    plot_ilin_reproduction(cluster_data)
-    plot_comprehensive_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data, cluster_data)
-    plot_alpha_beta_comparison(alpha, beta, fit_results)
-    plot_proxima_comparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data)
-    plot_age_activity_relation(alpha, beta, lit_data)
+    fnPlotBasicFfd(ffd_x, ffd_y, ffd_yerr, alpha, beta)
+    lit_data = fdictGetLiteratureData()
+    fnPlotFfdComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data)
+    cluster_data = fdictGetClusterData()
+    fnPlotIlinReproduction(cluster_data)
+    fnPlotComprehensiveComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data, cluster_data)
+    fnPlotAlphaBetaComparison(alpha, beta, fit_results)
+    fnPlotProximaComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data)
+    fnPlotAgeActivityRelation(alpha, beta, lit_data)
 
     # Run age analysis
     stellar_mass = 0.2
-    age_results = run_age_analysis(alpha, beta, fit_results, cluster_data['params'], stellar_mass)
-    print_age_results(age_results)
-    plot_age_histograms(age_results)
-    save_age_data(age_results, stellar_mass)
+    age_results = fdictRunAgeAnalysis(alpha, beta, fit_results, cluster_data['params'], stellar_mass)
+    fnPrintAgeResults(age_results)
+    fnPlotAgeHistograms(age_results)
+    fnSaveAgeData(age_results, stellar_mass)
 
     print("\nAnalysis complete! Generated plots:")
     print("  - GJ1132_flares.pdf (3-panel flare plot)")
@@ -754,27 +837,27 @@ def main():
     print("  - GJ1132_age_distribution_beta.pdf")
 
 
-def ftRunPipeline():
+def ftRunPipeline(dictKeplerPosterior=None):
     """Run the shared TESS flare analysis pipeline.
 
     Returns a tuple of all intermediate results needed by any plot function.
     """
-    lc = download_tess_data()
-    totexp = calculate_total_exposure(lc)
+    lc = flistDownloadTessData()
+    totexp = fdCalculateTotalExposure(lc)
     print(f"Total exposure time: {totexp:.2f} days")
     print(f"Number of sectors: {len(lc)}")
 
-    sectors, t_start, t_stop, lumin = get_flare_parameters()
-    ed = compute_flare_equivalent_durations(lc, sectors, t_start, t_stop)
+    sectors, t_start, t_stop, lumin = ftGetFlareParameters()
+    ed = fdaComputeFlareEquivalentDurations(lc, sectors, t_start, t_stop)
 
-    ffd_x, ffd_y, ffd_xerr, ffd_yerr, fit_results = compute_and_fit_ffd(
+    ffd_x, ffd_y, ffd_xerr, ffd_yerr, fit_results = ftComputeAndFitFfd(
         ed, totexp, lumin, lc, t_start, t_stop)
-    print_ffd_results(fit_results)
+    fnPrintFfdResults(fit_results)
 
     dAlpha = fit_results['alpha']
     dBeta = fit_results['beta']
-    dictLiterature = get_literature_comparison_data()
-    dictCluster = get_cluster_data()
+    dictLiterature = fdictGetLiteratureData()
+    dictCluster = fdictGetClusterData(dictKeplerPosterior=dictKeplerPosterior)
 
     return (lc, sectors, t_start, t_stop, ffd_x, ffd_y, ffd_xerr,
             ffd_yerr, fit_results, dAlpha, dBeta, dictLiterature, dictCluster)
@@ -791,6 +874,8 @@ if __name__ == '__main__':
                         help="Generate comprehensive FFD comparison plot.")
     parser.add_argument('--plot-fit-comparison', metavar='PATH',
                         help="Generate Kepler vs TESS alpha-beta comparison.")
+    parser.add_argument('--kepler-posterior', metavar='PATH',
+                        help="Path to kepler_ffd_posterior_stats.json.")
     parser.add_argument('--tess-cache-dir', metavar='PATH',
                         help="Set lightkurve cache directory.")
     args = parser.parse_args()
@@ -802,20 +887,28 @@ if __name__ == '__main__':
         import os
         os.environ['LIGHTKURVE_CACHE_DIR'] = args.tess_cache_dir
 
+    dictKeplerPosterior = None
+    if args.kepler_posterior:
+        dictKeplerPosterior = fdictLoadKeplerPosterior(args.kepler_posterior)
+        print(f"Loaded Kepler posterior from {args.kepler_posterior} "
+              f"({dictKeplerPosterior['iNumSamples']} samples)")
+
     if bHasPlotFlag:
-        tPipeline = ftRunPipeline()
+        tPipeline = ftRunPipeline(
+            dictKeplerPosterior=dictKeplerPosterior)
         (lc, sectors, t_start, t_stop, ffd_x, ffd_y, ffd_xerr,
          ffd_yerr, fit_results, dAlpha, dBeta, dictLit, dictCluster) = tPipeline
 
         if args.plot_flares:
-            plot_flare_lightcurves(lc, sectors, t_start, t_stop,
+            fnPlotFlareLightcurves(lc, sectors, t_start, t_stop,
                                   sOutputPath=args.plot_flares)
         if args.plot_comprehensive:
-            plot_comprehensive_comparison(ffd_x, ffd_y, ffd_yerr, dAlpha,
+            fnPlotComprehensiveComparison(ffd_x, ffd_y, ffd_yerr, dAlpha,
                                          dBeta, dictLit, dictCluster,
                                          sOutputPath=args.plot_comprehensive)
         if args.plot_fit_comparison:
-            plot_alpha_beta_comparison(dAlpha, dBeta, fit_results,
-                                      sOutputPath=args.plot_fit_comparison)
+            fnPlotAlphaBetaComparison(dAlpha, dBeta, fit_results,
+                                      sOutputPath=args.plot_fit_comparison,
+                                      dictKeplerPosterior=dictKeplerPosterior)
     else:
         main()

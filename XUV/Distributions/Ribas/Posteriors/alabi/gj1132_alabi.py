@@ -440,30 +440,58 @@ def fdTestGPConfig(sm, dictConfig):
         return np.nan
 
 
+def fsScalerName(scaler):
+    """Return a human-readable name for a scaler object."""
+    if hasattr(scaler, "name"):
+        return scaler.name
+    return type(scaler).__name__
+
+
 def fdictSelectBestGPConfig(sm, dictBaseConfig, dictSearchGrid):
     """Grid-search kernel and scaler combinations, return the best by test MSE.
 
     Tests each combination via sm.init_gp(overwrite=True) and selects the
-    configuration with the lowest test set mean squared error.
+    configuration with the lowest test set mean squared error. Writes the
+    full comparison table to gp_grid_search_results.txt.
     """
     listCombinations = flistDictCartesianProduct(dictSearchGrid)
     iTotal = len(listCombinations)
     print(f"\nTesting {iTotal} GP hyperparameter combinations...")
     dBestMSE = np.inf
     dictBestConfig = None
+    listResults = []
     for iIdx, dictVariable in enumerate(listCombinations):
         dictConfig = {**dictBaseConfig, **dictVariable}
         dTestMSE = fdTestGPConfig(sm, dictConfig)
         bIsBest = np.isfinite(dTestMSE) and dTestMSE < dBestMSE
         sSuffix = "  <-- best" if bIsBest else ""
         print(f"  [{iIdx+1}/{iTotal}] MSE={dTestMSE:.4e}{sSuffix}")
+        listResults.append((dictVariable, dTestMSE))
         if bIsBest:
             dBestMSE = dTestMSE
             dictBestConfig = dictConfig
     if dictBestConfig is None:
         raise RuntimeError("All GP configurations failed during grid search")
     print(f"\n  Best test MSE: {dBestMSE:.4e}")
+    fnWriteGridSearchResults(listResults, dBestMSE)
     return dictBestConfig
+
+
+def fnWriteGridSearchResults(listResults, dBestMSE):
+    """Write grid search results to a text file for publication reference."""
+    sPath = os.path.join(sSaveDir, "gp_grid_search_results.txt")
+    with open(sPath, "w") as f:
+        f.write(f"{'Kernel':<25s} {'Theta Scaler':<18s} "
+                f"{'Y Scaler':<18s} {'Test MSE':<14s} {'Best'}\n")
+        f.write("-" * 80 + "\n")
+        for dictVariable, dMSE in listResults:
+            sKernel = dictVariable["kernel"]
+            sThetaScaler = fsScalerName(dictVariable["theta_scaler"])
+            sYScaler = fsScalerName(dictVariable["y_scaler"])
+            sBest = " <--" if dMSE == dBestMSE else ""
+            f.write(f"{sKernel:<25s} {sThetaScaler:<18s} "
+                    f"{sYScaler:<18s} {dMSE:<14.4e}{sBest}\n")
+    print(f"  Grid search results saved to {sPath}")
 
 
 def fnTrainSurrogate(sSaveDir):

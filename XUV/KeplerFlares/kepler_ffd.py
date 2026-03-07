@@ -16,6 +16,7 @@ Where:
 - b1, b2, b3: Control the normalization (intercept dependence)
 """
 
+import json
 import sys
 
 import numpy as np
@@ -26,7 +27,7 @@ from scipy.optimize import minimize, differential_evolution
 import corner
 import vplot
 
-def log_flare_rate_model(log_energy, log_age, mass, params):
+def fdaLogFlareRateModel(log_energy, log_age, mass, params):
     """
     Model for log10(flare rate) based on Davenport et al. 2019 Equation (3).
     
@@ -63,7 +64,7 @@ def log_flare_rate_model(log_energy, log_age, mass, params):
     
     return log_rate
 
-def log_likelihood_ensemble(params, log_energy, log_age, mass, observed_log_ff, log_ff_errors):
+def fdLogLikelihoodEnsemble(params, log_energy, log_age, mass, observed_log_ff, log_ff_errors):
     """
     Log-likelihood function for the ensemble flare frequency model.
     
@@ -91,7 +92,7 @@ def log_likelihood_ensemble(params, log_energy, log_age, mass, observed_log_ff, 
         Log-likelihood value
     """
     # Predict flare rates for all data points
-    predicted_log_ff = log_flare_rate_model(log_energy, log_age, mass, params)
+    predicted_log_ff = fdaLogFlareRateModel(log_energy, log_age, mass, params)
     
     # Calculate residuals
     residuals = observed_log_ff - predicted_log_ff
@@ -106,7 +107,7 @@ def log_likelihood_ensemble(params, log_energy, log_age, mass, observed_log_ff, 
     
     return log_like
 
-def log_prior_ensemble(params):
+def fdLogPriorEnsemble(params):
     """
     Log-prior function with physically motivated priors for ensemble analysis.
     
@@ -135,19 +136,19 @@ def log_prior_ensemble(params):
     else:
         return -np.inf  # Outside prior bounds
 
-def log_posterior_ensemble(params, log_energy, log_age, mass, observed_log_ff, log_ff_errors):
+def fdLogPosteriorEnsemble(params, log_energy, log_age, mass, observed_log_ff, log_ff_errors):
     """
     Log-posterior probability function for ensemble analysis.
     """
-    lp = log_prior_ensemble(params)
+    lp = fdLogPriorEnsemble(params)
     if not np.isfinite(lp):
         return -np.inf
     
-    ll = log_likelihood_ensemble(params, log_energy, log_age, mass, observed_log_ff, log_ff_errors)
+    ll = fdLogLikelihoodEnsemble(params, log_energy, log_age, mass, observed_log_ff, log_ff_errors)
     
     return lp + ll
 
-def find_initial_guess_ensemble(log_energy, log_age, mass, observed_log_ff, log_ff_errors):
+def fdaFindInitialGuess(log_energy, log_age, mass, observed_log_ff, log_ff_errors):
     """
     Find initial parameter guess using maximum likelihood estimation for ensemble data.
     
@@ -158,7 +159,7 @@ def find_initial_guess_ensemble(log_energy, log_age, mass, observed_log_ff, log_
     """
     
     def neg_log_likelihood(params):
-        return -log_likelihood_ensemble(params, log_energy, log_age, mass, observed_log_ff, log_ff_errors)
+        return -fdLogLikelihoodEnsemble(params, log_energy, log_age, mass, observed_log_ff, log_ff_errors)
     
     # Better initial guess based on corrected parameter roles
     # a1, a2, a3 control slope; b1, b2, b3 control intercept
@@ -184,7 +185,7 @@ def find_initial_guess_ensemble(log_energy, log_age, mass, observed_log_ff, log_
         print("Using default initial guess")
         return np.array(p0)
 
-def load_and_process_ensemble_data(data_file):
+def ftLoadEnsembleData(data_file):
     """
     Load and process the ensemble flare frequency data.
     
@@ -290,7 +291,7 @@ def load_and_process_ensemble_data(data_file):
     
     return log_energy, log_age, mass, observed_log_ff, log_ff_errors, star_ids
 
-def run_mcmc_ensemble(data_file, nwalkers=32, nsteps=5000, burn_in=1000, thin=10):
+def fnRunMcmcEnsemble(data_file, nwalkers=32, nsteps=5000, burn_in=1000, thin=10):
     """
     Run MCMC sampling to infer flare frequency parameters from ensemble data.
     
@@ -314,11 +315,11 @@ def run_mcmc_ensemble(data_file, nwalkers=32, nsteps=5000, burn_in=1000, thin=10
     """
     
     # Load and process ensemble data
-    log_energy, log_age, mass, observed_log_ff, log_ff_errors, star_ids = load_and_process_ensemble_data(data_file)
+    log_energy, log_age, mass, observed_log_ff, log_ff_errors, star_ids = ftLoadEnsembleData(data_file)
     
     # Find initial parameter estimate
     print("Finding initial parameter guess...")
-    initial_params = find_initial_guess_ensemble(log_energy, log_age, mass, observed_log_ff, log_ff_errors)
+    initial_params = fdaFindInitialGuess(log_energy, log_age, mass, observed_log_ff, log_ff_errors)
     print(f"Initial parameters: a1={initial_params[0]:.3f}, a2={initial_params[1]:.3f}, a3={initial_params[2]:.3f}")
     print(f"                   b1={initial_params[3]:.3f}, b2={initial_params[4]:.3f}, b3={initial_params[5]:.3f}")
     
@@ -331,12 +332,12 @@ def run_mcmc_ensemble(data_file, nwalkers=32, nsteps=5000, burn_in=1000, thin=10
     
     # Ensure all walkers start within prior bounds
     for i in range(nwalkers):
-        while log_prior_ensemble(pos[i]) == -np.inf:
+        while fdLogPriorEnsemble(pos[i]) == -np.inf:
             pos[i] = initial_params + 0.1 * np.random.randn(ndim)
     
     # Create sampler for ensemble analysis
     sampler = emcee.EnsembleSampler(
-        nwalkers, ndim, log_posterior_ensemble, 
+        nwalkers, ndim, fdLogPosteriorEnsemble, 
         args=(log_energy, log_age, mass, observed_log_ff, log_ff_errors)
     )
     
@@ -364,7 +365,7 @@ def run_mcmc_ensemble(data_file, nwalkers=32, nsteps=5000, burn_in=1000, thin=10
     
     return sampler
 
-def save_samples(samples, param_names, filename='flare_mcmc_samples.txt'):
+def fsSaveSamples(samples, param_names, filename='flare_mcmc_samples.txt'):
     """
     Save MCMC samples to file with header information.
     
@@ -401,7 +402,7 @@ def save_samples(samples, param_names, filename='flare_mcmc_samples.txt'):
     
     return filename
 
-def save_samples_multiple_formats(samples, param_names, base_filename='flare_mcmc_samples'):
+def fdictSaveMultipleFormats(samples, param_names, base_filename='flare_mcmc_samples'):
     """
     Save MCMC samples in multiple formats for different use cases.
     
@@ -424,7 +425,7 @@ def save_samples_multiple_formats(samples, param_names, base_filename='flare_mcm
     
     # 1. Plain text file (easy to read, good for plotting)
     txt_file = f"{base_filename}.txt"
-    save_samples(samples, param_names, txt_file)
+    fsSaveSamples(samples, param_names, txt_file)
     filenames['txt'] = txt_file
     
     # 2. CSV file (easy to load in Excel, R, etc.)
@@ -458,7 +459,7 @@ def save_samples_multiple_formats(samples, param_names, base_filename='flare_mcm
         print(f"  {fmt.upper()}: {filename}")
     
     return filenames
-def analyze_results(sampler, thin=10, save_samples_flag=True):
+def fdaAnalyzeResults(sampler, thin=10, bSaveSamples=True):
     """
     Analyze MCMC results and create plots.
     
@@ -468,7 +469,7 @@ def analyze_results(sampler, thin=10, save_samples_flag=True):
         MCMC sampler with results
     thin : int
         Thinning factor for analysis
-    save_samples_flag : bool
+    bSaveSamples : bool
         Whether to save the samples to file
         
     Returns:
@@ -485,8 +486,8 @@ def analyze_results(sampler, thin=10, save_samples_flag=True):
     param_names = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3']
     
     # Save samples to file if requested
-    if save_samples_flag:
-        filenames = save_samples_multiple_formats(samples, param_names)
+    if bSaveSamples:
+        filenames = fdictSaveMultipleFormats(samples, param_names)
     
     # Calculate statistics
     print("\nParameter estimates (median ± 1σ):")
@@ -536,24 +537,52 @@ def analyze_results(sampler, thin=10, save_samples_flag=True):
 
 def fnPlotCornerFromSamples(daSamples, sOutputPath):
     """Generate a corner plot from a pre-existing samples array."""
+    listLabels = [r"$a_1$", r"$a_2$", r"$a_3$", r"$b_1$", r"$b_2$", r"$b_3$"]
     fig = corner.corner(
         daSamples,
+        labels=listLabels,
         quantiles=[0.16, 0.5, 0.84],
-        show_titles=True,
-        title_kwargs={"fontsize": 12},
+        show_titles=False,
+        label_kwargs={"fontsize": 20},
+        labelpad=0.1,
     )
+    iNumParams = daSamples.shape[1]
+    daAxes = np.array(fig.axes).reshape((iNumParams, iNumParams))
+    for i in range(iNumParams):
+        for j in range(iNumParams):
+            if i >= j:
+                daAxes[i, j].tick_params(axis="both", labelsize=14)
     plt.savefig(sOutputPath, dpi=150, bbox_inches='tight')
     plt.close()
     print(f"Corner plot saved to: {sOutputPath}")
+
+
+def fnWritePosteriorStatistics(daSamples, sOutputPath):
+    """Write posterior medians and full covariance matrix to JSON."""
+    daMedians = np.median(daSamples, axis=0).tolist()
+    daCovarianceMatrix = np.cov(daSamples, rowvar=False).tolist()
+    listParamNames = ["a1", "a2", "a3", "b1", "b2", "b3"]
+    iNumSamples = daSamples.shape[0]
+
+    dictStatistics = {
+        "daMedians": daMedians,
+        "daCovarianceMatrix": daCovarianceMatrix,
+        "listParamNames": listParamNames,
+        "iNumSamples": iNumSamples,
+    }
+
+    with open(sOutputPath, "w") as fileHandle:
+        json.dump(dictStatistics, fileHandle, indent=2)
+
+    print(f"Posterior statistics saved to: {sOutputPath}")
 
 
 if __name__ == "__main__":
     import os
 
     sCornerOutput = sys.argv[1] if len(sys.argv) > 1 else 'CornerVariableSlope.pdf'
-    sCachedSamples = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "flare_mcmc_samples.npy"
-    )
+    sScriptDirectory = os.path.dirname(os.path.abspath(__file__))
+    sCachedSamples = os.path.join(sScriptDirectory, "flare_mcmc_samples.npy")
 
     if os.path.exists(sCachedSamples):
         print("Loading cached MCMC samples...")
@@ -569,8 +598,11 @@ if __name__ == "__main__":
         print("  b1, b2, b3: Control normalization (intercept)")
         print("=" * 50)
 
-        sampler = run_mcmc_ensemble(
+        sampler = fnRunMcmcEnsemble(
             "ensemble_FFD.csv", nwalkers=32, nsteps=8000, burn_in=1000
         )
-        samples = analyze_results(sampler)
-        fnPlotCornerFromSamples(samples, sCornerOutput)
+        daSamples = fdaAnalyzeResults(sampler)
+        fnPlotCornerFromSamples(daSamples, sCornerOutput)
+
+    sStatsOutput = os.path.join(sScriptDirectory, "kepler_ffd_posterior_stats.json")
+    fnWritePosteriorStatistics(daSamples, sStatsOutput)

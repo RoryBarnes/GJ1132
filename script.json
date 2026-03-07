@@ -17,7 +17,8 @@
       ],
       "saOutputFiles": [
         "{sPlotDirectory}/CornerVariableSlope.{sFigureType}",
-        "flare_mcmc_samples.npy"
+        "flare_mcmc_samples.npy",
+        "kepler_ffd_posterior_stats.json"
       ]
     },
     {
@@ -53,7 +54,7 @@
       "bPlotOnly": true,
       "saSetupCommands": [],
       "saCommands": [
-        "python flares_from_TESS.py --plot-comprehensive {sPlotDirectory}/GJ1132_FFD_comp2.{sFigureType}"
+        "python flares_from_TESS.py --kepler-posterior {Scene01.kepler_ffd_posterior_stats} --plot-comprehensive {sPlotDirectory}/GJ1132_FFD_comp2.{sFigureType}"
       ],
       "saOutputFiles": [
         "{sPlotDirectory}/GJ1132_FFD_comp2.{sFigureType}"
@@ -171,7 +172,7 @@
       "bPlotOnly": true,
       "saSetupCommands": [],
       "saCommands": [
-        "python flares_from_TESS.py --plot-fit-comparison {sPlotDirectory}/FitComparison.{sFigureType}"
+        "python flares_from_TESS.py --kepler-posterior {Scene01.kepler_ffd_posterior_stats} --plot-fit-comparison {sPlotDirectory}/FitComparison.{sFigureType}"
       ],
       "saOutputFiles": [
         "{sPlotDirectory}/FitComparison.{sFigureType}"
