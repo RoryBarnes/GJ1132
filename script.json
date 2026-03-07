@@ -35,13 +35,26 @@
       ]
     },
     {
+      "sName": "TESS Flare Candidates",
+      "sDirectory": "XUV/TESS",
+      "bEnabled": true,
+      "bPlotOnly": true,
+      "saSetupCommands": [],
+      "saCommands": [
+        "python identifyFlareCandidates.py --review flare_candidates.json"
+      ],
+      "saOutputFiles": [
+        "flare_candidates.json"
+      ]
+    },
+    {
       "sName": "TESS Flare Lightcurves",
       "sDirectory": "XUV/TESS",
       "bEnabled": true,
       "bPlotOnly": true,
       "saSetupCommands": [],
       "saCommands": [
-        "python flares_from_TESS.py --plot-flares {sPlotDirectory}/GJ1132_flares.{sFigureType}"
+        "python flares_from_TESS.py --flare-candidates {Scene03.flare_candidates} --plot-flares {sPlotDirectory}/GJ1132_flares.{sFigureType}"
       ],
       "saOutputFiles": [
         "{sPlotDirectory}/GJ1132_flares.{sFigureType}"
@@ -54,7 +67,7 @@
       "bPlotOnly": true,
       "saSetupCommands": [],
       "saCommands": [
-        "python flares_from_TESS.py --kepler-posterior {Scene01.kepler_ffd_posterior_stats} --plot-comprehensive {sPlotDirectory}/GJ1132_FFD_comp2.{sFigureType}"
+        "python flares_from_TESS.py --flare-candidates {Scene03.flare_candidates} --kepler-posterior {Scene01.kepler_ffd_posterior_stats} --plot-comprehensive {sPlotDirectory}/GJ1132_FFD_comp2.{sFigureType}"
       ],
       "saOutputFiles": [
         "{sPlotDirectory}/GJ1132_FFD_comp2.{sFigureType}"
@@ -113,7 +126,7 @@
       "saSetupCommands": [
         "echo '--- EngleBarnes: copying priors ---'",
         "cp {Scene01.flare_mcmc_samples} EngleBarnes/flares_variable_slope.npy",
-        "cp {Scene06.age_samples} EngleBarnes/age_samples.txt",
+        "cp {Scene07.age_samples} EngleBarnes/age_samples.txt",
         "cp {sRepoRoot}/priors/dynesty_transform_final.npy EngleBarnes/dynesty_transform_final.npy",
         "cp EngleBarnes/output/Converged_Param_Dictionary.json EngleBarnes/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
         "echo '--- EngleBarnes: running vconverge ---'",
@@ -121,7 +134,7 @@
         "rm -f EngleBarnes/.Converged_Param_Dictionary.json.bak",
         "echo '--- RibasBarnes: copying priors ---'",
         "cp {Scene01.flare_mcmc_samples} RibasBarnes/flares_variable_slope.npy",
-        "cp {Scene06.age_samples} RibasBarnes/age_samples.txt",
+        "cp {Scene07.age_samples} RibasBarnes/age_samples.txt",
         "cp {sRepoRoot}/priors/dynesty_transform_final.npy RibasBarnes/dynesty_transform_final.npy",
         "cp RibasBarnes/output/Converged_Param_Dictionary.json RibasBarnes/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
         "echo '--- RibasBarnes: running vconverge ---'",
@@ -172,7 +185,7 @@
       "bPlotOnly": true,
       "saSetupCommands": [],
       "saCommands": [
-        "python flares_from_TESS.py --kepler-posterior {Scene01.kepler_ffd_posterior_stats} --plot-fit-comparison {sPlotDirectory}/FitComparison.{sFigureType}"
+        "python flares_from_TESS.py --flare-candidates {Scene03.flare_candidates} --kepler-posterior {Scene01.kepler_ffd_posterior_stats} --plot-fit-comparison {sPlotDirectory}/FitComparison.{sFigureType}"
       ],
       "saOutputFiles": [
         "{sPlotDirectory}/FitComparison.{sFigureType}"

@@ -289,13 +289,35 @@ def fdCalculateTotalExposure(lc):
     return totexp
 
 
-def ftGetFlareParameters():
-    """Return flare detection parameters and stellar properties for GJ 1132"""
+def ftGetFlareParameters(sFlareJsonPath=None):
+    """Return flare detection parameters and stellar properties for GJ 1132.
+
+    If sFlareJsonPath is provided, load labeled flares from the JSON
+    produced by identifyFlareCandidates.py. Otherwise fall back to
+    hard-coded values.
+    """
+    dLuminosity = 4.77e-3 * const.L_sun.to('erg/s')
+    if sFlareJsonPath is not None:
+        return ftLoadFlaresFromJson(sFlareJsonPath, dLuminosity)
     sectors = [2, 2, 3]
     t_start = np.array([2284.8817, 2291.2813, 3029.6533])
     t_stop = np.array([2284.8905, 2291.3374, 3029.6852])
-    lumin = 4.77e-3 * const.L_sun.to('erg/s')
-    return sectors, t_start, t_stop, lumin
+    return sectors, t_start, t_stop, dLuminosity
+
+
+def ftLoadFlaresFromJson(sFilePath, dLuminosity):
+    """Load labeled flares from identifyFlareCandidates.py JSON output."""
+    with open(sFilePath, 'r') as fileHandle:
+        dictSession = json.load(fileHandle)
+    listFlares = [c for c in dictSession['listCandidates']
+                  if c.get('sLabel') == 'flare']
+    if len(listFlares) == 0:
+        raise ValueError(f"No flares labeled in {sFilePath}")
+    sectors = [c['iSectorIndex'] for c in listFlares]
+    t_start = np.array([c['dTimeStart'] for c in listFlares])
+    t_stop = np.array([c['dTimeStop'] for c in listFlares])
+    print(f"Loaded {len(listFlares)} flares from {sFilePath}")
+    return sectors, t_start, t_stop, dLuminosity
 
 
 # ===== Literature Data Functions =====
@@ -837,7 +859,7 @@ def main():
     print("  - GJ1132_age_distribution_beta.pdf")
 
 
-def ftRunPipeline(dictKeplerPosterior=None):
+def ftRunPipeline(dictKeplerPosterior=None, sFlareJsonPath=None):
     """Run the shared TESS flare analysis pipeline.
 
     Returns a tuple of all intermediate results needed by any plot function.
@@ -847,7 +869,7 @@ def ftRunPipeline(dictKeplerPosterior=None):
     print(f"Total exposure time: {totexp:.2f} days")
     print(f"Number of sectors: {len(lc)}")
 
-    sectors, t_start, t_stop, lumin = ftGetFlareParameters()
+    sectors, t_start, t_stop, lumin = ftGetFlareParameters(sFlareJsonPath)
     ed = fdaComputeFlareEquivalentDurations(lc, sectors, t_start, t_stop)
 
     ffd_x, ffd_y, ffd_xerr, ffd_yerr, fit_results = ftComputeAndFitFfd(
@@ -874,6 +896,9 @@ if __name__ == '__main__':
                         help="Generate comprehensive FFD comparison plot.")
     parser.add_argument('--plot-fit-comparison', metavar='PATH',
                         help="Generate Kepler vs TESS alpha-beta comparison.")
+    parser.add_argument('--flare-candidates', metavar='PATH',
+                        help="Path to flare_candidates.json from "
+                             "identifyFlareCandidates.py.")
     parser.add_argument('--kepler-posterior', metavar='PATH',
                         help="Path to kepler_ffd_posterior_stats.json.")
     parser.add_argument('--tess-cache-dir', metavar='PATH',
@@ -895,7 +920,8 @@ if __name__ == '__main__':
 
     if bHasPlotFlag:
         tPipeline = ftRunPipeline(
-            dictKeplerPosterior=dictKeplerPosterior)
+            dictKeplerPosterior=dictKeplerPosterior,
+            sFlareJsonPath=args.flare_candidates)
         (lc, sectors, t_start, t_stop, ffd_x, ffd_y, ffd_xerr,
          ffd_yerr, fit_results, dAlpha, dBeta, dictLit, dictCluster) = tPipeline
 
