@@ -76,7 +76,8 @@ def fdComputeEquivalentDuration(daFlux, daTime, iStart, iStop):
     """Integrate (flux - 1) * dt over the candidate window (seconds)."""
     daSliceFlux = daFlux[iStart:iStop + 1] - 1.0
     daSliceTime = daTime[iStart:iStop + 1] * 86400.0
-    return float(np.trapezoid(daSliceFlux, daSliceTime))
+    daTrapezoid = getattr(np, 'trapezoid', np.trapz)
+    return float(daTrapezoid(daSliceFlux, daSliceTime))
 
 
 def fdictBuildCandidate(daFluxNorm, daFluxFlat, daTime, iaGroup,

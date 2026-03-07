@@ -302,7 +302,7 @@ def ftGetFlareParameters(sFlareJsonPath=None):
     sectors = [2, 2, 3]
     t_start = np.array([2284.8817, 2291.2813, 3029.6533])
     t_stop = np.array([2284.8905, 2291.3374, 3029.6852])
-    return sectors, t_start, t_stop, dLuminosity
+    return sectors, t_start, t_stop, dLuminosity, None
 
 
 def ftLoadFlaresFromJson(sFilePath, dLuminosity):
@@ -316,8 +316,9 @@ def ftLoadFlaresFromJson(sFilePath, dLuminosity):
     sectors = [c['iSectorIndex'] for c in listFlares]
     t_start = np.array([c['dTimeStart'] for c in listFlares])
     t_stop = np.array([c['dTimeStop'] for c in listFlares])
+    daPeakSigma = np.array([c['dPeakSigma'] for c in listFlares])
     print(f"Loaded {len(listFlares)} flares from {sFilePath}")
-    return sectors, t_start, t_stop, dLuminosity
+    return sectors, t_start, t_stop, dLuminosity, daPeakSigma
 
 
 # ===== Literature Data Functions =====
@@ -425,19 +426,36 @@ def fdaComputeFlareEquivalentDurations(lc, sectors, t_start, t_stop):
     for k in range(len(t_start)):
         flare = np.where((lc[sectors[k]]['time'].value >= t_start[k]) &
                          (lc[sectors[k]]['time'].value <= t_stop[k]))[0]
-        ed[k] = np.trapezoid(lc[sectors[k]].normalize()['flux'].value[flare] - 1,
-                             lc[sectors[k]]['time'].value[flare]*60*60*24)
+        daTrapezoid = getattr(np, 'trapezoid', np.trapz)
+        ed[k] = daTrapezoid(lc[sectors[k]].normalize()['flux'].value[flare] - 1,
+                            lc[sectors[k]]['time'].value[flare]*60*60*24)
         print(f"  Flare {k}: ED = {ed[k]:.2e} s")
     return ed
 
 
-def fnPlotFlareLightcurves(lc, sectors, t_start, t_stop, sOutputPath=None):
-    """Create 3-panel flare lightcurve plot."""
-    fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharey=True)
-    for k in range(len(t_start)):
+def ftComputePanelLayout(iNumFlares):
+    """Return (iRows, iCols) for the flare lightcurve grid.
+
+    1-3 flares: single row.  4-6 flares: two rows of 2-3 columns.
+    """
+    if iNumFlares <= 3:
+        return 1, iNumFlares
+    iCols = (iNumFlares + 1) // 2
+    return 2, iCols
+
+
+def fnPlotFlareLightcurves(lc, sectors, t_start, t_stop,
+                           daPeakSigma=None, sOutputPath=None):
+    """Create multi-panel flare lightcurve plot."""
+    iNumFlares = len(t_start)
+    iRows, iCols = ftComputePanelLayout(iNumFlares)
+    fig, axes = plt.subplots(iRows, iCols,
+                             figsize=(5 * iCols, 5 * iRows), sharey=True)
+    daAxesFlat = np.atleast_1d(axes).flatten()
+    for k in range(iNumFlares):
         flare = np.where((lc[sectors[k]]['time'].value >= t_start[k]) &
                          (lc[sectors[k]]['time'].value <= t_stop[k]))[0]
-        ax = axes[k]
+        ax = daAxesFlat[k]
         ax.plot(lc[sectors[k]]['time'].value - np.nanmin(lc[sectors[k]]['time'].value[flare]),
                 lc[sectors[k]].normalize()['flux'].value, c='k')
         ax.scatter(lc[sectors[k]]['time'].value[flare] - np.nanmin(lc[sectors[k]]['time'].value[flare]),
@@ -445,8 +463,14 @@ def fnPlotFlareLightcurves(lc, sectors, t_start, t_stop, sOutputPath=None):
         ax.set_xlim(-0.05, 0.1)
         ax.set_xlabel('Time [days]', fontsize=20)
         ax.tick_params(axis='both', labelsize=16)
-        if k == 0:
+        if k % iCols == 0:
             ax.set_ylabel('Relative Flux', fontsize=20)
+        if daPeakSigma is not None:
+            ax.text(0.05, 0.95, f'{daPeakSigma[k]:.1f}σ',
+                    transform=ax.transAxes, fontsize=16,
+                    verticalalignment='top')
+    for k in range(iNumFlares, iRows * iCols):
+        daAxesFlat[k].set_visible(False)
     plt.tight_layout()
     sFile = sOutputPath if sOutputPath else 'GJ1132_flares.pdf'
     plt.savefig(sFile, dpi=300, bbox_inches='tight',
@@ -818,12 +842,13 @@ def main():
     print(f"Number of sectors: {len(lc)}")
 
     # Get flare parameters and stellar properties
-    sectors, t_start, t_stop, lumin = ftGetFlareParameters()
+    sectors, t_start, t_stop, lumin, daPeakSigma = ftGetFlareParameters()
     print(f"GJ 1132 log luminosity: {np.log10(lumin.value):.2f}")
 
     # Compute flare equivalent durations and plot lightcurves
     ed = fdaComputeFlareEquivalentDurations(lc, sectors, t_start, t_stop)
-    fnPlotFlareLightcurves(lc, sectors, t_start, t_stop)
+    fnPlotFlareLightcurves(lc, sectors, t_start, t_stop,
+                           daPeakSigma=daPeakSigma)
 
     # Compute and fit FFD
     ffd_x, ffd_y, ffd_xerr, ffd_yerr, fit_results = ftComputeAndFitFfd(
@@ -869,7 +894,8 @@ def ftRunPipeline(dictKeplerPosterior=None, sFlareJsonPath=None):
     print(f"Total exposure time: {totexp:.2f} days")
     print(f"Number of sectors: {len(lc)}")
 
-    sectors, t_start, t_stop, lumin = ftGetFlareParameters(sFlareJsonPath)
+    sectors, t_start, t_stop, lumin, daPeakSigma = ftGetFlareParameters(
+        sFlareJsonPath)
     ed = fdaComputeFlareEquivalentDurations(lc, sectors, t_start, t_stop)
 
     ffd_x, ffd_y, ffd_xerr, ffd_yerr, fit_results = ftComputeAndFitFfd(
@@ -881,8 +907,9 @@ def ftRunPipeline(dictKeplerPosterior=None, sFlareJsonPath=None):
     dictLiterature = fdictGetLiteratureData()
     dictCluster = fdictGetClusterData(dictKeplerPosterior=dictKeplerPosterior)
 
-    return (lc, sectors, t_start, t_stop, ffd_x, ffd_y, ffd_xerr,
-            ffd_yerr, fit_results, dAlpha, dBeta, dictLiterature, dictCluster)
+    return (lc, sectors, t_start, t_stop, daPeakSigma, ffd_x, ffd_y,
+            ffd_xerr, ffd_yerr, fit_results, dAlpha, dBeta,
+            dictLiterature, dictCluster)
 
 
 if __name__ == '__main__':
@@ -922,11 +949,13 @@ if __name__ == '__main__':
         tPipeline = ftRunPipeline(
             dictKeplerPosterior=dictKeplerPosterior,
             sFlareJsonPath=args.flare_candidates)
-        (lc, sectors, t_start, t_stop, ffd_x, ffd_y, ffd_xerr,
-         ffd_yerr, fit_results, dAlpha, dBeta, dictLit, dictCluster) = tPipeline
+        (lc, sectors, t_start, t_stop, daPeakSigma, ffd_x, ffd_y,
+         ffd_xerr, ffd_yerr, fit_results, dAlpha, dBeta,
+         dictLit, dictCluster) = tPipeline
 
         if args.plot_flares:
             fnPlotFlareLightcurves(lc, sectors, t_start, t_stop,
+                                  daPeakSigma=daPeakSigma,
                                   sOutputPath=args.plot_flares)
         if args.plot_comprehensive:
             fnPlotComprehensiveComparison(ffd_x, ffd_y, ffd_yerr, dAlpha,
