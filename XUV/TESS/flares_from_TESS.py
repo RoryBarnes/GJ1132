@@ -357,20 +357,29 @@ def fdaComputeProjectionJacobian(dLogAge, dMass):
     return daJacobian
 
 
-def fnPrintParameterTension(sName, dPredicted, dPredVariance,
-                            dObserved, dObsVariance):
-    """Print the tension between predicted and observed values in sigma."""
-    dTotalVariance = dPredVariance + dObsVariance
-    if dTotalVariance <= 0:
-        print(f"  {sName}: variance is zero, cannot compute tension")
-        return
-    dSigma = abs(dPredicted - dObserved) / np.sqrt(dTotalVariance)
-    print(f"  {sName}: predicted={dPredicted:.4f}, observed={dObserved:.4f}, "
-          f"tension={dSigma:.2f} sigma")
+def fdComputeJointTensionSigma(daDelta, daCovarianceMatrix):
+    """Return the equivalent sigma for a 2D offset given the joint covariance.
+
+    Computes chi2 = delta^T @ C^{-1} @ delta, then converts to an
+    equivalent Gaussian sigma via the chi-squared CDF with 2 DOF.
+    See Press et al. (1992), Numerical Recipes, Section 15.6.
+    """
+    from scipy.stats import chi2 as chi2dist
+    daCovarianceInverse = np.linalg.inv(daCovarianceMatrix)
+    dChi2 = float(daDelta @ daCovarianceInverse @ daDelta)
+    dPValue = 1.0 - chi2dist.cdf(dChi2, df=2)
+    from scipy.stats import norm
+    dSigma = float(norm.ppf(1.0 - dPValue / 2.0))
+    return dChi2, dPValue, dSigma
 
 
 def fnPrintKeplerTessDiscrepancy(dictFitResults, daMedians, daCovarianceMatrix):
-    """Quantify Kepler-predicted vs TESS-measured alpha/beta discrepancy."""
+    """Quantify Kepler-predicted vs TESS-measured alpha/beta discrepancy.
+
+    Uses the joint 2D chi-squared statistic to account for the strong
+    correlation between alpha and beta in the TESS fit.  Marginal
+    (1D) tensions are also printed for reference.
+    """
     dLogAge = np.log10(8000)  # 8 Gyr in Myr
     dMass = 0.2
 
@@ -382,17 +391,37 @@ def fnPrintKeplerTessDiscrepancy(dictFitResults, daMedians, daCovarianceMatrix):
     dPredBeta = (daMedians[3] * dLogAge + daMedians[4] * dMass
                  + daMedians[5])
 
+    daDelta = np.array([
+        dictFitResults["alpha"] - dPredAlpha,
+        dictFitResults["beta"] - dPredBeta,
+    ])
+    daTotalCovariance = daProjectedCovariance + dictFitResults["pcov"]
+    dChi2, dPValue, dJointSigma = fdComputeJointTensionSigma(
+        daDelta, daTotalCovariance)
+
+    dMarginalAlpha = (abs(daDelta[0])
+                      / np.sqrt(daProjectedCovariance[0, 0]
+                                + dictFitResults["alpha_err"] ** 2))
+    dMarginalBeta = (abs(daDelta[1])
+                     / np.sqrt(daProjectedCovariance[1, 1]
+                               + dictFitResults["beta_err"] ** 2))
+
     print("\n" + "=" * 60)
     print("Kepler vs TESS discrepancy")
     print("=" * 60)
-    fnPrintParameterTension(
-        "alpha", dPredAlpha, daProjectedCovariance[0, 0],
-        dictFitResults["alpha"], dictFitResults["alpha_err"] ** 2,
-    )
-    fnPrintParameterTension(
-        "beta", dPredBeta, daProjectedCovariance[1, 1],
-        dictFitResults["beta"], dictFitResults["beta_err"] ** 2,
-    )
+    print(f"  Predicted (8 Gyr): alpha={dPredAlpha:.4f}, "
+          f"beta={dPredBeta:.4f}")
+    print(f"  Observed (TESS):   alpha={dictFitResults['alpha']:.4f}, "
+          f"beta={dictFitResults['beta']:.4f}")
+    print(f"\n  Marginal tensions (ignoring alpha-beta correlation):")
+    print(f"    alpha: {dMarginalAlpha:.2f} sigma")
+    print(f"    beta:  {dMarginalBeta:.2f} sigma")
+    print(f"\n  TESS fit correlation coefficient: "
+          f"{dictFitResults['pcov'][0,1] / (dictFitResults['alpha_err'] * dictFitResults['beta_err']):.4f}")
+    print(f"\n  Joint 2D tension (accounts for alpha-beta correlation):")
+    print(f"    chi2 = {dChi2:.2f} (2 DOF)")
+    print(f"    p-value = {dPValue:.4f}")
+    print(f"    equivalent sigma = {dJointSigma:.2f}")
     print("=" * 60 + "\n")
 
 
@@ -413,8 +442,13 @@ def fdictGetClusterData(dictKeplerPosterior=None):
     IEmin = np.array([1.31e32, 2.32e32, 0.4e33])
     IEmax = np.array([0.84e34, 2.11e34, 0.36e35])
     clrs = [vplot.colors.dark_blue, vplot.colors.red, vplot.colors.orange]
-    return {'params': params, 'cluster': cluster, 'ages': Iages,
-            'alpha': Ialpha, 'beta': Ibeta, 'Emin': IEmin, 'Emax': IEmax, 'colors': clrs}
+    daCovarianceMatrix = None
+    if dictKeplerPosterior is not None:
+        daCovarianceMatrix = dictKeplerPosterior["daCovarianceMatrix"]
+    return {'params': params, 'covariance': daCovarianceMatrix,
+            'cluster': cluster, 'ages': Iages,
+            'alpha': Ialpha, 'beta': Ibeta, 'Emin': IEmin, 'Emax': IEmax,
+            'colors': clrs}
 
 
 # ===== Flare Analysis Functions =====
@@ -562,14 +596,73 @@ def fnPlotIlinReproduction(cluster_data):
     plt.ylabel('Flare Rate (year$^{-1}$)')
 
 
-def fnPlotComprehensiveComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data, cluster_data, sOutputPath=None):
+def fdaComputePredictionBand(daLogEnergy, daParams, daCovarianceMatrix,
+                             dLogAge, dMass, iNumSamples=1000):
+    """Return (daMedian, daLower1, daUpper1, daLower2, daUpper2) for the
+    Kepler-predicted FFD evaluated over daLogEnergy.
+
+    Draws samples from the 6-parameter posterior, evaluates fdFlareEquation
+    at each, and returns the median plus 1-sigma and 2-sigma percentile
+    envelopes.
+    """
+    daSamples = np.random.multivariate_normal(
+        daParams, daCovarianceMatrix, size=iNumSamples)
+    daLogAge = np.full_like(daLogEnergy, dLogAge)
+    daMass = np.full_like(daLogEnergy, dMass)
+    daRates = np.array([
+        fdFlareEquation((daLogEnergy, daLogAge, daMass), *s)
+        for s in daSamples
+    ])
+    daMedian = np.percentile(daRates, 50, axis=0)
+    daLower1 = np.percentile(daRates, 16, axis=0)
+    daUpper1 = np.percentile(daRates, 84, axis=0)
+    daLower2 = np.percentile(daRates, 2.5, axis=0)
+    daUpper2 = np.percentile(daRates, 97.5, axis=0)
+    return daMedian, daLower1, daUpper1, daLower2, daUpper2
+
+
+def fdaComputeTessFitBand(daLogEnergy, dAlpha, dBeta, daCovarianceMatrix,
+                          iNumSamples=1000):
+    """Return (daLower, daUpper) 1-sigma band for the TESS FFD fit.
+
+    Draws correlated (alpha, beta) samples from the fit covariance and
+    evaluates the linear FFD model at each, returning the 16th and 84th
+    percentile envelopes.
+    """
+    daSamples = np.random.multivariate_normal(
+        [dAlpha, dBeta], daCovarianceMatrix, size=iNumSamples)
+    daRates = np.array([
+        fdFfdFit(daLogEnergy, s[0], s[1]) for s in daSamples
+    ])
+    daLower = np.percentile(daRates, 16, axis=0)
+    daUpper = np.percentile(daRates, 84, axis=0)
+    return daLower, daUpper
+
+
+def fnPlotComprehensiveComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta,
+                                  lit_data, cluster_data, fit_results=None,
+                                  sOutputPath=None):
     """Create comprehensive FFD comparison plot with clusters."""
     params = cluster_data['params']
     plt.figure()
+
+    iNumPoints = 100
+    daLogEnergy = np.linspace(30.0, 34.5, iNumPoints)
+    dEnergyMin = np.min(ffd_x)
+    dEnergyMax = np.max(ffd_x)
+    daLogEnergyData = np.linspace(dEnergyMin, dEnergyMax, iNumPoints)
+
+    if fit_results is not None:
+        daLo, daHi = fdaComputeTessFitBand(
+            daLogEnergyData, alpha, beta, fit_results['pcov'])
+        plt.fill_between(daLogEnergyData, daLo, daHi,
+                         color='k', alpha=0.15,
+                         label=r'TESS fit 1$\sigma$')
+
     plt.errorbar(ffd_x, ffd_y, yerr=ffd_yerr, linestyle='none', color='k')
     plt.scatter(ffd_x, ffd_y, c='k')
-    plt.plot([31.0, 32.5], fdFfdFit(np.array([31.5, 32.5]), alpha, beta), c='k')
-    plt.text(31.5, -2.4, 'GJ 1132\n(actual)', color='k', fontsize=10)
+    plt.plot(daLogEnergyData, fdFfdFit(daLogEnergyData, alpha, beta), c='k')
+    plt.text(31.5, -2.4, 'GJ 1132\n(observed)', color='k', fontsize=10)
 
     plt.plot(lit_data['gj4083_x'], np.log10(lit_data['gj4083_y']), marker='s',
              linestyle='dotted', lw=2, c=vplot.colors.pale_blue)
@@ -591,9 +684,14 @@ def fnPlotComprehensiveComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data,
                  fdFlareEquation(X, *params), c=cluster_data['colors'][k], linestyle='--')
 
     plt.plot([], c='k', linestyle='--', label='Fit at Cluster Ages')
-    X = (np.array([31.5, 32.5]), np.log10([8000, 8000]), np.array([0.2, 0.2]))
-    plt.plot([31.5, 32.5], fdFlareEquation(X, *params), color=vplot.colors.purple, label='Fits at 8 Gyr')
-    plt.text(31.4, -1, 'GJ 1132\n(fit prediction)', color=vplot.colors.purple, fontsize=10)
+    dLogAge = np.log10(8000)
+    dMass = 0.2
+    X = (daLogEnergy, np.full(iNumPoints, dLogAge),
+         np.full(iNumPoints, dMass))
+    plt.plot(daLogEnergy, fdFlareEquation(X, *params),
+             color=vplot.colors.purple, label='Kepler prediction (8 Gyr)')
+    plt.text(31.4, -1, 'GJ 1132\n(predicted)',
+             color=vplot.colors.purple, fontsize=10)
 
     plt.xlabel('log Flare Energy [erg]')
     plt.ylabel('log Flare Rate [day$^{-1}$]')
@@ -862,7 +960,9 @@ def main():
     fnPlotFfdComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data)
     cluster_data = fdictGetClusterData()
     fnPlotIlinReproduction(cluster_data)
-    fnPlotComprehensiveComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data, cluster_data)
+    fnPlotComprehensiveComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta,
+                                 lit_data, cluster_data,
+                                 fit_results=fit_results)
     fnPlotAlphaBetaComparison(alpha, beta, fit_results)
     fnPlotProximaComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta, lit_data)
     fnPlotAgeActivityRelation(alpha, beta, lit_data)
@@ -960,6 +1060,7 @@ if __name__ == '__main__':
         if args.plot_comprehensive:
             fnPlotComprehensiveComparison(ffd_x, ffd_y, ffd_yerr, dAlpha,
                                          dBeta, dictLit, dictCluster,
+                                         fit_results=fit_results,
                                          sOutputPath=args.plot_comprehensive)
         if args.plot_fit_comparison:
             fnPlotAlphaBetaComparison(dAlpha, dBeta, fit_results,
