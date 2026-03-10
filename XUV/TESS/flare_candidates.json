@@ -67,7 +67,7 @@
       "dDurationMinutes": 6.0,
       "dEquivalentDuration": 2.26,
       "iNumPointsAbove": 2,
-      "sLabel": "uncertain"
+      "sLabel": "not_flare"
     },
     {
       "iSectorIndex": 0,
@@ -145,7 +145,7 @@
       "dDurationMinutes": 6.0,
       "dEquivalentDuration": 1.32,
       "iNumPointsAbove": 2,
-      "sLabel": "uncertain"
+      "sLabel": "not_flare"
     },
     {
       "iSectorIndex": 3,

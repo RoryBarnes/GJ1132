@@ -9,12 +9,17 @@ MAD-based robust sigma threshold (Rousseeuw & Croux 1993, JASA 88,
 import argparse
 import json
 import os
+import select
 import sys
+import tkinter as tk
 
 import lightkurve as lk
 import matplotlib
-import matplotlib.pyplot as plt
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np
+from PIL import Image, ImageTk
+
 import vplot
 
 D_DEFAULT_SIGMA_THRESHOLD = 2.5
@@ -151,23 +156,30 @@ def flistDetectAllCandidates(listLightcurves, dSigmaThreshold):
 # ===== Display =====
 
 def fnVerifyInteractiveDisplay():
-    """Exit with an error if figures cannot be displayed interactively."""
-    if matplotlib.get_backend().lower() == 'agg':
-        try:
-            matplotlib.use('TkAgg')
-        except Exception:
-            pass
-    if matplotlib.get_backend().lower() == 'agg':
+    """Exit with an error if an X11 display is not available."""
+    sDisplay = os.environ.get('DISPLAY', '')
+    if not sDisplay:
         print("ERROR: Cannot open interactive figure window.")
-        print(f"  DISPLAY: {os.environ.get('DISPLAY', '(not set)')}")
-        print("\nThis script requires an interactive matplotlib backend.")
-        print("If running in a container, ensure X11 display forwarding")
-        print("is enabled and rebuild the container.")
+        print("  DISPLAY environment variable is not set.")
+        print("\nThis script requires X11 display forwarding.")
+        print("If running in a container, ensure X11 is enabled.")
         sys.exit(1)
 
 
+def fnRenderFigureToTk(fig, tkRoot):
+    """Render a matplotlib figure and display it in a Tk window.
+
+    Returns the ImageTk.PhotoImage (caller must retain reference).
+    """
+    fig.canvas.draw()
+    daBuffer = fig.canvas.buffer_rgba()
+    iWidth, iHeight = fig.canvas.get_width_height()
+    imgPil = Image.frombytes('RGBA', (iWidth, iHeight), daBuffer)
+    return ImageTk.PhotoImage(imgPil, master=tkRoot)
+
+
 def fnPlotCandidatePanel(lcNorm, dictCandidate, iNumber, iTotal):
-    """Display a candidate flare panel for interactive labeling."""
+    """Build a candidate flare figure (does not display it)."""
     daTime = np.array(lcNorm['time'].value, dtype=float)
     daFlux = np.array(lcNorm['flux'].value, dtype=float)
     dPeak = dictCandidate['dTimePeak']
@@ -175,7 +187,7 @@ def fnPlotCandidatePanel(lcNorm, dictCandidate, iNumber, iTotal):
     baCandidate = ((daTime >= dictCandidate['dTimeStart'])
                    & (daTime <= dictCandidate['dTimeStop']))
     plt.close('all')
-    plt.figure(figsize=(8, 5))
+    fig = plt.figure(figsize=(8, 5))
     plt.plot(daTime[baWindow] - dPeak, daFlux[baWindow], c='k')
     plt.scatter(daTime[baCandidate] - dPeak, daFlux[baCandidate],
                 c=vplot.colors.pale_blue, zorder=5)
@@ -189,11 +201,23 @@ def fnPlotCandidatePanel(lcNorm, dictCandidate, iNumber, iTotal):
               f"{dictCandidate['dDurationMinutes']:.0f} min")
     plt.title(sTitle, fontsize=14)
     plt.tight_layout()
+    return fig
 
 
 # ===== Interactive =====
 
-def fsPromptUserLabel(iNumber, iTotal, dictCandidate):
+def fsReadTerminalInput(sPrompt, tkRoot):
+    """Read one line from stdin while keeping the Tk display alive."""
+    sys.stdout.write(sPrompt)
+    sys.stdout.flush()
+    while True:
+        if select.select([sys.stdin], [], [], 0)[0]:
+            return sys.stdin.readline().strip().lower()
+        tkRoot.update()
+        tkRoot.after(100)
+
+
+def fsPromptUserLabel(iNumber, iTotal, dictCandidate, tkRoot):
     """Prompt user to classify a candidate. Returns label string."""
     print(f"\nCandidate {iNumber}/{iTotal} | "
           f"Sector {dictCandidate['iSectorNumber']} | "
@@ -202,8 +226,9 @@ def fsPromptUserLabel(iNumber, iTotal, dictCandidate):
     dictLabels = {'f': 'flare', 'n': 'not_flare', 'u': 'uncertain',
                   'b': 'back', 'q': 'quit'}
     while True:
-        sInput = input("  [f]lare  [n]ot-flare  [u]ncertain  "
-                       "[b]ack  [q]uit > ").strip().lower()
+        sInput = fsReadTerminalInput(
+            "  [f]lare  [n]ot-flare  [u]ncertain  "
+            "[b]ack  [q]uit > ", tkRoot)
         if sInput in dictLabels:
             return dictLabels[sInput]
         print("  Invalid input. Enter f, n, u, b, or q.")
@@ -212,18 +237,25 @@ def fsPromptUserLabel(iNumber, iTotal, dictCandidate):
 def fnRunInteractiveSession(listLightcurves, dictSession,
                             sOutputPath, iStartIndex=0):
     """Main interactive labeling loop with crash-safe saves."""
+    tkRoot = tk.Tk()
+    tkRoot.title("GJ 1132 Flare Candidates")
+    tkLabel = tk.Label(tkRoot)
+    tkLabel.pack()
+    imgRef = None
     listCandidates = dictSession['listCandidates']
     iIndex = iStartIndex
     while iIndex < len(listCandidates):
         dictCandidate = listCandidates[iIndex]
         iSectorIdx = dictCandidate['iSectorIndex']
         lcNorm = listLightcurves[iSectorIdx].normalize()
-        fnPlotCandidatePanel(lcNorm, dictCandidate, iIndex + 1,
-                             len(listCandidates))
-        plt.show(block=False)
-        plt.pause(0.1)
+        fig = fnPlotCandidatePanel(lcNorm, dictCandidate, iIndex + 1,
+                                   len(listCandidates))
+        imgRef = fnRenderFigureToTk(fig, tkRoot)
+        tkLabel.configure(image=imgRef)
+        tkRoot.update()
+        plt.close(fig)
         sLabel = fsPromptUserLabel(iIndex + 1, len(listCandidates),
-                                   dictCandidate)
+                                   dictCandidate, tkRoot)
         if sLabel == 'quit':
             break
         if sLabel == 'back':
@@ -232,7 +264,7 @@ def fnRunInteractiveSession(listLightcurves, dictSession,
         dictCandidate['sLabel'] = sLabel
         fnSaveCandidatesToJson(dictSession, sOutputPath)
         iIndex += 1
-    plt.close('all')
+    tkRoot.destroy()
     fnPrintLabelingSummary(listCandidates)
 
 
