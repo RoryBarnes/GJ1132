@@ -115,7 +115,8 @@
         "python gj1132_alabi.py {sPlotDirectory}/sampler_comparison.{sFigureType}"
       ],
       "saOutputFiles": [
-        "{sPlotDirectory}/sampler_comparison.{sFigureType}"
+        "{sPlotDirectory}/sampler_comparison.{sFigureType}",
+        "output/dynesty_transform_final.npy"
       ]
     },
     {
@@ -127,7 +128,7 @@
         "echo '--- EngleBarnes: copying priors ---'",
         "cp {Scene01.flare_mcmc_samples} EngleBarnes/flares_variable_slope.npy",
         "cp {Scene07.age_samples} EngleBarnes/age_samples.txt",
-        "cp {sRepoRoot}/priors/dynesty_transform_final.npy EngleBarnes/dynesty_transform_final.npy",
+        "cp {Scene08.dynesty_transform_final} EngleBarnes/dynesty_transform_final.npy",
         "cp EngleBarnes/output/Converged_Param_Dictionary.json EngleBarnes/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
         "echo '--- EngleBarnes: running vconverge ---'",
         "cd EngleBarnes && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
@@ -135,7 +136,7 @@
         "echo '--- RibasBarnes: copying priors ---'",
         "cp {Scene01.flare_mcmc_samples} RibasBarnes/flares_variable_slope.npy",
         "cp {Scene07.age_samples} RibasBarnes/age_samples.txt",
-        "cp {sRepoRoot}/priors/dynesty_transform_final.npy RibasBarnes/dynesty_transform_final.npy",
+        "cp {Scene08.dynesty_transform_final} RibasBarnes/dynesty_transform_final.npy",
         "cp RibasBarnes/output/Converged_Param_Dictionary.json RibasBarnes/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
         "echo '--- RibasBarnes: running vconverge ---'",
         "cd RibasBarnes && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
@@ -154,28 +155,70 @@
       "sName": "Cumulative XUV and Cosmic Shoreline",
       "sDirectory": "XUV/Distributions/CumulativeXUV",
       "bEnabled": true,
-      "bPlotOnly": true,
-      "saSetupCommands": [],
+      "bPlotOnly": false,
+      "saSetupCommands": [
+        "echo '--- Engle: copying priors ---'",
+        "cp {Scene07.age_samples} Engle/age_samples.txt",
+        "cp Engle/output/Converged_Param_Dictionary.json Engle/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
+        "echo '--- Engle: running vconverge ---'",
+        "cd Engle && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
+        "rm -f Engle/.Converged_Param_Dictionary.json.bak",
+        "echo '--- Ribas: copying priors ---'",
+        "cp {Scene08.dynesty_transform_final} Ribas/dynesty_transform_final.npy",
+        "cp Ribas/output/Converged_Param_Dictionary.json Ribas/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
+        "echo '--- Ribas: running vconverge ---'",
+        "cd Ribas && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
+        "rm -f Ribas/.Converged_Param_Dictionary.json.bak"
+      ],
       "saCommands": [
         "python vconverge_hist.py {sPlotDirectory}/GJ1132b_CumulativeXUV_Multi.{sFigureType}",
         "python {sRepoRoot}/XUV/CosmicShoreline/makeplot.py {sPlotDirectory}/CosmicShoreline.{sFigureType}"
       ],
       "saOutputFiles": [
         "{sPlotDirectory}/GJ1132b_CumulativeXUV_Multi.{sFigureType}",
-        "{sPlotDirectory}/CosmicShoreline.{sFigureType}"
+        "{sPlotDirectory}/CosmicShoreline.{sFigureType}",
+        "Engle/output/Converged_Param_Dictionary.json",
+        "Ribas/output/Converged_Param_Dictionary.json"
       ]
     },
     {
       "sName": "Error Source Comparison",
       "sDirectory": "XUV/Distributions/CumulativeXUV",
       "bEnabled": true,
-      "bPlotOnly": true,
-      "saSetupCommands": [],
+      "bPlotOnly": false,
+      "saSetupCommands": [
+        "echo '--- EngleModelErrorsOnly: running vconverge ---'",
+        "cp EngleModelErrorsOnly/output/Converged_Param_Dictionary.json EngleModelErrorsOnly/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
+        "cd EngleModelErrorsOnly && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
+        "rm -f EngleModelErrorsOnly/.Converged_Param_Dictionary.json.bak",
+        "echo '--- EngleStellarErrorsOnly: copying priors ---'",
+        "cp {Scene07.age_samples} EngleStellarErrorsOnly/age_samples.txt",
+        "cp EngleStellarErrorsOnly/output/Converged_Param_Dictionary.json EngleStellarErrorsOnly/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
+        "echo '--- EngleStellarErrorsOnly: running vconverge ---'",
+        "cd EngleStellarErrorsOnly && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
+        "rm -f EngleStellarErrorsOnly/.Converged_Param_Dictionary.json.bak",
+        "echo '--- RibasModelErrorsOnly: copying priors ---'",
+        "cp {Scene08.dynesty_transform_final} RibasModelErrorsOnly/dynesty_transform_final.npy",
+        "cp RibasModelErrorsOnly/output/Converged_Param_Dictionary.json RibasModelErrorsOnly/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
+        "echo '--- RibasModelErrorsOnly: running vconverge ---'",
+        "cd RibasModelErrorsOnly && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
+        "rm -f RibasModelErrorsOnly/.Converged_Param_Dictionary.json.bak",
+        "echo '--- RibasStellarErrorsOnly: copying priors ---'",
+        "cp {Scene08.dynesty_transform_final} RibasStellarErrorsOnly/dynesty_transform_final.npy",
+        "cp RibasStellarErrorsOnly/output/Converged_Param_Dictionary.json RibasStellarErrorsOnly/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
+        "echo '--- RibasStellarErrorsOnly: running vconverge ---'",
+        "cd RibasStellarErrorsOnly && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
+        "rm -f RibasStellarErrorsOnly/.Converged_Param_Dictionary.json.bak"
+      ],
       "saCommands": [
         "python error_source_compare.py {sPlotDirectory}/GJ1132b_ErrorSourceComparison.{sFigureType}"
       ],
       "saOutputFiles": [
-        "{sPlotDirectory}/GJ1132b_ErrorSourceComparison.{sFigureType}"
+        "{sPlotDirectory}/GJ1132b_ErrorSourceComparison.{sFigureType}",
+        "EngleModelErrorsOnly/output/Converged_Param_Dictionary.json",
+        "EngleStellarErrorsOnly/output/Converged_Param_Dictionary.json",
+        "RibasModelErrorsOnly/output/Converged_Param_Dictionary.json",
+        "RibasStellarErrorsOnly/output/Converged_Param_Dictionary.json"
       ]
     },
     {

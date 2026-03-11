@@ -3,23 +3,23 @@ GJ1132_Ribas_XUV Maximum A Posteriori (MAP) Estimation
 
 MAP Parameters:
 ----------------------------------------------------------------------
-star.dMass                     = 1.941341e-01
-star.dSatXUVFrac               = -2.916345e+00
-star.dSatXUVTime               = 4.226595e-01
-vpl.dStopTime                  = 5.801399e+00
-star.dXUVBeta                  = 1.178998e+00
+star.dMass                     = 1.939982e-01
+star.dSatXUVFrac               = -2.917925e+00
+star.dSatXUVTime               = 4.254564e-01
+vpl.dStopTime                  = 5.767872e+00
+star.dXUVBeta                  = 1.184939e+00
 
--ln(Posterior)  = 8.388764e-03
--ln(Likelihood) = 4.426741e-03
--ln(Prior)      = 3.962023e-03
-chi^2           = 8.853481e-03
+-ln(Posterior)  = 8.401860e-03
+-ln(Likelihood) = 2.210370e-03
+-ln(Prior)      = 6.191490e-03
+chi^2           = 4.420739e-03
 
 Model Predictions:
 ----------------------------------------------------------------------
-L_bol                          = 4.411651e-03 (obs: 4.380000e-03)
-  Residual: +0.093 sigma
-log_Lxuv_Lbol                  = -4.257946e+00 (obs: -4.260000e+00)
-  Residual: +0.014 sigma
+L_bol                          = 4.402605e-03 (obs: 4.380000e-03)
+  Residual: +0.066 sigma
+log_Lxuv_Lbol                  = -4.259901e+00 (obs: -4.260000e+00)
+  Residual: +0.001 sigma
 
 Parameter Bounds:
 ----------------------------------------------------------------------

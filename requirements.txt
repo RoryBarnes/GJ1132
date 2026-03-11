@@ -5,6 +5,8 @@ lightkurve
 matplotlib
 numpy
 pandas
+pymultinest
 scipy
 scikit-learn
 seaborn
+ultranest

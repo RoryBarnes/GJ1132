@@ -89,7 +89,7 @@ daLikeData = np.array([
 ])
 
 iNumDimensions = len(listBounds)
-iNumTraining = 100 * iNumDimensions
+iNumTraining = 300 * iNumDimensions
 iNumTest = 100 * iNumDimensions
 iActiveIterations = 500
 iNumCores = max(1, multiprocessing.cpu_count() - 1)
@@ -940,6 +940,24 @@ def fnPlotSamplerComparison(sm, daMaxLikeParams, sOutputFile=None):
     )
 
 
+def fnSaveVspaceTransform(daSamples, sOutputPath):
+    """Convert dynesty posterior samples to vspace-compatible format.
+
+    Dynesty samples are in surrogate units:
+        [mass (Msun), log10(fsat), tsat (Gyr), age (Gyr), beta]
+
+    Vspace expects physical units:
+        [mass (Msun), fsat (fraction), tsat (years), age (years), beta]
+    """
+    daTransformed = daSamples.copy()
+    daTransformed[:, 1] = 10.0 ** daSamples[:, 1]
+    daTransformed[:, 2] = daSamples[:, 2] * 1e9
+    daTransformed[:, 3] = daSamples[:, 3] * 1e9
+    np.save(sOutputPath, daTransformed)
+    print(f"  Saved vspace transform ({daTransformed.shape[0]} samples)"
+          f" to {sOutputPath}")
+
+
 if __name__ == "__main__":
     smResult = fnMain()
 
@@ -950,5 +968,8 @@ if __name__ == "__main__":
         ("UltraNest", smResult.ultranest_samples),
     ]
     fnPrintPosteriorComparison(listSamplerResults)
+
+    sTransformPath = os.path.join(sSaveDir, "dynesty_transform_final.npy")
+    fnSaveVspaceTransform(smResult.dynesty_samples, sTransformPath)
 
     print("\nDone.")

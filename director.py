@@ -300,15 +300,36 @@ def fnRunVerifyOnly(dictScript, dictVariables):
     return all(bOk for _, _, bOk, _ in listResults)
 
 
-def fnRunPipeline(dictScript, dictVariables):
-    """Execute all enabled scenes, halting on first failure."""
+def fnRunPipeline(dictScript, dictVariables, iStartScene=1):
+    """Execute all enabled scenes, halting on first failure.
+
+    Scenes numbered below *iStartScene* are skipped but their outputs
+    are still registered so cross-scene variables resolve correctly.
+    """
     listResults = []
     for iScene, dictScene in enumerate(dictScript["listScenes"]):
         if not dictScene.get("bEnabled", True):
             continue
-        sLabel = f"Scene{iScene + 1:02d}"
+        iSceneNumber = iScene + 1
+        sLabel = f"Scene{iSceneNumber:02d}"
         dictVariables["sFigureType"] = dictScene.get(
             "sFigureType", dictScript.get("sFigureType", "pdf")).lower()
+
+        if iSceneNumber < iStartScene:
+            try:
+                fnRegisterSceneOutputs(dictScene, dictVariables, sLabel)
+                print(f"  SKIPPED (--start-scene): {sLabel} "
+                      f"{dictScene['sName']}")
+                listResults.append((sLabel, dictScene["sName"], True, ""))
+            except FileNotFoundError as error:
+                print(f"  FAILED: {sLabel} — outputs missing for skipped "
+                      f"scene: {error}")
+                listResults.append(
+                    (sLabel, dictScene["sName"], False, str(error)))
+                fnPrintSummary(listResults)
+                return False
+            continue
+
         fnPrintSceneBanner(sLabel, dictScene, dictVariables)
         try:
             fnExecuteScene(dictScene, dictVariables)
@@ -355,6 +376,10 @@ def main():
         "--verify-only", action="store_true",
         help="Only verify that all expected output files exist.")
     parser.add_argument(
+        "--start-scene", type=int, default=1, metavar="N",
+        help="Skip execution of scenes before N (1-based), registering "
+             "their outputs without re-running them.")
+    parser.add_argument(
         "--log", default=os.path.join(REPO_ROOT, "director.log"),
         help="Path to log file (default: director.log in repo root).")
     args = parser.parse_args()
@@ -369,7 +394,7 @@ def main():
     if args.verify_only:
         bSuccess = fnRunVerifyOnly(dictScript, dictVariables)
     else:
-        bSuccess = fnRunPipeline(dictScript, dictVariables)
+        bSuccess = fnRunPipeline(dictScript, dictVariables, args.start_scene)
     fileLog.close()
     sys.exit(0 if bSuccess else 1)
 

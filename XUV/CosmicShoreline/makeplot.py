@@ -7,25 +7,13 @@ import vplot as vpl
 
 import vplanet
 
+sys.path.insert(0, str(pathlib.Path(__file__).parents[1] / "Distributions"
+                       / "CumulativeXUV"))
+from cumulative_xuv import ftGatherFluxes
+
 PATH = pathlib.Path(__file__).parents[0].absolute()
 
 D_ESCAPE_VELOCITY = 13.858
-
-D_ENGLE_MEAN = 401.16
-D_ENGLE_LOWER = 238.48
-D_ENGLE_UPPER = 564.09
-
-D_ENGLE_DAV_MEAN = 478.71
-D_ENGLE_DAV_LOWER = 275.49
-D_ENGLE_DAV_UPPER = 662.63
-
-D_RIBAS_MEAN = 420.6
-D_RIBAS_LOWER = 80.82
-D_RIBAS_UPPER = 1104.60
-
-D_RIBAS_DAV_MEAN = 478.31
-D_RIBAS_DAV_LOWER = 141.18
-D_RIBAS_DAV_UPPER = 1106.13
 
 I_MARKER_SIZE = 6
 I_FONT_SIZE = 24
@@ -42,6 +30,16 @@ SA_PLANET_LABELS = [
     ('Jupiter', 30, 0.05), ('Saturn', 38, 0.0075),
     ('Uranus', 23, 0.002), ('Neptune', 26, 0.0007),
 ]
+
+SA_CUMXUV_DIR = str(pathlib.Path(__file__).parents[1] / "Distributions"
+                     / "CumulativeXUV")
+
+
+def ftLoadModelStatistics(sModelDirectory):
+    """Load mean and 95% CI from a vconverge output directory."""
+    sFullPath = SA_CUMXUV_DIR + "/" + sModelDirectory
+    _, _, dMean, dLower, dUpper = ftGatherFluxes(sFullPath)
+    return dMean, dLower, dUpper
 
 
 def fnPlotErrorBar(dX, dY, dLower, dUpper, color, dAlpha=1):
@@ -89,16 +87,23 @@ def fnPlotAnnotations():
 
 
 def fnPlotGJ1132ErrorBars():
-    """Plot GJ 1132 b data points with error bars."""
+    """Plot GJ 1132 b data points with error bars from vconverge output."""
+    dEngleMean, dEngleLower, dEngleUpper = ftLoadModelStatistics("Engle")
+    dEngleDavMean, dEngleDavLower, dEngleDavUpper = ftLoadModelStatistics(
+        "EngleBarnes")
+    dRibasMean, dRibasLower, dRibasUpper = ftLoadModelStatistics("Ribas")
+    dRibasDavMean, dRibasDavLower, dRibasDavUpper = ftLoadModelStatistics(
+        "RibasBarnes")
+
     dEsc = D_ESCAPE_VELOCITY
-    fnPlotErrorBar(dEsc * 1.02, D_RIBAS_DAV_MEAN,
-                   D_RIBAS_DAV_LOWER, D_RIBAS_DAV_UPPER, vpl.colors.orange)
-    fnPlotErrorBar(dEsc * 1.06, D_RIBAS_MEAN,
-                   D_RIBAS_LOWER, D_RIBAS_UPPER, vpl.colors.orange, 0.5)
-    fnPlotErrorBar(dEsc * 0.94, D_ENGLE_MEAN,
-                   D_ENGLE_LOWER, D_ENGLE_UPPER, 'grey')
-    fnPlotErrorBar(dEsc * 0.98, D_ENGLE_DAV_MEAN,
-                   D_ENGLE_DAV_LOWER, D_ENGLE_DAV_UPPER, 'k')
+    fnPlotErrorBar(dEsc * 1.02, dRibasDavMean,
+                   dRibasDavLower, dRibasDavUpper, vpl.colors.orange)
+    fnPlotErrorBar(dEsc * 1.06, dRibasMean,
+                   dRibasLower, dRibasUpper, vpl.colors.orange, 0.5)
+    fnPlotErrorBar(dEsc * 0.94, dEngleMean,
+                   dEngleLower, dEngleUpper, 'grey')
+    fnPlotErrorBar(dEsc * 0.98, dEngleDavMean,
+                   dEngleDavLower, dEngleDavUpper, 'k')
 
 
 def main():

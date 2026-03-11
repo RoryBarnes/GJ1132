@@ -1,0 +1,116 @@
+
+----- Step 1 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.022333333333333334
+
+Converged = False
+
+----- Step 2 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.012857142857142857
+
+Converged = False
+
+----- Step 3 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.011428571428571429
+
+Converged = False
+
+----- Step 4 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.009027777777777777
+
+Converged = False
+
+----- Step 5 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.008444444444444444
+
+Converged = False
+
+----- Step 6 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.007727272727272728
+
+Converged = False
+
+----- Step 7 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.0067424242424242425
+
+Converged = False
+
+----- Step 8 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.008974358974358974
+
+Converged = False
+
+----- Step 9 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.004835164835164835
+
+Converged = False
+
+----- Step 10 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.005285714285714286
+
+Converged = False
+
+----- Step 11 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.00275
+
+Converged = True
+Number of Consecutive Convergences: 1
+
+----- Step 12 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.005955882352941176
+
+Converged = False
+
+----- Step 13 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.0030718954248366015
+
+Converged = True
+Number of Consecutive Convergences: 1
+
+----- Step 14 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.003538011695906433
+
+Converged = True
+Number of Consecutive Convergences: 2
+
+----- Step 15 -----
+
+KS Statistics:
+b,CumulativeXUVFlux,final ----- 0.003263157894736842
+
+Converged = True
+Number of Consecutive Convergences: 3
+
+-------------- VCONVERGE STATS ----------------
+
+Number of Steps Taken: 15
+Total Number of Simulations Ran: 2000
+3 Consecutive Convergences Achieved, vconverge run sucessful
+Total Number of Convergences during vconverge run: 4
