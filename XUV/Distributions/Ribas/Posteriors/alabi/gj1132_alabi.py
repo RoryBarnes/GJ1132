@@ -31,6 +31,7 @@ os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 
+import json
 import re
 import multiprocessing
 import numpy as np
@@ -83,13 +84,27 @@ listPriorData = [
 ]
 
 # Observational constraints: [[mean, std], ...]
-daLikeData = np.array([
-    [4.38e-3, 3.4e-4],  # Lbol [Lsun]
-    [-4.26, 0.15],       # log(Lxuv/Lbol)
-])
+# Lbol from Berta-Thompson et al. (2015), Table 5
+sLxuvConstraintsPath = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)),
+    "lxuv_constraints.json"
+)
+
+
+def fdaLoadLikeData(sConstraintsPath):
+    """Load observational constraints from lxuv_constraints.json."""
+    with open(sConstraintsPath, "r") as fileHandle:
+        dictConstraint = json.load(fileHandle)
+    return np.array([
+        [4.38e-3, 3.4e-4],
+        [dictConstraint["dMean"], dictConstraint["dStd"]],
+    ])
+
+
+daLikeData = fdaLoadLikeData(sLxuvConstraintsPath)
 
 iNumDimensions = len(listBounds)
-iNumTraining = 300 * iNumDimensions
+iNumTraining = 600 * iNumDimensions
 iNumTest = 100 * iNumDimensions
 iActiveIterations = 500
 iNumCores = max(1, multiprocessing.cpu_count() - 1)

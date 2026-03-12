@@ -14,7 +14,7 @@ fit mean: True
 fit amplitude: True 
 fit white_noise: False 
 GP white noise: -12 
-Hyperparameter bounds: [[ 0.79412961  1.01302318]
+Hyperparameter bounds: [[ 0.79459181  1.00635694]
  [-2.30258509  2.30258509]
  [-4.60517019 13.81551056]
  [-4.60517019 13.81551056]
@@ -22,21 +22,21 @@ Hyperparameter bounds: [[ 0.79412961  1.01302318]
  [-4.60517019 13.81551056]
  [-4.60517019 13.81551056]] 
 Active learning algorithm: bape 
-Number of total training samples: 1000 
-Number of initial training samples: 500 
+Number of total training samples: 3500 
+Number of initial training samples: 3000 
 Number of active training samples: 500 
 Number of test samples: 500 
 
 Results: 
 -------- 
 GP final hyperparameters: 
-   [mean:value] 	0.7941296064734885 
+   [mean:value] 	0.7945918105829406 
    [kernel:k1:log_constant] 	2.302585092994046 
-   [kernel:k2:metric:log_M_0_0] 	5.57600521986371 
-   [kernel:k2:metric:log_M_1_1] 	3.660853597515311 
-   [kernel:k2:metric:log_M_2_2] 	-3.6041874714763558 
-   [kernel:k2:metric:log_M_3_3] 	-0.507774732494626 
-   [kernel:k2:metric:log_M_4_4] 	1.6700900898443336 
+   [kernel:k2:metric:log_M_0_0] 	6.790127109465182 
+   [kernel:k2:metric:log_M_1_1] 	5.101913380043938 
+   [kernel:k2:metric:log_M_2_2] 	-1.8871787895851126 
+   [kernel:k2:metric:log_M_3_3] 	-0.13749562107910607 
+   [kernel:k2:metric:log_M_4_4] 	3.7739130172778212 
 
-Final test error (MSE): 885.5298110566225 
+Final test error (MSE): 0.36362338025174 
 

@@ -24,7 +24,7 @@ def fnFormatPanel(ax, sTitle):
     ax.set_xlim(D_LOWER_BOUND, D_UPPER_BOUND)
     ax.set_xscale('log')
     ax.tick_params(axis='both', labelsize=16)
-    ax.set_ylim(0, 0.6)
+    ax.set_ylim(0, 0.4)
     ax.legend(loc='upper right', fontsize=12)
     ax.set_title(sTitle, fontsize=22)
     ax.annotate('Cosmic Shoreline', (40, 0.06), fontsize=20,
@@ -43,7 +43,7 @@ def fnPrintVariantStatistics(sGroupName, saLabels, listData):
 def main():
     """Generate error source comparison figure."""
     sOutputPath = (sys.argv[1] if len(sys.argv) > 1
-                   else 'GJ1132b_ErrorSourceComparison.png')
+                   else 'GJ1132b_ErrorSourceComparison.pdf')
     saLabels = ['All Errors', 'Model Errors Only', 'Stellar Errors Only']
     saColors = ['k', vplot.colors.purple, vplot.colors.red]
 

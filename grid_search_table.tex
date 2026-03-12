@@ -1,0 +1,44 @@
+\begin{deluxetable}{llll}
+\tablecaption{GP Kernel and Scaler Grid Search Results\label{tab:grid_search}}
+\tablehead{
+\colhead{Kernel} & \colhead{Input Scaler} & \colhead{Output Scaler} & \colhead{Test MSE}
+}
+\startdata
+Squared Exponential & None          & None           &  11.44 \\
+Squared Exponential & None          & Negative Log   &  90.29 \\
+Squared Exponential & None          & Min-Max        &   0.37 \\
+Squared Exponential & None          & Standard       &   2.90 \\
+Squared Exponential & Min-Max       & None           &  10.23 \\
+Squared Exponential & Min-Max       & Negative Log   &  57.28 \\
+Squared Exponential & Min-Max       & Min-Max        &   0.37 \\
+Squared Exponential & Min-Max       & Standard       &   3.18 \\
+Squared Exponential & Standard      & None           &   4.10 \\
+Squared Exponential & Standard      & Negative Log   &  58.22 \\
+Squared Exponential & Standard      & Min-Max        &   0.37 \\
+Squared Exponential & Standard      & Standard       &   3.18 \\
+Mat\'{e}rn 3/2      & None          & None           &   2.31 \\
+Mat\'{e}rn 3/2      & None          & Negative Log   &  11.52 \\
+Mat\'{e}rn 3/2      & None          & Min-Max        &   1.07 \\
+Mat\'{e}rn 3/2      & None          & Standard       &   1.00 \\
+Mat\'{e}rn 3/2      & Min-Max       & None           &   2.57 \\
+Mat\'{e}rn 3/2      & Min-Max       & Negative Log   &  11.53 \\
+Mat\'{e}rn 3/2      & Min-Max       & Min-Max        &   1.07 \\
+Mat\'{e}rn 3/2      & Min-Max       & Standard       &   0.99 \\
+Mat\'{e}rn 3/2      & Standard      & None           &   2.58 \\
+Mat\'{e}rn 3/2      & Standard      & Negative Log   &  11.52 \\
+Mat\'{e}rn 3/2      & Standard      & Min-Max        &   1.07 \\
+Mat\'{e}rn 3/2      & Standard      & Standard       &   0.99 \\
+Mat\'{e}rn 5/2      & None          & None           &   1.92 \\
+Mat\'{e}rn 5/2      & None          & Negative Log   &  60.04 \\
+Mat\'{e}rn 5/2      & None          & Min-Max        &   0.51 \\
+Mat\'{e}rn 5/2      & None          & Standard       &   0.47 \\
+Mat\'{e}rn 5/2      & Min-Max       & None           &   2.16 \\
+Mat\'{e}rn 5/2      & Min-Max       & Negative Log   &  15.26 \\
+Mat\'{e}rn 5/2      & Min-Max       & Min-Max        &   0.51 \\
+Mat\'{e}rn 5/2      & Min-Max       & Standard       &   0.47 \\
+Mat\'{e}rn 5/2      & Standard      & None           &   2.16 \\
+Mat\'{e}rn 5/2      & Standard      & Negative Log   &  15.24 \\
+Mat\'{e}rn 5/2      & Standard      & Min-Max        &   0.51 \\
+Mat\'{e}rn 5/2      & Standard      & Standard       &   0.47 \\
+\enddata
+\end{deluxetable}

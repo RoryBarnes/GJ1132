@@ -6,6 +6,7 @@ Performs Monte Carlo uncertainty propagation using observed X-ray luminosity,
 EUV-to-X-ray scaling relation, and bolometric luminosity with asymmetric errors.
 """
 
+import json
 import os
 
 import numpy as np
@@ -136,6 +137,14 @@ def fnSaveSamples(daSamples, sFilename):
     print(f"Saved {len(daSamples):,} samples to: {sFilename}")
 
 
+def fnWriteConstraintsJson(dMean, dStd, sFilename):
+    """Write log10(Lxuv/Lbol) constraint to a JSON file."""
+    dictConstraint = {"dMean": round(dMean, 4), "dStd": round(dStd, 4)}
+    with open(sFilename, "w") as fileHandle:
+        json.dump(dictConstraint, fileHandle, indent=2)
+    print(f"Saved constraint to: {sFilename}")
+
+
 def daSampleAsymmetricNormal(dMean, dSigmaPlus, dSigmaMinus, iNumSamples):
     """Sample from a split-normal distribution with asymmetric errors."""
     daUniform = np.random.uniform(0, 1, iNumSamples)
@@ -239,6 +248,10 @@ def main(sOutputDirectory=None, sFigureType="pdf"):
         daLogRatio, "log10(L_XUV/L_bol)", 'log_lxuv_lbol_samples.txt',
         r'$\log_{10}(L_{XUV} / L_{bol})$',
         fsResolvePath(f'log_lxuv_lbol_hist.{sFigureType}', sOutputDirectory))
+
+    dLogRatioMean, dLogRatioStd, _ = ftComputeStatistics(daLogRatio)
+    fnWriteConstraintsJson(dLogRatioMean, dLogRatioStd,
+                           'lxuv_constraints.json')
 
     print("\nAnalysis complete!")
 

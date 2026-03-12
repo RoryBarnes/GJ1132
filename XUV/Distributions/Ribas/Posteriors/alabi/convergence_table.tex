@@ -1,0 +1,22 @@
+\begin{table}
+\centering
+\caption{GP surrogate convergence across training configurations. $N_{\rm init}$
+is the number of initial space-filling training points, $f_{\rm opt}$ is the GP
+hyperparameter optimization frequency (iterations), and ``White Noise'' indicates
+whether the GP nugget term was fit. The normalized RMSE is
+$100\sqrt{{\rm MSE}_{\rm test}/{\rm Var}(y_{\rm train})}$, evaluated on 500
+held-out test points. ``Stable'' indicates that the test/training NRMSE ratio
+remained below 2 throughout active learning (i.e., no overfitting).}
+\label{tab:convergence}
+\begin{tabular}{ccccccc}
+\hline
+Run & $N_{\rm init}$ & $f_{\rm opt}$ & White Noise & Best NRMSE (\%) & Final NRMSE (\%) & Stable \\
+\hline
+1 & 500  & 50 & No  &  9.00 & 96.64 & No  \\
+2 & 1500 & 50 & No  &  2.63 &  2.73 & Yes \\
+3 & 1500 & 10 & Yes &  4.21 &  4.27 & Yes \\
+4 & 3000 & 10 & No  &  2.38 & 13.24 & No  \\
+5 & 3000 & 50 & No  &  2.38 &  2.41 & Yes \\
+\hline
+\end{tabular}
+\end{table}
