@@ -4,7 +4,6 @@
   "sFigureType": "pdf",
   "iNumberOfCores": -1,
   "sTessDataCache": "data/tess_cache",
-
   "listScenes": [
     {
       "sName": "Kepler FFD Corner",
@@ -104,13 +103,25 @@
       ]
     },
     {
+      "sName": "Maximum Likelihood",
+      "sDirectory": "XUV/EvolutionPlots/MaximumLikelihood",
+      "bEnabled": true,
+      "bPlotOnly": false,
+      "saSetupCommands": [
+        "maxlev gj1132_ribas.json"
+      ],
+      "saCommands": [],
+      "saOutputFiles": [
+        "maxlike_results.txt"
+      ]
+    },
+    {
       "sName": "Bayesian Posteriors",
       "sDirectory": "XUV/Distributions/Ribas/Posteriors/alabi",
       "bEnabled": true,
       "bPlotOnly": false,
       "saSetupCommands": [
         "cp {Scene06.lxuv_constraints} lxuv_constraints.json",
-        "cd {sRepoRoot}/XUV/EvolutionPlots/MaximumLikelihood && maxlev gj1132_ribas.json",
         "python gj1132_alabi.py {sPlotDirectory}/sampler_comparison.{sFigureType}"
       ],
       "saCommands": [
@@ -130,7 +141,7 @@
         "echo '--- EngleBarnes: copying priors ---'",
         "cp {Scene01.flare_mcmc_samples} EngleBarnes/flares_variable_slope.npy",
         "cp {Scene07.age_samples} EngleBarnes/age_samples.txt",
-        "cp {Scene08.dynesty_transform_final} EngleBarnes/dynesty_transform_final.npy",
+        "cp {Scene09.dynesty_transform_final} EngleBarnes/dynesty_transform_final.npy",
         "cp EngleBarnes/output/Converged_Param_Dictionary.json EngleBarnes/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
         "echo '--- EngleBarnes: running vconverge ---'",
         "cd EngleBarnes && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
@@ -138,7 +149,7 @@
         "echo '--- RibasBarnes: copying priors ---'",
         "cp {Scene01.flare_mcmc_samples} RibasBarnes/flares_variable_slope.npy",
         "cp {Scene07.age_samples} RibasBarnes/age_samples.txt",
-        "cp {Scene08.dynesty_transform_final} RibasBarnes/dynesty_transform_final.npy",
+        "cp {Scene09.dynesty_transform_final} RibasBarnes/dynesty_transform_final.npy",
         "cp RibasBarnes/output/Converged_Param_Dictionary.json RibasBarnes/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
         "echo '--- RibasBarnes: running vconverge ---'",
         "cd RibasBarnes && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
@@ -166,7 +177,7 @@
         "cd Engle && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
         "rm -f Engle/.Converged_Param_Dictionary.json.bak",
         "echo '--- Ribas: copying priors ---'",
-        "cp {Scene08.dynesty_transform_final} Ribas/dynesty_transform_final.npy",
+        "cp {Scene09.dynesty_transform_final} Ribas/dynesty_transform_final.npy",
         "cp Ribas/output/Converged_Param_Dictionary.json Ribas/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
         "echo '--- Ribas: running vconverge ---'",
         "cd Ribas && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
@@ -200,13 +211,13 @@
         "cd EngleStellarErrorsOnly && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
         "rm -f EngleStellarErrorsOnly/.Converged_Param_Dictionary.json.bak",
         "echo '--- RibasModelErrorsOnly: copying priors ---'",
-        "cp {Scene08.dynesty_transform_final} RibasModelErrorsOnly/dynesty_transform_final.npy",
+        "cp {Scene09.dynesty_transform_final} RibasModelErrorsOnly/dynesty_transform_final.npy",
         "cp RibasModelErrorsOnly/output/Converged_Param_Dictionary.json RibasModelErrorsOnly/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
         "echo '--- RibasModelErrorsOnly: running vconverge ---'",
         "cd RibasModelErrorsOnly && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",
         "rm -f RibasModelErrorsOnly/.Converged_Param_Dictionary.json.bak",
         "echo '--- RibasStellarErrorsOnly: copying priors ---'",
-        "cp {Scene08.dynesty_transform_final} RibasStellarErrorsOnly/dynesty_transform_final.npy",
+        "cp {Scene09.dynesty_transform_final} RibasStellarErrorsOnly/dynesty_transform_final.npy",
         "cp RibasStellarErrorsOnly/output/Converged_Param_Dictionary.json RibasStellarErrorsOnly/.Converged_Param_Dictionary.json.bak 2>/dev/null; true",
         "echo '--- RibasStellarErrorsOnly: running vconverge ---'",
         "cd RibasStellarErrorsOnly && vconverge vconverge.in || (cp .Converged_Param_Dictionary.json.bak output/Converged_Param_Dictionary.json 2>/dev/null; exit 1)",

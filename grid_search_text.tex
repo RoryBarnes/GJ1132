@@ -1,0 +1,156 @@
+Bayesian inference requires evaluating the likelihood function at
+thousands to millions of points in parameter space. When each
+likelihood evaluation demands a forward-model simulation that takes
+seconds to minutes, direct sampling methods such as Markov chain Monte
+Carlo (MCMC) become prohibitively expensive. To overcome this
+computational bottleneck, \texttt{alabi} constructs a \emph{surrogate
+model}: a fast, continuously differentiable approximation to the
+log-likelihood surface that can be evaluated in microseconds once
+trained \citep{Luger2017,Fleming2024}.
+
+The surrogate model is a Gaussian process (GP), a non-parametric
+regression method that defines a probability distribution over
+functions rather than fitting a fixed functional form
+\citep{Rasmussen2006}. Given a set of training points---pairs of
+input parameters and their corresponding log-likelihood values---the
+GP predicts the log-likelihood at any untested point together with an
+uncertainty estimate. This uncertainty quantification is a key
+advantage over parametric interpolation schemes: it reveals where the
+surrogate is poorly constrained and thereby guides the acquisition of
+new training points during the active learning phase described in
+Section~\ref{sec:active_learning}.
+
+A GP is fully specified by two components: a mean function and a
+covariance function, the latter commonly called a \emph{kernel}. The
+mean function captures the global trend of the target function (often
+set to a constant), while the kernel controls how the GP generalizes
+from observed points to unobserved ones. Mathematically, the kernel is a function
+$k(\mathbf{x}, \mathbf{x}')$ that returns the covariance between the
+GP's predictions at any two points $\mathbf{x}$ and $\mathbf{x}'$ in
+parameter space. When two points are close together (relative to the
+length scale $\ell$), the kernel returns a value near the output
+variance $\sigma^{2}$, meaning the GP expects their log-likelihood
+values to be strongly correlated. As the points move farther apart,
+the kernel value decays toward zero and the predictions become
+independent. The functional form of the kernel
+therefore encodes prior assumptions about the smoothness and
+correlation structure of the log-likelihood surface. Choosing a kernel
+that is too smooth can wash out genuine features, while a kernel that
+is too rough can overfit noise in the training data. Each kernel has a small number of free parameters---an output
+variance $\sigma^{2}$ and one or more length scales $\ell$---that
+must be tuned to the training data. The standard approach is to
+maximize the \emph{marginal likelihood} (also called the model
+evidence), which is the probability of the observed training outputs
+given the inputs after integrating over all possible functions
+consistent with the GP prior. The marginal likelihood naturally
+balances model fit against model complexity: a kernel configuration
+that fits the training data well but requires an implausibly flexible
+function space is penalized relative to a simpler configuration that
+fits nearly as well \citep{Rasmussen2006}. In practice,
+\texttt{alabi} maximizes the log of the marginal likelihood using the
+L-BFGS-B gradient-based optimizer \citep{Byrd1995}, starting from
+multiple initial guesses to reduce the chance of converging to a local
+maximum.
+
+In addition to the kernel, GP performance depends on how the input
+parameters and output log-likelihood values are numerically
+represented. The input parameters in a planetary-evolution model often
+span very different physical scales (e.g., masses in Earth masses
+versus orbital periods in days), and the log-likelihood values can
+range over many orders of magnitude. Without preprocessing, parameters
+with large numerical ranges can dominate the distance calculations in
+the kernel, effectively rendering the GP insensitive to parameters
+with small ranges. Similarly, extreme dynamic range in the output can
+cause the GP to focus its predictive power on the largest-magnitude
+training points at the expense of accuracy near the likelihood peak,
+which is precisely the region that matters most for inference.
+\emph{Scaling}---applying a mathematical transformation to the inputs,
+the outputs, or both before training---mitigates these problems by
+placing all quantities on comparable numerical footing.
+
+Because the optimal kernel and scaling strategy depend on the specific
+shape of the log-likelihood surface, which is not known \emph{a
+priori}, we perform a grid search over three kernel families and
+several data-scaling strategies. The goal of this search is to
+identify the kernel--scaler combination that most accurately
+reproduces the true log-likelihood surface, as measured by the
+prediction error on a held-out test set. The winning configuration is
+then used for the full surrogate-model training.
+
+We consider three stationary kernels. The squared exponential (SE)
+kernel,
+\begin{equation}
+  k_{\mathrm{SE}}(\mathbf{x}, \mathbf{x}') = \sigma^{2}
+  \exp\!\left(-\frac{|\mathbf{x} - \mathbf{x}'|^{2}}{2\ell^{2}}\right),
+  \label{eq:se_kernel}
+\end{equation}
+assumes infinitely differentiable target functions and produces the
+smoothest interpolants. The Mat\'{e}rn 3/2 kernel,
+\begin{equation}
+  k_{3/2}(\mathbf{x}, \mathbf{x}') = \sigma^{2}
+  \left(1 + \frac{\sqrt{3}\,|\mathbf{x} - \mathbf{x}'|}{\ell}\right)
+  \exp\!\left(-\frac{\sqrt{3}\,|\mathbf{x} - \mathbf{x}'|}{\ell}\right),
+  \label{eq:matern32_kernel}
+\end{equation}
+produces once-differentiable sample paths and accommodates rougher
+target functions. The Mat\'{e}rn 5/2 kernel,
+\begin{equation}
+  k_{5/2}(\mathbf{x}, \mathbf{x}') = \sigma^{2}
+  \left(1 + \frac{\sqrt{5}\,|\mathbf{x} - \mathbf{x}'|}{\ell}
+  + \frac{5\,|\mathbf{x} - \mathbf{x}'|^{2}}{3\ell^{2}}\right)
+  \exp\!\left(-\frac{\sqrt{5}\,|\mathbf{x} - \mathbf{x}'|}{\ell}\right),
+  \label{eq:matern52_kernel}
+\end{equation}
+is twice-differentiable and occupies the middle ground between the SE
+and Mat\'{e}rn 3/2 kernels. In each case, $\sigma^{2}$ is the output
+variance and $\ell$ is the characteristic length scale.
+
+In addition to the kernel, the performance of a GP depends on how
+the input (parameter) and output (log-likelihood) values are scaled
+before training. We consider three input scalers: no transformation,
+min--max scaling to $[0,1]$, and standardization to zero mean and unit
+variance. For the output, we add a fourth option: the negative
+logarithm, $y \to -\!\ln(-y)$, which compresses the dynamic range of
+strongly negative log-likelihoods. The full grid therefore comprises
+$3 \times 3 \times 4 = 36$ kernel--scaler combinations.
+
+For each combination, the GP is trained on $N_{\mathrm{train}} = 500$
+points drawn from the five-dimensional parameter space via Latin
+hypercube sampling (LHS) and evaluated on a separate set of
+$N_{\mathrm{test}} = 500$ LHS points. The quality of each
+configuration is quantified by the mean squared error (MSE) between
+the GP predictions and the true log-likelihood values on the test set,
+\begin{equation}
+  \mathrm{MSE} = \frac{1}{N_{\mathrm{test}}}
+  \sum_{i=1}^{N_{\mathrm{test}}}
+  \bigl[\hat{y}(\mathbf{x}_{i}) - y(\mathbf{x}_{i})\bigr]^{2},
+  \label{eq:mse}
+\end{equation}
+where $\hat{y}(\mathbf{x}_{i})$ is the GP prediction and
+$y(\mathbf{x}_{i})$ is the forward-model log-likelihood at test point
+$\mathbf{x}_{i}$. Both quantities are evaluated in the original
+(unscaled) output space to ensure a fair comparison across scaling
+strategies.
+
+Table~\ref{tab:grid_search} reports the test MSE for all 36
+configurations. The best-performing configuration is the SE kernel
+with no input scaling and min--max output scaling
+($\mathrm{MSE} = 3.44$). The SE and Mat\'{e}rn 5/2 kernels with
+min--max output scaling consistently achieve the lowest errors
+($\mathrm{MSE} \lesssim 3.8$), while the Mat\'{e}rn 3/2 kernel
+performs notably worse ($\mathrm{MSE} \gtrsim 7.7$), indicating that
+the log-likelihood surface is sufficiently smooth to benefit from the
+higher differentiability of the SE and Mat\'{e}rn 5/2 kernels. The
+negative-log output scaler performs poorly across all kernels
+($\mathrm{MSE} > 25$), likely because the transformation distorts the
+relative spacing of log-likelihood values. Input scaling has minimal
+effect for the SE kernel (MSE varies by $< 0.1$) and a modest effect
+for Mat\'{e}rn 5/2 (MSE varies by $< 0.04$), suggesting that the GP
+hyperparameter optimization compensates for differences in input
+scaling in these cases.
+
+After selecting the optimal configuration from the grid search, the
+GP is refined through 500 iterations of active learning, in which new
+training points are sequentially chosen to maximize the GP's
+predictive uncertainty. The active learning phase is described in
+Section~\ref{sec:active_learning}.

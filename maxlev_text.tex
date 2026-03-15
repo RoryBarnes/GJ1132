@@ -1,0 +1,33 @@
+Before training the GP surrogate, we obtain a maximum \emph{a
+posteriori} (MAP) estimate of the model parameters to serve as an
+initial reference point for the MCMC samplers. The MAP estimate is
+computed with \texttt{MaxLEV}, a maximum likelihood estimator for
+\texttt{VPLanet} models that reads a JSON configuration file
+specifying the free parameters, their bounds and priors, the
+observational constraints, and the optimizer settings. For each
+proposed parameter vector, \texttt{MaxLEV} writes \texttt{VPLanet}
+input files, executes the forward model, parses the output, and
+evaluates a Gaussian log-likelihood
+\begin{equation}
+  \ln\mathcal{L} = -\frac{1}{2}\sum_{k}
+  \left(\frac{y_{k}^{\mathrm{obs}} - y_{k}^{\mathrm{model}}}
+  {\sigma_{k}}\right)^{2},
+  \label{eq:loglike}
+\end{equation}
+where $y_{k}^{\mathrm{obs}}$ and $\sigma_{k}$ are the observed value
+and uncertainty of the $k$th constraint, and
+$y_{k}^{\mathrm{model}}$ is the corresponding \texttt{VPLanet} output.
+The two constraints used here are the bolometric luminosity
+$L_{\mathrm{bol}}$ and the XUV-to-bolometric luminosity ratio
+$\log(L_{\mathrm{XUV}}/L_{\mathrm{bol}})$.
+
+The objective function---the negative log-posterior, incorporating
+priors on stellar mass, $f_{\mathrm{sat}}$, age, and
+$\beta_{\mathrm{XUV}}$---is minimized with differential evolution
+\citep{StornPrice97} as implemented in \texttt{SciPy}
+\citep{Virtanen20}. We use the \texttt{best1bin} strategy with a
+population size of 3 per dimension, dithered mutation in $[0.5, 1.0]$,
+a crossover probability of 0.7, and a convergence tolerance of 0.01,
+running for up to 50 generations. The resulting MAP parameter vector
+is used to initialize the \texttt{emcee} walkers and to verify that
+the GP surrogate reproduces the true likelihood at the mode.

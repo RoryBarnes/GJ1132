@@ -1,0 +1,360 @@
+\subsection{Flare Candidate Identification}\label{sec:flare_detection}
+
+We identified stellar flare candidates in the TESS photometry of
+GJ~1132 using a semi-automated detection pipeline followed by visual
+classification.  The pipeline ingests all available TESS 2-minute
+cadence lightcurves from the Science Processing Operations Center
+\citep[SPOC;][]{Jenkins2016} via the \texttt{lightkurve} package
+\citep{Lightkurve2018}, covering Sectors~9, 10, 36, 63, 90, and~99.
+
+\subsubsection{Preprocessing}
+
+Each sector's lightcurve is first normalized to unit median flux using
+the \texttt{lightkurve} \texttt{normalize()} method.  We then remove
+low-frequency stellar variability by applying a Savitzky--Golay filter
+\citep{Savitzky1964} with a window length of 101~cadences
+($\approx$3.4~hr at 2-minute cadence).  The \texttt{lightkurve}
+implementation iteratively sigma-clips outliers during the fit,
+preventing flare signals from biasing the trend removal
+\citep{Lightkurve2018}.  The resulting flattened lightcurve isolates
+short-duration transient events against a unit baseline.
+
+\subsubsection{Noise Estimation}
+
+We estimate the photometric noise in each sector using the Median
+Absolute Deviation (MAD), a robust measure of statistical dispersion
+that is insensitive to outliers such as flares
+\citep{Rousseeuw1993}.  For a sample of $N$ flux measurements
+$\{F_i\}$, the MAD is defined as
+\begin{equation}\label{eq:mad}
+  \mathrm{MAD} = \mathrm{median}\bigl(|F_i - \widetilde{F}|\bigr),
+\end{equation}
+where $\widetilde{F} = \mathrm{median}(F_i)$.  The MAD is related to
+the standard deviation of a Gaussian distribution by the consistency
+constant $c = 1/\Phi^{-1}(3/4) \approx 1.4826$, where $\Phi^{-1}$ is
+the quantile function of the standard normal distribution.  The
+MAD-based robust sigma is therefore
+\begin{equation}\label{eq:robust_sigma}
+  \hat{\sigma} = 1.4826 \times \mathrm{MAD}.
+\end{equation}
+Unlike the sample standard deviation, $\hat{\sigma}$ has a breakdown
+point of 50\%, meaning that up to half the data can be arbitrarily
+corrupted without affecting the estimate \citep{Rousseeuw1993}.  This
+property makes it well suited for flare detection, where bright
+transient events would inflate a conventional $\sigma$ estimate and
+suppress the detection of weaker flares.
+
+\subsubsection{Candidate Detection}\label{sec:detection}
+
+We flag all cadences in the flattened lightcurve whose flux exceeds
+$\widetilde{F} + n_\sigma\,\hat{\sigma}$, where $n_\sigma$ is the
+detection threshold.  We adopt $n_\sigma = 2.5$ to ensure sensitivity
+to low-amplitude flares at the expense of a higher false-positive rate
+that is subsequently filtered by visual inspection.  Individual
+above-threshold cadences are grouped into contiguous clusters, allowing
+a gap tolerance of up to 2 cadences ($\approx$4~min) to bridge
+single-point dropouts within a flare event.  Clusters containing fewer
+than $I_\mathrm{min} = 2$ consecutive above-threshold cadences are
+discarded, as isolated single-point excursions are more likely due to
+cosmic ray hits or instrumental artifacts than to stellar flares
+\citep{Ilin2021}.
+
+\subsubsection{Decay Tail Extension}\label{sec:decay_tail}
+
+Stellar flares exhibit a characteristic fast-rise, exponential-decay
+morphology \citep{Davenport2014}.  While the impulsive rise is
+typically captured by the above-threshold cadences, the exponential
+decay tail often extends well below the detection threshold.  To
+capture the full flare energy, we extend each candidate window forward
+in time from the last above-threshold cadence until the flux returns
+to within $1\,\hat{\sigma}$ of the median for at least 3 consecutive
+cadences ($\approx$6~min).  This criterion balances the need to
+capture the decay phase against the risk of absorbing unrelated
+variability.
+
+\subsubsection{Candidate Characterization}
+
+For each candidate, we record the following quantities:
+\begin{itemize}
+  \item \textbf{Peak time} ($t_\mathrm{peak}$): the TESS Barycentric
+    Julian Date (BTJD) of maximum flux in the candidate window.
+  \item \textbf{Peak significance} ($n_\sigma$): the peak flux
+    expressed in units of $\hat{\sigma}$ above the sector median.
+  \item \textbf{Duration}: the time interval from the first
+    above-threshold cadence to the end of the decay tail, in minutes.
+  \item \textbf{Equivalent duration} ($\mathrm{ED}$): the
+    time-integrated relative flux excess,
+    \begin{equation}\label{eq:equiv_dur}
+      \mathrm{ED} = \int_{t_\mathrm{start}}^{t_\mathrm{stop}}
+        \bigl(F(t)/F_\mathrm{quiescent} - 1\bigr)\,dt,
+    \end{equation}
+    with units of seconds \citep{Hunt-Walker2012}.  The equivalent
+    duration is proportional to the flare energy and independent of
+    distance, making it a natural unit for constructing flare frequency
+    distributions \citep{Hawley2014}.  We evaluate the integral
+    numerically using the trapezoidal rule on the normalized
+    (unflattened) lightcurve, as the flattening process can distort
+    the absolute flux scale of long-duration events.
+\end{itemize}
+
+Candidates are sorted by peak significance in descending order, so
+that the most prominent events are presented first during visual
+classification.
+
+\subsubsection{Visual Classification}\label{sec:classification}
+
+Each candidate is presented to the observer as a lightcurve panel
+spanning $[-0.05, +0.10]$~days ($\approx$[$-72$, $+144$]~min) relative
+to the peak time.  The normalized (unflattened) flux is plotted as a
+black line, with the candidate interval highlighted using scatter
+points.  The observer classifies each candidate into one of three
+categories:
+\begin{enumerate}
+  \item \textbf{Flare}: the event displays morphology consistent with
+    a stellar flare, typically a fast rise followed by an exponential
+    decay.
+  \item \textbf{Not a flare}: the event is attributed to instrumental
+    artifacts, cosmic rays, or other non-astrophysical sources.
+  \item \textbf{Uncertain}: the event is ambiguous and cannot be
+    confidently classified.
+\end{enumerate}
+
+The classification is saved to a JSON file after each label, providing
+crash-safe persistence.  The observer may navigate backward to
+reclassify previous candidates and may quit the session at any point,
+resuming later from the first unlabeled candidate.
+
+\subsubsection{Pipeline Integration}
+
+The labeled flare catalog is consumed by the downstream analysis
+pipeline, which loads the JSON file and extracts the time intervals
+of confirmed flares.  These intervals replace the previously
+hard-coded flare parameters, ensuring that the flare frequency
+distribution and energy analysis are derived from a systematic,
+reproducible identification process.  The pipeline validates the
+existence of the labeled catalog as a prerequisite before proceeding
+with flare energy calculations and FFD construction.
+
+\subsection{Joint Statistical Tension Between Kepler-Predicted and
+TESS-Observed Flare Frequency Distributions}
+\label{sec:joint_tension}
+
+We quantify the discrepancy between the flare frequency distribution
+(FFD) measured from TESS observations of GJ~1132 and the FFD
+predicted by a Kepler-calibrated model evaluated at the stellar mass
+and age of GJ~1132.  The FFD is parameterized as a power law in
+log-space,
+\begin{equation}
+\log_{10} R = \alpha \log_{10} E + \beta,
+\label{eq:ffd_powerlaw}
+\end{equation}
+where $R$ is the cumulative flare rate (day$^{-1}$) above energy $E$
+(erg), $\alpha$ is the power-law slope, and $\beta$ is the intercept.
+Both the TESS measurement and the Kepler prediction yield estimates of
+the two-dimensional parameter vector $\boldsymbol{\theta} = (\alpha,
+\beta)$.
+
+\subsubsection{The TESS Measurement}
+
+We fit Equation~\ref{eq:ffd_powerlaw} to the four TESS flares using
+weighted least squares (\texttt{scipy.optimize.curve\_fit} with
+\texttt{absolute\_sigma=True}), obtaining
+\begin{equation}
+\hat{\boldsymbol{\theta}}_{\mathrm{TESS}} =
+  (\hat{\alpha}_{\mathrm{TESS}},\; \hat{\beta}_{\mathrm{TESS}}) =
+  (-0.4498,\; 12.4864).
+\end{equation}
+The fit also returns the $2 \times 2$ covariance matrix
+$\mathbf{C}_{\mathrm{TESS}}$, which encodes the uncertainties in
+$\alpha$ and $\beta$ \emph{and their correlation}.  Because the four
+flares span barely one order of magnitude in energy ($31.1 \lesssim
+\log_{10} E \lesssim 32.2$), the slope and intercept are almost
+perfectly anticorrelated: a slightly steeper slope can be compensated
+by a higher intercept without moving the fit line away from the data.
+The correlation coefficient is
+\begin{equation}
+r_{\alpha\beta} =
+  \frac{C_{\alpha\beta}}{\sigma_\alpha \, \sigma_\beta} = -0.9999,
+\end{equation}
+where $\sigma_\alpha = 0.7205$ and $\sigma_\beta = 22.6824$ are the
+marginal (one-dimensional) standard deviations read from the diagonal
+of $\mathbf{C}_{\mathrm{TESS}}$.  This near-perfect anticorrelation
+means the joint constraint occupies a razor-thin ellipse in $(\alpha,
+\beta)$ space, even though the marginal uncertainties on each
+parameter individually appear large.
+
+\subsubsection{The Kepler Prediction}
+
+The Kepler-calibrated model of \citet{Davenport2019} parameterizes the
+FFD slope and intercept as linear functions of stellar age and mass:
+\begin{align}
+\alpha &= a_1 \log_{10} t + a_2 m + a_3,
+  \label{eq:alpha_model} \\
+\beta  &= b_1 \log_{10} t + b_2 m + b_3,
+  \label{eq:beta_model}
+\end{align}
+where $t$ is the stellar age in Myr and $m$ is the stellar mass in
+solar masses.  The six parameters $(a_1, a_2, a_3, b_1, b_2, b_3)$
+were inferred via MCMC from a Kepler flare ensemble (see
+Section~\ref{sec:kepler_ffd}), yielding posterior medians
+$\boldsymbol{p}$ and a $6 \times 6$ covariance matrix
+$\mathbf{C}_{6}$.
+
+To predict $(\alpha, \beta)$ for GJ~1132, we evaluate
+Equations~\ref{eq:alpha_model}--\ref{eq:beta_model} at $\log_{10} t =
+\log_{10}(8000) \approx 3.903$ (i.e., 8~Gyr) and $m =
+0.2\;M_\odot$:
+\begin{equation}
+\hat{\boldsymbol{\theta}}_{\mathrm{Kepler}} =
+  (\hat{\alpha}_{\mathrm{Kep}},\; \hat{\beta}_{\mathrm{Kep}}) =
+  (-1.0928,\; 34.4459).
+\end{equation}
+Because the model (Equations~\ref{eq:alpha_model}--\ref{eq:beta_model})
+is linear in the six parameters, the uncertainty in the prediction is
+obtained exactly via the Jacobian projection.  The $2 \times 6$
+Jacobian matrix is
+\begin{equation}
+\mathbf{J} = \begin{pmatrix}
+\log_{10} t & m & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & \log_{10} t & m & 1
+\end{pmatrix},
+\label{eq:jacobian}
+\end{equation}
+and the projected $2 \times 2$ covariance of the Kepler prediction in
+$(\alpha, \beta)$ space is
+\begin{equation}
+\mathbf{C}_{\mathrm{Kepler}} =
+  \mathbf{J} \, \mathbf{C}_{6} \, \mathbf{J}^{\mathsf{T}}.
+\label{eq:projected_cov}
+\end{equation}
+With 25{,}600 MCMC samples constraining six parameters,
+$\mathbf{C}_{\mathrm{Kepler}}$ is very small---the Kepler prediction
+is tight.
+
+\subsubsection{Why Marginal Tensions are Misleading}
+
+The simplest approach to quantifying the discrepancy is to compare the
+predicted and observed values of each parameter separately:
+\begin{equation}
+n_{\sigma,\alpha} =
+  \frac{|\hat{\alpha}_{\mathrm{TESS}} - \hat{\alpha}_{\mathrm{Kep}}|}
+       {\sqrt{\sigma^2_{\alpha,\mathrm{Kep}} +
+              \sigma^2_{\alpha,\mathrm{TESS}}}} = 0.89\;\sigma,
+\qquad
+n_{\sigma,\beta} =
+  \frac{|\hat{\beta}_{\mathrm{TESS}} - \hat{\beta}_{\mathrm{Kep}}|}
+       {\sqrt{\sigma^2_{\beta,\mathrm{Kep}} +
+              \sigma^2_{\beta,\mathrm{TESS}}}} = 0.97\;\sigma.
+\label{eq:marginal_tensions}
+\end{equation}
+These marginal tensions use only the diagonal elements of the
+covariance matrices and therefore treat $\alpha$ and $\beta$ as if
+they were independent.  When the correlation is weak, this is a
+reasonable approximation.  However, with $r_{\alpha\beta} = -0.9999$,
+the marginal standard deviations $\sigma_\alpha$ and $\sigma_\beta$
+reflect the \emph{full extent} of the thin confidence ellipse
+projected onto each axis.  These projections vastly overstate the
+volume of parameter space consistent with the data.
+
+Concretely, $\sigma_\alpha = 0.72$ and $\sigma_\beta = 22.7$ suggest
+that the TESS fit is poorly constrained in both parameters.  But the
+near-perfect anticorrelation means that knowing $\alpha$ determines
+$\beta$ almost exactly (and vice versa).  The allowed region in
+$(\alpha, \beta)$ space is not a $0.72 \times 22.7$ rectangle; it is
+a sliver whose width perpendicular to its major axis is orders of
+magnitude smaller.
+
+\subsubsection{The Joint 2D Chi-Squared Test}
+
+The correct approach accounts for the full $2 \times 2$ covariance
+structure.  We define the residual vector
+\begin{equation}
+\boldsymbol{\Delta} =
+  \hat{\boldsymbol{\theta}}_{\mathrm{TESS}} -
+  \hat{\boldsymbol{\theta}}_{\mathrm{Kepler}} =
+  (\hat{\alpha}_{\mathrm{TESS}} - \hat{\alpha}_{\mathrm{Kep}},\;
+   \hat{\beta}_{\mathrm{TESS}} - \hat{\beta}_{\mathrm{Kep}}).
+\label{eq:delta}
+\end{equation}
+Under the null hypothesis that both measurements estimate the same
+underlying $(\alpha, \beta)$, and assuming the Kepler and TESS
+measurements are independent (they use different instruments and
+different stellar samples), the total covariance of the difference is
+the sum of the individual covariances:
+\begin{equation}
+\mathbf{C}_{\mathrm{total}} =
+  \mathbf{C}_{\mathrm{Kepler}} + \mathbf{C}_{\mathrm{TESS}}.
+\label{eq:total_cov}
+\end{equation}
+Note that this sum preserves the off-diagonal terms.  Since
+$\mathbf{C}_{\mathrm{Kepler}}$ is very small,
+$\mathbf{C}_{\mathrm{total}} \approx \mathbf{C}_{\mathrm{TESS}}$, and
+the strong anticorrelation in the TESS fit dominates.
+
+The joint chi-squared statistic is then
+\begin{equation}
+\chi^2 = \boldsymbol{\Delta}^{\mathsf{T}} \,
+  \mathbf{C}_{\mathrm{total}}^{-1} \, \boldsymbol{\Delta}.
+\label{eq:chi2_joint}
+\end{equation}
+Under the null hypothesis, $\chi^2$ follows a chi-squared distribution
+with 2 degrees of freedom (one for each component of
+$\boldsymbol{\Delta}$).  This statistic measures the squared
+Mahalanobis distance between the two estimates, properly accounting
+for the shape and orientation of the confidence ellipse.
+
+\subsubsection{Conversion to Equivalent Sigma}
+
+To express the result as an equivalent Gaussian significance, we
+compute the $p$-value from the $\chi^2$ distribution:
+\begin{equation}
+p = 1 - F_{\chi^2}(\chi^2;\, \nu = 2),
+\label{eq:pvalue}
+\end{equation}
+where $F_{\chi^2}(\cdot;\, \nu)$ is the cumulative distribution
+function of the chi-squared distribution with $\nu$ degrees of
+freedom.  We then convert to an equivalent number of standard
+deviations using the inverse of the standard normal survival function:
+\begin{equation}
+n_\sigma = \Phi^{-1}\!\left(1 - \frac{p}{2}\right),
+\label{eq:nsigma}
+\end{equation}
+where $\Phi^{-1}$ is the quantile function (inverse CDF) of the
+standard normal distribution.  The factor of 2 in the denominator
+accounts for the two-tailed convention: $n_\sigma$ is the number of
+standard deviations at which the two-tailed probability of a standard
+normal equals $p$.
+
+\subsubsection{Result}
+
+Evaluating the above procedure yields
+\begin{align}
+\chi^2 &= 53.72 \quad (2\;\mathrm{DOF}), \\
+p &< 10^{-4}, \\
+n_\sigma &= 7.0.
+\end{align}
+The Kepler-predicted FFD for a $0.2\;M_\odot$ star at 8~Gyr is
+discrepant with the TESS-observed FFD of GJ~1132 at $7.0\sigma$
+significance.  GJ~1132 flares significantly less frequently than the
+Kepler ensemble model predicts.
+
+\subsubsection{Geometric Interpretation}
+
+The geometry of the discrepancy is illustrated in the $(\alpha,
+\beta)$ scatter plot (Figure~\ref{fig:fit_comparison}).  The Kepler
+prediction occupies a tight cluster near $(\alpha, \beta) \approx
+(-1.09, 34.4)$.  The TESS measurement, despite its large marginal
+uncertainties, is confined to a thin diagonal band running from
+upper-left to lower-right---the locus of lines that pass through the
+observed flare data.  The Kepler prediction falls far from this band
+in the direction perpendicular to it, which is why the joint tension
+is so much larger than either marginal tension.
+
+In the FFD plot itself (Figure~\ref{fig:ffd_comparison}), this
+manifests as the Kepler prediction line (purple) lying well above the
+grey $1\sigma$ confidence band of the TESS fit within the energy range
+of the data.  The grey band is narrow despite the large marginal
+uncertainties precisely because of the strong $\alpha$--$\beta$
+anticorrelation: the band represents the family of lines consistent
+with the data, and that family excludes the steeper, higher-intercept
+Kepler prediction.

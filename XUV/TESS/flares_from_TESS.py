@@ -292,11 +292,18 @@ def fdCalculateTotalExposure(lc):
 def ftGetFlareParameters(sFlareJsonPath=None):
     """Return flare detection parameters and stellar properties for GJ 1132.
 
-    If sFlareJsonPath is provided, load labeled flares from the JSON
-    produced by identifyFlareCandidates.py. Otherwise fall back to
-    hard-coded values.
+    If sFlareJsonPath is provided, load labeled flares from that JSON.
+    Otherwise, look for flare_candidates.json next to this script.
+    Falls back to hard-coded values only if no JSON file is found.
     """
+    import os
     dLuminosity = 4.77e-3 * const.L_sun.to('erg/s')
+    if sFlareJsonPath is None:
+        sDefaultPath = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            'flare_candidates.json')
+        if os.path.isfile(sDefaultPath):
+            sFlareJsonPath = sDefaultPath
     if sFlareJsonPath is not None:
         return ftLoadFlaresFromJson(sFlareJsonPath, dLuminosity)
     sectors = [2, 2, 3]
@@ -662,7 +669,7 @@ def fnPlotComprehensiveComparison(ffd_x, ffd_y, ffd_yerr, alpha, beta,
     plt.errorbar(ffd_x, ffd_y, yerr=ffd_yerr, linestyle='none', color='k')
     plt.scatter(ffd_x, ffd_y, c='k')
     plt.plot(daLogEnergyData, fdFfdFit(daLogEnergyData, alpha, beta), c='k')
-    plt.text(31.5, -2.4, 'GJ 1132\n(observed)', color='k', fontsize=10)
+    plt.text(31.1, -2.7, 'GJ 1132\n(observed)', color='k', fontsize=10)
 
     plt.plot(lit_data['gj4083_x'], np.log10(lit_data['gj4083_y']), marker='s',
              linestyle='dotted', lw=2, c=vplot.colors.pale_blue)

@@ -1,0 +1,38 @@
+\texttt{emcee} \citep{ForemanMackey13} implements the
+affine-invariant ensemble sampler of \citet{GoodmanWeare10}, in which
+a set of ``walkers'' explore the parameter space collectively, using
+the positions of complementary walkers to propose new steps. Because
+the proposal distribution adapts to the covariance structure of the
+target, the algorithm is insensitive to linear degeneracies among
+parameters and requires no hand-tuning of a proposal covariance
+matrix. We initialize 100 walkers in a tight ball around the maximum
+likelihood estimate and run each for $2\times10^{4}$ steps, discarding
+samples until the effective sample size exceeds $10^{4}$.
+
+\texttt{dynesty} \citep{Speagle20} implements dynamic nested sampling
+\citep{Skilling04,Higson19}, an algorithm that simultaneously
+estimates the Bayesian evidence $\mathcal{Z}$ and the posterior. Live
+points are drawn from the prior, and at each iteration the
+lowest-likelihood point is replaced by a new sample drawn from within
+an iso-likelihood contour. We use multi-ellipsoidal bounding with
+random slice sampling \citep{Handley15a,Handley15b} and 50 initial
+live points, adding live points dynamically until the estimated
+evidence error satisfies $\Delta\ln\mathcal{Z} < 1$.
+
+\texttt{PyMultiNest} \citep{Buchner14} provides a Python interface to
+the \texttt{MultiNest} library \citep{Feroz09,Feroz19}, which
+implements the multimodal nested sampling algorithm. \texttt{MultiNest}
+partitions the prior volume into multiple ellipsoidal clusters,
+enabling efficient sampling of posteriors with well-separated modes.
+We run with 500 live points and a sampling efficiency of 0.8, and
+terminate when the remaining evidence contribution falls below a
+tolerance of $\Delta\ln\mathcal{Z} = 0.5$.
+
+\texttt{UltraNest} \citep{Buchner21} implements a
+reactively-allocated nested sampling algorithm that adjusts the number
+of live points during the run to maintain a target accuracy in both
+the evidence and the posterior. The algorithm uses the MLFriends
+region \citep{Buchner19} to draw new live points, which provides
+robust performance in high-dimensional or multimodal settings without
+requiring user-specified bounding geometries. We run with a minimum of
+500 live points and terminate at $\Delta\ln\mathcal{Z} < 0.5$.
