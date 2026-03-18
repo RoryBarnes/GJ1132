@@ -17,15 +17,12 @@ Where:
 """
 
 import json
-import sys
+import os
 
 import numpy as np
 import pandas as pd
 import emcee
-import matplotlib.pyplot as plt
 from scipy.optimize import minimize, differential_evolution
-import corner
-import vplot
 
 def fdaLogFlareRateModel(log_energy, log_age, mass, params):
     """
@@ -459,102 +456,20 @@ def fdictSaveMultipleFormats(samples, param_names, base_filename='flare_mcmc_sam
         print(f"  {fmt.upper()}: {filename}")
     
     return filenames
-def fdaAnalyzeResults(sampler, thin=10, bSaveSamples=True):
-    """
-    Analyze MCMC results and create plots.
-    
-    Parameters:
-    -----------
-    sampler : emcee.EnsembleSampler
-        MCMC sampler with results
-    thin : int
-        Thinning factor for analysis
-    bSaveSamples : bool
-        Whether to save the samples to file
-        
-    Returns:
-    --------
-    samples : array
-        Flattened MCMC samples
-    """
-    
-    # Get samples
-    samples = sampler.get_chain(discard=0, thin=thin, flat=True)
-    
-    # Parameter names with correct roles from Davenport et al. 2019 Eq. (3)
-    # a1, a2, a3 control energy slope; b1, b2, b3 control normalization
-    param_names = ['a1', 'a2', 'a3', 'b1', 'b2', 'b3']
-    
-    # Save samples to file if requested
-    if bSaveSamples:
-        filenames = fdictSaveMultipleFormats(samples, param_names)
-    
-    # Calculate statistics
-    print("\nParameter estimates (median ± 1σ):")
-    print("=" * 40)
-    print("NOTE: a1,a2,a3 = slope parameters; b1,b2,b3 = intercept parameters")
-    print("From Davenport et al. 2019 Eq. (3):")
-    print("log10(rate) = (a1*log_age + a2*mass + a3) * log_energy + (b1*log_age + b2*mass + b3)")
-    print("=" * 40)
-    
-    for i, name in enumerate(param_names):
-        mcmc = np.percentile(samples[:, i], [16, 50, 84])
-        q = np.diff(mcmc)
-        print(f"{name}: {mcmc[1]:.4f} +{q[1]:.4f} -{q[0]:.4f}")
-    
-    # Create corner plot
-    print("\nCreating corner plot...")
-    fig = corner.corner(
-        samples, 
-        #labels=param_names,
-        quantiles=[0.16, 0.5, 0.84],
-        show_titles=True,
-        title_kwargs={"fontsize": 12}
-    )
-    
-    sCornerOutput = sys.argv[1] if len(sys.argv) > 1 else 'flare_frequency_ensemble_corner.png'
-    plt.savefig(sCornerOutput, dpi=150, bbox_inches='tight')
-    plt.close()
-    
-    # Plot chains
-    print("Creating trace plots...")
-    fig, axes = plt.subplots(2, 3, figsize=(15, 8))
-    axes = axes.flatten()
-    
-    for i in range(6):
-        ax = axes[i]
-        ax.plot(sampler.get_chain()[:, :, i], "k", alpha=0.3)
-        ax.set_xlim(0, len(sampler.get_chain()))
-        ax.set_ylabel(param_names[i])
-        ax.yaxis.set_label_coords(-0.1, 0.5)
-    
-    axes[-1].set_xlabel("Step number")
-    plt.tight_layout()
-    plt.savefig('flare_frequency_ensemble_traces.png', dpi=150, bbox_inches='tight')
-    plt.close()
-    
-    return samples
-
-def fnPlotCornerFromSamples(daSamples, sOutputPath):
-    """Generate a corner plot from a pre-existing samples array."""
-    listLabels = [r"$a_1$", r"$a_2$", r"$a_3$", r"$b_1$", r"$b_2$", r"$b_3$"]
-    fig = corner.corner(
-        daSamples,
-        labels=listLabels,
-        quantiles=[0.16, 0.5, 0.84],
-        show_titles=False,
-        label_kwargs={"fontsize": 20},
-        labelpad=0.1,
-    )
-    iNumParams = daSamples.shape[1]
-    daAxes = np.array(fig.axes).reshape((iNumParams, iNumParams))
-    for i in range(iNumParams):
-        for j in range(iNumParams):
-            if i >= j:
-                daAxes[i, j].tick_params(axis="both", labelsize=14)
-    plt.savefig(sOutputPath, dpi=150, bbox_inches='tight')
-    plt.close()
-    print(f"Corner plot saved to: {sOutputPath}")
+def fdictComputeStatistics(daSamples, listParamNames):
+    """Compute median and 1-sigma uncertainties for each parameter."""
+    dictStats = {}
+    for iParam, sName in enumerate(listParamNames):
+        daPercentiles = np.percentile(
+            daSamples[:, iParam], [16, 50, 84]
+        )
+        daUncertainty = np.diff(daPercentiles)
+        dictStats[sName] = {
+            "fMedian": float(daPercentiles[1]),
+            "fUpperSigma": float(daUncertainty[1]),
+            "fLowerSigma": float(daUncertainty[0]),
+        }
+    return dictStats
 
 
 def fnWritePosteriorStatistics(daSamples, sOutputPath):
@@ -562,47 +477,59 @@ def fnWritePosteriorStatistics(daSamples, sOutputPath):
     daMedians = np.median(daSamples, axis=0).tolist()
     daCovarianceMatrix = np.cov(daSamples, rowvar=False).tolist()
     listParamNames = ["a1", "a2", "a3", "b1", "b2", "b3"]
-    iNumSamples = daSamples.shape[0]
 
     dictStatistics = {
         "daMedians": daMedians,
         "daCovarianceMatrix": daCovarianceMatrix,
         "listParamNames": listParamNames,
-        "iNumSamples": iNumSamples,
+        "iNumSamples": daSamples.shape[0],
     }
-
     with open(sOutputPath, "w") as fileHandle:
         json.dump(dictStatistics, fileHandle, indent=2)
-
     print(f"Posterior statistics saved to: {sOutputPath}")
 
 
-if __name__ == "__main__":
-    import os
+def fdaAnalyzeResults(sampler, iThin=10):
+    """Extract samples, save data files, and print statistics."""
+    daSamples = sampler.get_chain(discard=0, thin=iThin, flat=True)
+    listParamNames = ["a1", "a2", "a3", "b1", "b2", "b3"]
+    fdictSaveMultipleFormats(daSamples, listParamNames)
+    dictStats = fdictComputeStatistics(daSamples, listParamNames)
+    for sName, dictValues in dictStats.items():
+        print(
+            f"{sName}: {dictValues['fMedian']:.4f} "
+            f"+{dictValues['fUpperSigma']:.4f} "
+            f"-{dictValues['fLowerSigma']:.4f}"
+        )
+    sScriptDir = os.path.dirname(os.path.abspath(__file__))
+    fnWritePosteriorStatistics(
+        daSamples,
+        os.path.join(sScriptDir, "kepler_ffd_posterior_stats.json"),
+    )
+    return daSamples
 
-    sCornerOutput = sys.argv[1] if len(sys.argv) > 1 else 'CornerVariableSlope.pdf'
+
+if __name__ == "__main__":
     sScriptDirectory = os.path.dirname(os.path.abspath(__file__))
-    sCachedSamples = os.path.join(sScriptDirectory, "flare_mcmc_samples.npy")
+    sCachedSamples = os.path.join(
+        sScriptDirectory, "flare_mcmc_samples.npy"
+    )
 
     if os.path.exists(sCachedSamples):
         print("Loading cached MCMC samples...")
         daSamples = np.load(sCachedSamples)
-        print(f"Loaded {daSamples.shape[0]} samples with {daSamples.shape[1]} parameters")
-        fnPlotCornerFromSamples(daSamples, sCornerOutput)
+        print(f"Loaded {daSamples.shape[0]} samples")
+        fnWritePosteriorStatistics(
+            daSamples,
+            os.path.join(sScriptDirectory, "kepler_ffd_posterior_stats.json"),
+        )
     else:
         print("Stellar Flare Frequency Ensemble MCMC Analysis")
         print("=" * 50)
-        print("Based on Davenport et al. 2019 (ApJ 871, 241) Equation (3)")
-        print("CORRECTED parameter roles:")
-        print("  a1, a2, a3: Control energy slope (power-law index)")
-        print("  b1, b2, b3: Control normalization (intercept)")
-        print("=" * 50)
-
         sampler = fnRunMcmcEnsemble(
             "ensemble_FFD.csv", nwalkers=32, nsteps=8000, burn_in=1000
         )
         daSamples = fdaAnalyzeResults(sampler)
-        fnPlotCornerFromSamples(daSamples, sCornerOutput)
 
-    sStatsOutput = os.path.join(sScriptDirectory, "kepler_ffd_posterior_stats.json")
-    fnWritePosteriorStatistics(daSamples, sStatsOutput)
+    print("\nData analysis complete!")
+    print("Run plotKeplerFfd.py to generate figures.")
